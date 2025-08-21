@@ -4,9 +4,13 @@ import {javascript} from "@codemirror/lang-javascript";
 import {transpileJavaScript} from "@observablehq/notebook-kit";
 import {Runtime} from "@observablehq/runtime";
 import * as cm from "charmingjs";
+import {parse} from "acorn";
+import {group} from "d3-array";
+
+const PREFIX = "//:";
 
 function split(code) {
-  return code.split(/\n\s*\n/).filter((block) => block.trim().length > 0);
+  return parse(code, {ecmaVersion: "latest"}).body;
 }
 
 function uid() {
@@ -17,10 +21,6 @@ function safeEval(code, inputs) {
   const body = `const foo = ${code}; return foo(${inputs.join(",")})`;
   const fn = new Function(...inputs, body);
   return fn;
-}
-
-function removeComments(code) {
-  return code.replace(/\/\/.*|\/\*[\s\S]*?\*\//g, "");
 }
 
 function debounce(fn, delay = 0) {
@@ -34,7 +34,7 @@ function debounce(fn, delay = 0) {
 function inspect(value) {
   const string = value.toString();
   const lines = string.split("\n");
-  return lines.map((line) => `// ${line}`).join("\n");
+  return lines.map((line) => `${PREFIX} ${line}`).join("\n");
 }
 
 function main(root) {
@@ -51,10 +51,10 @@ function main(root) {
 
 const b = a ** 2;
 print(b);
-  
+
 const sum = add(a, b);
 print(sum);
-  
+
 function add(a, b) {
   return a + b;
 }`;
@@ -85,31 +85,51 @@ function add(a, b) {
 
   const runtime = new Runtime();
   const main = runtime.module();
-  const stateByKey = new Map();
-  const indexByKey = new Map();
+  const nodesByKey = new Map();
 
   const refresh = debounce(() => {
-    const keyCode = [];
-    for (const [cell, state] of stateByKey) {
-      const {code, values} = state;
-      const removed = removeComments(code);
-      const output = values.map(inspect).join("\n");
-      const outputCode = output ? output + "\n" + removed : removed;
-      keyCode.push([cell, outputCode]);
+    const dispatch = [];
+    const doc = view.state.doc;
+
+    // Remove old outputs
+    const oldOutputs = code
+      .split("\n")
+      .map((l, i) => [l, i])
+      .filter(([l]) => l.startsWith(PREFIX))
+      .map(([_, i]) => i + 1);
+    for (const i of oldOutputs) {
+      const line = doc.line(i);
+      const from = line.from;
+      const to = line.to + 1 > code.length ? line.to : line.to + 1;
+      dispatch.push({from, to, insert: ""});
     }
-    keyCode.sort((a, b) => indexByKey.get(a[0]) - indexByKey.get(b[0]));
-    const newCode = keyCode.map(([cell, code]) => code).join("\n\n");
+
+    // Insert new outputs
+    const nodes = Array.from(nodesByKey.values()).flat(Infinity);
+    for (const node of nodes) {
+      const start = node.start;
+      const {values, error} = node.state;
+      const V = error ? [error] : values;
+      if (V.length) {
+        const output = V.map(inspect).join("\n") + "\n";
+        dispatch.push({from: start, insert: output});
+      }
+    }
+
     view.dispatch({
-      changes: {from: 0, to: code.length, insert: newCode},
+      changes: dispatch,
     });
   }, 0);
 
   function observer(state) {
     return {
       pending() {},
-      fulfilled() {},
+      fulfilled() {
+        state.error = null;
+        refresh();
+      },
       rejected(error) {
-        state.values = [error];
+        state.error = error;
         refresh();
       },
     };
@@ -125,32 +145,52 @@ function add(a, b) {
   }
 
   function run(code) {
-    const cells = split(removeComments(code));
+    const nodes = split(code);
+    const groups = group(nodes, (n) => code.slice(n.start, n.end));
     const enter = [];
-    const exit = new Set(stateByKey.keys());
+    const remove = [];
+    const exit = new Set(nodesByKey.keys());
 
-    for (let i = 0; i < cells.length; i++) {
-      const cell = cells[i];
-      if (stateByKey.has(cell)) {
-        exit.delete(cell);
-        indexByKey.set(cell, i);
+    for (const [key, nodes] of groups) {
+      if (nodesByKey.has(key)) {
+        exit.delete(key);
+        const preNodes = nodesByKey.get(key);
+        const pn = preNodes.length;
+        const n = nodes.length;
+        if (n > pn) {
+          const newNodes = nodes.slice(pn);
+          enter.push(...newNodes);
+          preNodes.push(...newNodes);
+        } else if (n < pn) {
+          const oldNodes = preNodes.slice(n);
+          remove.push(...oldNodes);
+        }
+        // Pass states to new nodes.
+        for (let i = 0; i < Math.min(n, pn); i++) {
+          nodes[i].state = preNodes[i].state;
+        }
       } else {
-        enter.push(cell);
-        indexByKey.set(cell, i);
+        enter.push(...nodes);
       }
+      nodesByKey.set(key, nodes);
     }
 
-    for (const cell of exit) {
-      const {variables} = stateByKey.get(cell);
+    for (const key of exit) {
+      const preNodes = nodesByKey.get(key);
+      remove.push(...preNodes);
+      nodesByKey.delete(key);
+    }
+
+    for (const node of remove) {
+      const {variables} = node.state;
       for (const variable of variables) variable.delete();
-      stateByKey.delete(cell);
-      indexByKey.delete(cell);
     }
 
-    for (const cell of enter) {
+    for (const node of enter) {
       const vid = uid();
-      const variables = [];
-      const state = {variables, values: [], code: cell};
+      const state = {values: [], variables: [], error: null};
+      node.state = state;
+      const cell = code.slice(node.start, node.end);
       const parsed = transpileJavaScript(cell);
       const {inputs, body, outputs} = parsed;
       const v = main.variable(observer(state), {shadow: {}});
@@ -173,13 +213,11 @@ function add(a, b) {
         );
         v._shadow.set("print", vd);
       }
-      variables.push(v.define(vid, inputs, safeEval(body, inputs)));
+      state.variables.push(v.define(vid, inputs, safeEval(body, inputs)));
       for (const o of outputs) {
-        variables.push(main.variable(true).define(o, [vid], (exports) => exports[o]));
+        state.variables.push(main.variable(true).define(o, [vid], (exports) => exports[o]));
       }
-      stateByKey.set(cell, state);
     }
-
     refresh();
   }
 

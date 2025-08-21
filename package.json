@@ -14,7 +14,10 @@
     "@codemirror/view": "^6.38.1",
     "@observablehq/notebook-kit": "^1.0.1",
     "@observablehq/runtime": "^6.0.0",
+    "acorn": "^8.15.0",
+    "acorn-walk": "^8.3.4",
     "charmingjs": "^0.0.19",
-    "codemirror": "^6.0.2"
+    "codemirror": "^6.0.2",
+    "d3-array": "^3.2.4"
   }
 }
