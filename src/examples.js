@@ -9,6 +9,29 @@ function add(a, b) {
   return a + b;
 }`;
 
+const INSPECTORS = `print("line1\\nline2");
+
+print([1, 2, 3]);
+
+print(function add(a, b) {
+  return a + b;
+});
+
+print({a: 1, b: 2});
+
+print(class Foo {
+  constructor(a, b) {
+    this.a = a;
+    this.b = b;
+  }
+});
+
+print(new Map([[1, 2], [3, 4]]));
+
+print(new Map([[1, 2], [3, 4]]), {indent: 2});
+
+print(new Date())`;
+
 const MANDELBROT_SET = `const cols = 80;
 const rows = 30;
 const maxIter = 80;
@@ -44,6 +67,10 @@ export const examples = [
   {
     name: "Addition",
     code: ADDITION,
+  },
+  {
+    name: "Inspectors",
+    code: INSPECTORS,
   },
   {
     name: "Mandelbrot Set",

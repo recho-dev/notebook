@@ -1,6 +1,6 @@
 import {useMemo, useRef, useState, useEffect} from "react";
-import {examples} from "./examples";
-import {createEditor} from "./editor";
+import {examples} from "./examples.js";
+import {createEditor} from "./editor.js";
 
 export default function App() {
   const initialValue = new URL(location).searchParams.get("name");

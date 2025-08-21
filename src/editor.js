@@ -3,6 +3,7 @@ import {EditorState} from "@codemirror/state";
 import {javascript} from "@codemirror/lang-javascript";
 import {transpileJavaScript} from "@observablehq/notebook-kit";
 import {Runtime} from "@observablehq/runtime";
+import inspector from "object-inspect";
 import {parse} from "acorn";
 import {group} from "d3-array";
 
@@ -30,8 +31,25 @@ function debounce(fn, delay = 0) {
   };
 }
 
-function inspect(value) {
-  const string = value.toString();
+function formatMultiline(value) {
+  const lines = value.split("\n");
+  return `\`${lines.map((line, i) => (i === 0 ? line : ` ${line}`)).join("\n")}\``;
+}
+
+function isMultiline(value) {
+  const isString = typeof value === "string";
+  if (!isString) return false;
+  const lines = value.split("\n");
+  return lines.length > 1;
+}
+
+function inspect(value, options) {
+  if (isMultiline(value)) return formatMultiline(value);
+  return inspector(value, options);
+}
+
+function format(value, options) {
+  const string = inspect(value, options);
   const lines = string.split("\n");
   return lines.map((line) => `${PREFIX} ${line}`).join("\n");
 }
@@ -89,9 +107,9 @@ export function createEditor(container, options) {
     for (const node of nodes) {
       const start = node.start;
       const {values, error} = node.state;
-      const V = error ? [error] : values;
+      const V = error ? {value: error} : values;
       if (V.length) {
-        const output = V.map(inspect).join("\n") + "\n";
+        const output = V.map(({value, options}) => format(value, options)).join("\n") + "\n";
         dispatch.push({from: start, insert: output});
       }
     }
@@ -115,8 +133,8 @@ export function createEditor(container, options) {
     };
   }
 
-  function print(state, value) {
-    state.values.push(value);
+  function print(state, value, options) {
+    state.values.push({value, options});
     refresh();
   }
 
@@ -181,12 +199,12 @@ export function createEditor(container, options) {
           inputs.filter((i) => i !== "print"),
           () => {
             const version = v._version; // capture version on input change
-            return (value) => {
+            return (value, options) => {
               if (version < printVersion) throw new Error("stale print");
               else if (state.variables[0] !== v) throw new Error("stale print");
               else if (version > printVersion) clear(state);
               printVersion = version;
-              print(state, value);
+              print(state, value, options);
               return value;
             };
           }
