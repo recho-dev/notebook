@@ -32,7 +32,7 @@ export default function App() {
     <>
       <h1>Observable Script</h1>
       <div style={{display: "flex"}}>
-        <ul style={{width: "200px", margin: 0}}>
+        <ul style={{width: "200px", margin: 0, height: "calc(100vh - 85px)", overflow: "auto"}}>
           {examples.map(({name, code}) => (
             <li
               key={name}
@@ -47,7 +47,9 @@ export default function App() {
           <button style={{marginBottom: "10px"}} onClick={() => editorRef.current.run()}>
             Run
           </button>
-          <div ref={containerRef}></div>
+          <div style={{height: "calc(100vh - 115px)", overflow: "auto"}}>
+            <div ref={containerRef}></div>
+          </div>
         </div>
       </div>
     </>
