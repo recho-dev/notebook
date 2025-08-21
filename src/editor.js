@@ -3,11 +3,10 @@ import {EditorState} from "@codemirror/state";
 import {javascript} from "@codemirror/lang-javascript";
 import {transpileJavaScript} from "@observablehq/notebook-kit";
 import {Runtime} from "@observablehq/runtime";
-import * as cm from "charmingjs";
 import {parse} from "acorn";
 import {group} from "d3-array";
 
-const PREFIX = "//:";
+const PREFIX = "//➜";
 
 function split(code) {
   return parse(code, {ecmaVersion: "latest"}).body;
@@ -37,27 +36,8 @@ function inspect(value) {
   return lines.map((line) => `${PREFIX} ${line}`).join("\n");
 }
 
-function main(root) {
-  const editor = cm.html("div");
-  const button = cm.html("button", {
-    textContent: "Run",
-    onclick: onRun,
-    style_margin_bottom: "10px",
-  });
-  root.appendChild(button);
-  root.appendChild(editor);
-
-  let code = `const a = 3;
-
-const b = a ** 2;
-print(b);
-
-const sum = add(a, b);
-print(sum);
-
-function add(a, b) {
-  return a + b;
-}`;
+export function createEditor(container, options) {
+  let {code} = options;
 
   const state = EditorState.create({
     doc: code,
@@ -72,7 +52,7 @@ function add(a, b) {
 
   const view = new EditorView({
     state,
-    parent: editor,
+    parent: container,
   });
 
   function onChange(update) {
@@ -222,6 +202,14 @@ function add(a, b) {
   }
 
   run(code);
-}
 
-main(document.getElementById("app"));
+  function destroy() {
+    view.destroy();
+    runtime.dispose();
+  }
+
+  return {
+    run: onRun,
+    destroy,
+  };
+}
