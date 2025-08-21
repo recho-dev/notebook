@@ -133,7 +133,7 @@ export function createEditor(container, options) {
     };
   }
 
-  function print(state, value, options) {
+  function doc(state, value, options) {
     state.values.push({value, options});
     refresh();
   }
@@ -192,24 +192,24 @@ export function createEditor(container, options) {
       const parsed = transpileJavaScript(cell);
       const {inputs, body, outputs} = parsed;
       const v = main.variable(observer(state), {shadow: {}});
-      if (inputs.includes("print")) {
+      if (inputs.includes("doc")) {
         let printVersion = -1;
         const vd = new v.constructor(2, v._module);
         vd.define(
-          inputs.filter((i) => i !== "print"),
+          inputs.filter((i) => i !== "doc"),
           () => {
             const version = v._version; // capture version on input change
             return (value, options) => {
-              if (version < printVersion) throw new Error("stale print");
-              else if (state.variables[0] !== v) throw new Error("stale print");
+              if (version < printVersion) throw new Error("stale doc");
+              else if (state.variables[0] !== v) throw new Error("stale doc");
               else if (version > printVersion) clear(state);
               printVersion = version;
-              print(state, value, options);
+              doc(state, value, options);
               return value;
             };
           }
         );
-        v._shadow.set("print", vd);
+        v._shadow.set("doc", vd);
       }
       state.variables.push(v.define(vid, inputs, safeEval(body, inputs)));
       for (const o of outputs) {

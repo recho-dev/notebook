@@ -1,36 +1,36 @@
-const HELLO_WORLD = `print("Hello World");`;
+const HELLO_WORLD = `doc("Hello World");`;
 
 const ADDITION = `const a = 2;
 const b = a ** 2;
 
-print(add(a, b));
+doc(add(a, b));
 
 function add(a, b) {
   return a + b;
 }`;
 
-const INSPECTORS = `print("line1\\nline2");
+const INSPECTORS = `doc("line1\\nline2");
 
-print([1, 2, 3]);
+doc([1, 2, 3]);
 
-print(function add(a, b) {
+doc(function add(a, b) {
   return a + b;
 });
 
-print({a: 1, b: 2});
+doc({a: 1, b: 2});
 
-print(class Foo {
+doc(class Foo {
   constructor(a, b) {
     this.a = a;
     this.b = b;
   }
 });
 
-print(new Map([[1, 2], [3, 4]]));
+doc(new Map([[1, 2], [3, 4]]));
 
-print(new Map([[1, 2], [3, 4]]), {indent: 2});
+doc(new Map([[1, 2], [3, 4]]), {indent: 2});
 
-print(new Date())`;
+doc(new Date());`;
 
 const MANDELBROT_SET = `const cols = 80;
 const rows = 30;
@@ -52,7 +52,7 @@ const maxIter = 80;
     }
     output += y === rows - 1 ? "" : "\\n";
   }
-  print(output);
+  doc(output);
 }
 
 function map(x, d0, d1, r0, r1) {
