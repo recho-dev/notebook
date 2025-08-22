@@ -104,17 +104,20 @@ export function createEditor(container, options) {
   function removeChanges(code) {
     const doc = view.state.doc;
     const changes = [];
+
     const oldOutputs = code
       .split("\n")
       .map((l, i) => [l, i])
       .filter(([l]) => l.startsWith(PREFIX))
       .map(([_, i]) => i + 1);
+
     for (const i of oldOutputs) {
       const line = doc.line(i);
       const from = line.from;
       const to = line.to + 1 > code.length ? line.to : line.to + 1;
       changes.push({from, to, insert: ""});
     }
+
     return changes;
   }
 
@@ -127,6 +130,7 @@ export function createEditor(container, options) {
       },
       rejected(error) {
         state.error = error;
+        console.error(error);
         refresh();
       },
     };
