@@ -43,6 +43,16 @@ const PROMISE = `const a = doc(new Promise(resolve => setTimeout(() => resolve(1
 
 const b = doc(a + 1);`;
 
+const GENERATOR = `const now = doc((function* () {
+  for (let i = 0; true; ++i) {
+    yield i;
+  }
+})());
+
+const x = doc(Math.abs(~~(Math.sin(now / 100) * 22)));
+
+doc('~'.repeat(x) + '(๑•̀ㅂ•́)و✧', {quote: false});`;
+
 const SYNTAX_ERROR = `function add();`;
 
 const RUNTIME_ERROR = `add(1, 2);`;
@@ -118,6 +128,10 @@ export const examples = [
   {
     name: "Promise",
     code: PROMISE,
+  },
+  {
+    name: "Generator",
+    code: GENERATOR,
   },
   {
     name: "Syntax Error",

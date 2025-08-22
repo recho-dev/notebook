@@ -39,9 +39,9 @@ function isMultiline(value) {
   return lines.length > 1;
 }
 
-function inspect(value, {limit = 200, ...rest} = {}) {
-  if (value instanceof Promise) return "Running…";
+function inspect(value, {limit = 200, quote = true, ...rest} = {}) {
   if (isMultiline(value)) return value;
+  if (typeof value === "string" && !quote) return value;
   const string = inspector(value, rest);
   if (string.length > limit) return string.slice(0, limit) + "…";
   return string;
@@ -95,21 +95,6 @@ export function createEditor(container, options) {
       if (values.length) {
         const output = values.map(({value, options}) => format(value, options)).join("\n") + "\n";
         changes.push({from: start, insert: output});
-      }
-    }
-
-    // Handle Promises
-    for (const node of nodes) {
-      const {values} = node.state;
-      for (let i = 0; i < values.length; i++) {
-        const {value} = values[i];
-        if (value instanceof Promise) {
-          // Replace the promise with the resolved value.
-          value.then((v) => {
-            values[i] = {value: v};
-            onRun();
-          });
-        }
       }
     }
 
