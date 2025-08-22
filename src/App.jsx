@@ -2,12 +2,21 @@ import {useMemo, useRef, useState, useEffect} from "react";
 import {examples} from "./examples.js";
 import {createEditor} from "./editor.js";
 
-export default function App() {
+function getInitialValue() {
   const initialValue = new URL(location).searchParams.get("name");
+  if (initialValue && examples.find(({name}) => name === initialValue)) {
+    return initialValue;
+  }
+  const name = examples[0].name;
+  history.pushState(null, "", `?name=${name}`);
+  return name;
+}
+
+export default function App() {
   const containerRef = useRef(null);
   const editorRef = useRef(null);
 
-  const [selected, setSelected] = useState(initialValue || examples[0].name);
+  const [selected, setSelected] = useState(getInitialValue());
 
   const code = useMemo(() => {
     return examples.find(({name}) => name === selected).code;

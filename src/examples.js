@@ -32,7 +32,7 @@ doc(new Map([[1, 2], [3, 4]]), {indent: 2});
 
 doc(new Date());`;
 
-const REQUIRE = `const d3 = await require("d3");
+const RANDOM_HISTOGRAM = `const d3 = await require("d3");
 
 const count = 200;
 const width = 50;
@@ -101,8 +101,8 @@ export const examples = [
     code: INSPECTOR,
   },
   {
-    name: "Require",
-    code: REQUIRE,
+    name: "Random Histogram",
+    code: RANDOM_HISTOGRAM,
   },
   {
     name: "Mandelbrot Set",
