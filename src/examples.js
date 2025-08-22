@@ -9,7 +9,7 @@ function add(a, b) {
   return a + b;
 }`;
 
-const INSPECTORS = `doc("line1\\nline2");
+const INSPECTOR = `doc("line1\\nline2");
 
 doc([1, 2, 3]);
 
@@ -31,6 +31,34 @@ doc(new Map([[1, 2], [3, 4]]));
 doc(new Map([[1, 2], [3, 4]]), {indent: 2});
 
 doc(new Date());`;
+
+const RANDOM_HISTOGRAM = `const d3 = await require("d3");
+
+const count = 200;
+const width = 50;
+
+const randomInt = doc(d3.randomInt(0, width));
+
+const numbers = doc(d3.range(count).map(randomInt));
+
+const groups = doc(d3.group(numbers, d => d));
+
+const bins = doc(d3.range(width).map((_, i) => groups.has(i) ? groups.get(i).length : 0));
+
+const height = doc(d3.max(bins));
+
+{
+  let output = "";
+  for (let i = 0; i < height; i++) {
+    for (let j = 0; j < width; j++) {
+      const bin = bins[j];
+      const h = bin ? bin * height / d3.max(bins) : 0;
+      output += h >= height - i ? "█" : " ";
+    }
+    output += i === height - 1 ? "" : "\\n";
+  }
+  doc(output);
+}`;
 
 const MANDELBROT_SET = `const cols = 80;
 const rows = 30;
@@ -69,8 +97,12 @@ export const examples = [
     code: ADDITION,
   },
   {
-    name: "Inspectors",
-    code: INSPECTORS,
+    name: "Inspector",
+    code: INSPECTOR,
+  },
+  {
+    name: "Random Histogram",
+    code: RANDOM_HISTOGRAM,
   },
   {
     name: "Mandelbrot Set",
