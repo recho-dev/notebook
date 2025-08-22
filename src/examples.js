@@ -28,9 +28,20 @@ doc(class Foo {
 
 doc(new Map([[1, 2], [3, 4]]));
 
+doc(new Date());
+
 doc(new Map([[1, 2], [3, 4]]), {indent: 2});
 
-doc(new Date());`;
+doc(new Array(100).fill(0));
+
+doc(new Array(100).fill(0), {limit: 100});
+
+doc(new Array(100).fill(0), {limit: Infinity});
+`;
+
+const PROMISE = `const a = doc(new Promise(resolve => setTimeout(() => resolve(1), 2000)));
+
+const b = doc(a + 1);`;
 
 const SYNTAX_ERROR = `function add();`;
 
@@ -103,6 +114,10 @@ export const examples = [
   {
     name: "Inspector",
     code: INSPECTOR,
+  },
+  {
+    name: "Promise",
+    code: PROMISE,
   },
   {
     name: "Syntax Error",
