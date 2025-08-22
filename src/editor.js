@@ -6,11 +6,16 @@ import {Runtime} from "@observablehq/runtime";
 import inspector from "object-inspect";
 import {parse} from "acorn";
 import {group} from "d3-array";
+import {require} from "d3-require";
 
 const PREFIX = "//➜";
 
+const BUILTINS = {
+  require: () => require,
+};
+
 function split(code) {
-  return parse(code, {ecmaVersion: "latest"}).body;
+  return parse(code, {ecmaVersion: "latest", sourceType: "module"}).body;
 }
 
 function uid() {
@@ -31,11 +36,6 @@ function debounce(fn, delay = 0) {
   };
 }
 
-function formatMultiline(value) {
-  const lines = value.split("\n");
-  return `\`${lines.map((line, i) => (i === 0 ? line : ` ${line}`)).join("\n")}\``;
-}
-
 function isMultiline(value) {
   const isString = typeof value === "string";
   if (!isString) return false;
@@ -43,9 +43,11 @@ function isMultiline(value) {
   return lines.length > 1;
 }
 
-function inspect(value, options) {
-  if (isMultiline(value)) return formatMultiline(value);
-  return inspector(value, options);
+function inspect(value, {limit = 200, ...rest} = {}) {
+  if (isMultiline(value)) return value;
+  const string = inspector(value, rest);
+  if (string.length > limit) return string.slice(0, limit) + "…";
+  return string;
 }
 
 function format(value, options) {
@@ -81,7 +83,7 @@ export function createEditor(container, options) {
     run(code);
   }
 
-  const runtime = new Runtime();
+  const runtime = new Runtime(BUILTINS);
   const main = runtime.module();
   const nodesByKey = new Map();
 
@@ -107,7 +109,7 @@ export function createEditor(container, options) {
     for (const node of nodes) {
       const start = node.start;
       const {values, error} = node.state;
-      const V = error ? {value: error} : values;
+      const V = error ? [{value: error}] : values;
       if (V.length) {
         const output = V.map(({value, options}) => format(value, options)).join("\n") + "\n";
         dispatch.push({from: start, insert: output});
