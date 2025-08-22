@@ -1,5 +1,5 @@
 import {useMemo, useRef, useState, useEffect} from "react";
-import {examples} from "./examples.js";
+import {examples} from "../examples/index.js";
 import {createEditor} from "./editor.js";
 
 function getInitialValue() {
