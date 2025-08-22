@@ -138,9 +138,7 @@ export function createEditor(container, options) {
 
   function observer(state) {
     return {
-      _error: false,
       pending() {
-        if (this._error) this._error = false;
         clear(state);
       },
       fulfilled() {
@@ -150,7 +148,6 @@ export function createEditor(container, options) {
       },
       rejected(error) {
         console.error(error);
-        this._error = true;
         clear(state);
         doc(state, error);
       },
