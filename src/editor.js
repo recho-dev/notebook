@@ -40,6 +40,7 @@ function isMultiline(value) {
 }
 
 function inspect(value, {limit = 200, ...rest} = {}) {
+  if (value instanceof Promise) return "Running…";
   if (isMultiline(value)) return value;
   const string = inspector(value, rest);
   if (string.length > limit) return string.slice(0, limit) + "…";
@@ -90,11 +91,25 @@ export function createEditor(container, options) {
     const nodes = Array.from(nodesByKey.values()).flat(Infinity);
     for (const node of nodes) {
       const start = node.start;
-      const {values, error} = node.state;
-      const V = error ? [{value: error}] : values;
-      if (V.length) {
-        const output = V.map(({value, options}) => format(value, options)).join("\n") + "\n";
+      const {values} = node.state;
+      if (values.length) {
+        const output = values.map(({value, options}) => format(value, options)).join("\n") + "\n";
         changes.push({from: start, insert: output});
+      }
+    }
+
+    // Handle Promises
+    for (const node of nodes) {
+      const {values} = node.state;
+      for (let i = 0; i < values.length; i++) {
+        const {value} = values[i];
+        if (value instanceof Promise) {
+          // Replace the promise with the resolved value.
+          value.then((v) => {
+            values[i] = {value: v};
+            onRun();
+          });
+        }
       }
     }
 
@@ -123,22 +138,27 @@ export function createEditor(container, options) {
 
   function observer(state) {
     return {
-      pending() {},
+      _error: false,
+      pending() {
+        if (this._error) this._error = false;
+        clear(state);
+      },
       fulfilled() {
-        state.error = null;
-        refresh();
+        // Before blocks are fulfilled, their position might be changed or
+        // they might be removed. Run `onRun` to make sure the position of blocks are updated.
+        onRun();
       },
       rejected(error) {
-        state.error = error;
         console.error(error);
-        refresh();
+        this._error = true;
+        clear(state);
+        doc(state, error);
       },
     };
   }
 
   function doc(state, value, options) {
     state.values.push({value, options});
-    refresh();
   }
 
   function clear(state) {
