@@ -32,6 +32,10 @@ doc(new Map([[1, 2], [3, 4]]), {indent: 2});
 
 doc(new Date());`;
 
+const SYNTAX_ERROR = `function add();`;
+
+const RUNTIME_ERROR = `add(1, 2);`;
+
 const RANDOM_HISTOGRAM = `const d3 = await require("d3");
 
 const count = 200;
@@ -99,6 +103,14 @@ export const examples = [
   {
     name: "Inspector",
     code: INSPECTOR,
+  },
+  {
+    name: "Syntax Error",
+    code: SYNTAX_ERROR,
+  },
+  {
+    name: "Runtime Error",
+    code: RUNTIME_ERROR,
   },
   {
     name: "Random Histogram",

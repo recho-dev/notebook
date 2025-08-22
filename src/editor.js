@@ -14,10 +14,6 @@ const BUILTINS = {
   require: () => require,
 };
 
-function split(code) {
-  return parse(code, {ecmaVersion: "latest", sourceType: "module"}).body;
-}
-
 function uid() {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
@@ -88,21 +84,7 @@ export function createEditor(container, options) {
   const nodesByKey = new Map();
 
   const refresh = debounce(() => {
-    const dispatch = [];
-    const doc = view.state.doc;
-
-    // Remove old outputs
-    const oldOutputs = code
-      .split("\n")
-      .map((l, i) => [l, i])
-      .filter(([l]) => l.startsWith(PREFIX))
-      .map(([_, i]) => i + 1);
-    for (const i of oldOutputs) {
-      const line = doc.line(i);
-      const from = line.from;
-      const to = line.to + 1 > code.length ? line.to : line.to + 1;
-      dispatch.push({from, to, insert: ""});
-    }
+    const changes = removeChanges(code);
 
     // Insert new outputs
     const nodes = Array.from(nodesByKey.values()).flat(Infinity);
@@ -112,14 +94,32 @@ export function createEditor(container, options) {
       const V = error ? [{value: error}] : values;
       if (V.length) {
         const output = V.map(({value, options}) => format(value, options)).join("\n") + "\n";
-        dispatch.push({from: start, insert: output});
+        changes.push({from: start, insert: output});
       }
     }
 
-    view.dispatch({
-      changes: dispatch,
-    });
+    view.dispatch({changes});
   }, 0);
+
+  function removeChanges(code) {
+    const doc = view.state.doc;
+    const changes = [];
+
+    const oldOutputs = code
+      .split("\n")
+      .map((l, i) => [l, i])
+      .filter(([l]) => l.startsWith(PREFIX))
+      .map(([_, i]) => i + 1);
+
+    for (const i of oldOutputs) {
+      const line = doc.line(i);
+      const from = line.from;
+      const to = line.to + 1 > code.length ? line.to : line.to + 1;
+      changes.push({from, to, insert: ""});
+    }
+
+    return changes;
+  }
 
   function observer(state) {
     return {
@@ -130,6 +130,7 @@ export function createEditor(container, options) {
       },
       rejected(error) {
         state.error = error;
+        console.error(error);
         refresh();
       },
     };
@@ -144,8 +145,22 @@ export function createEditor(container, options) {
     state.values = [];
   }
 
+  function split(code) {
+    try {
+      return parse(code, {ecmaVersion: "latest", sourceType: "module"}).body;
+    } catch (error) {
+      console.error(error);
+      const changes = removeChanges(code);
+      const errorMsg = format(error) + "\n";
+      changes.push({from: 0, insert: errorMsg});
+      view.dispatch({changes});
+      return null;
+    }
+  }
+
   function run(code) {
     const nodes = split(code);
+    if (!nodes) return;
     const groups = group(nodes, (n) => code.slice(n.start, n.end));
     const enter = [];
     const remove = [];
