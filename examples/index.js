@@ -11,6 +11,7 @@ import {runtimeError} from "./runtime-error.js";
 import {randomHistogram} from "./random-histogram.js";
 import {mandelbrotSet} from "./mandelbrot-set.js";
 import {matrixRain} from "./matrix-rain.js";
+import {infiniteLoop} from "./infinite-loop.js";
 
 export const examples = [
   helloWorld,
@@ -23,6 +24,7 @@ export const examples = [
   syntaxError,
   syntaxError2,
   runtimeError,
+  // infiniteLoop,
   randomHistogram,
   mandelbrotSet,
   matrixRain,
