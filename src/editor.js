@@ -176,6 +176,19 @@ export function createEditor(container, options) {
     }
   }
 
+  function transpile(code) {
+    try {
+      return transpileJavaScript(code);
+    } catch (error) {
+      console.error(error);
+      const changes = removeChanges(code);
+      const errorMsg = format(error) + "\n";
+      changes.push({from: 0, insert: errorMsg});
+      view.dispatch({changes});
+      return null;
+    }
+  }
+
   function run(code) {
     // If the code is the same as the pervious one, there is no need to to update
     // the position of blocks. So skip the diffing and just refresh the outputs.
@@ -189,6 +202,7 @@ export function createEditor(container, options) {
 
     const nodes = split(code);
     if (!nodes) return;
+
     const groups = group(nodes, (n) => code.slice(n.start, n.end));
     const enter = [];
     const remove = [];
@@ -229,13 +243,17 @@ export function createEditor(container, options) {
       for (const variable of variables) variable.delete();
     }
 
-    for (const node of enter) {
+    const transpiledNode = enter.map((node) => {
+      const cell = code.slice(node.start, node.end);
+      return [transpile(cell), node];
+    });
+    if (transpiledNode.some(([t]) => !t)) return;
+
+    for (const [transpiled, node] of transpiledNode) {
       const vid = uid();
       const state = {values: [], variables: [], error: null, doc: false};
       node.state = state;
-      const cell = code.slice(node.start, node.end);
-      const parsed = transpileJavaScript(cell);
-      const {inputs, body, outputs} = parsed;
+      const {inputs, body, outputs} = transpiled;
       const v = main.variable(observer(state), {shadow: {}});
       if (inputs.includes("doc")) {
         state.doc = true;
@@ -279,6 +297,7 @@ export function createEditor(container, options) {
         state.variables.push(main.variable(true).define(o, [vid], (exports) => exports[o]));
       }
     }
+
     refresh();
   }
 
