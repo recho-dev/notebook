@@ -1,12 +1,13 @@
-import { helloWorld } from './hello-world.js';
-import { addition } from './addition.js';
-import { inspector } from './inspector.js';
-import { promise } from './promise.js';
-import { generator } from './generator.js';
-import { syntaxError } from './syntax-error.js';
-import { runtimeError } from './runtime-error.js';
-import { randomHistogram } from './random-histogram.js';
-import { mandelbrotSet } from './mandelbrot-set.js';
+import {helloWorld} from "./hello-world.js";
+import {addition} from "./addition.js";
+import {inspector} from "./inspector.js";
+import {promise} from "./promise.js";
+import {generator} from "./generator.js";
+import {syntaxError} from "./syntax-error.js";
+import {runtimeError} from "./runtime-error.js";
+import {randomHistogram} from "./random-histogram.js";
+import {mandelbrotSet} from "./mandelbrot-set.js";
+import {matrixRain} from "./matrix-rain.js";
 
 export const examples = [
   helloWorld,
@@ -18,4 +19,5 @@ export const examples = [
   runtimeError,
   randomHistogram,
   mandelbrotSet,
+  matrixRain,
 ];
