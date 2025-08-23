@@ -42,7 +42,7 @@ export default function App() {
       <h1>Observable Script</h1>
       <div style={{display: "flex"}}>
         <ul style={{width: "200px", margin: 0, height: "calc(100vh - 85px)", overflow: "auto"}}>
-          {examples.map(({name, code}) => (
+          {examples.map(({name}) => (
             <li
               key={name}
               style={{textDecoration: selected === name ? "underline" : "none", cursor: "pointer"}}
