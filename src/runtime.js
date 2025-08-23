@@ -195,6 +195,13 @@ export function createRuntime(initialCode, view) {
     const nodes = split(code);
     if (!nodes) return;
 
+    for (const node of nodes) {
+      const cell = code.slice(node.start, node.end);
+      const transpiled = transpile(cell);
+      node.transpiled = transpiled;
+    }
+    if (nodes.some((n) => !n.transpiled)) return;
+
     const groups = group(nodes, (n) => code.slice(n.start, n.end));
     const enter = [];
     const remove = [];
@@ -235,17 +242,11 @@ export function createRuntime(initialCode, view) {
       for (const variable of variables) variable.delete();
     }
 
-    const transpiledNode = enter.map((node) => {
-      const cell = code.slice(node.start, node.end);
-      return [transpile(cell), node];
-    });
-    if (transpiledNode.some(([t]) => !t)) return;
-
-    for (const [transpiled, node] of transpiledNode) {
+    for (const node of enter) {
       const vid = uid();
       const state = {values: [], variables: [], error: null, doc: false};
       node.state = state;
-      const {inputs, body, outputs} = transpiled;
+      const {inputs, body, outputs} = node.transpiled;
       const v = main.variable(observer(state), {shadow: {}});
       if (inputs.includes("doc")) {
         state.doc = true;
