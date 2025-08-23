@@ -37,8 +37,8 @@ export function createEditor(container, options) {
       runtime.setCode(update.state.doc.toString());
       const userEdit = update.transactions.some((tr) => tr.annotation(Transaction.userEvent));
       // Stop updating the outputs when user edit the code.
-      // Prevent triggering `onRun` by generators, which will parse the code immediately.
-      // This may lead to syntax error if imputing code is not finished.
+      // Prevent triggering `run` by generators, which will parse the code immediately.
+      // This may lead to syntax error if inputting code is not finished.
       if (userEdit) runtime.setIsRunning(false);
     }
   }
