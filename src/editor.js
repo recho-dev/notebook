@@ -153,6 +153,7 @@ export function createEditor(container, options) {
   function doc(state, value, options) {
     if (!isRunning) return;
     state.values.push({value, options});
+    onRun();
   }
 
   function clear(state) {
@@ -227,23 +228,40 @@ export function createEditor(container, options) {
       const v = main.variable(observer(state), {shadow: {}});
       if (inputs.includes("doc")) {
         state.doc = true;
-        let printVersion = -1;
+        let docVersion = -1;
         const vd = new v.constructor(2, v._module);
         vd.define(
-          inputs.filter((i) => i !== "doc"),
+          inputs.filter((i) => i !== "doc" && i !== "clear"),
           () => {
-            const version = v._version; // capture version on input change
+            const version = v._version; // Capture version on input change.
             return (value, options) => {
-              if (version < printVersion) throw new Error("stale doc");
+              if (version < docVersion) throw new Error("stale doc");
               else if (state.variables[0] !== v) throw new Error("stale doc");
-              else if (version > printVersion) clear(state);
-              printVersion = version;
+              else if (version > docVersion) clear(state);
+              docVersion = version;
               doc(state, value, options);
               return value;
             };
           }
         );
         v._shadow.set("doc", vd);
+      }
+      if (inputs.includes("clear")) {
+        let clearVersion = -1;
+        const vc = new v.constructor(2, v._module);
+        vc.define(
+          inputs.filter((i) => i !== "clear" && i !== "doc"),
+          () => {
+            const version = v._version;
+            return () => {
+              if (version < clearVersion) throw new Error("stale clear");
+              else if (state.variables[0] !== v) throw new Error("stale clear");
+              clearVersion = version;
+              clear(state);
+            };
+          }
+        );
+        v._shadow.set("clear", vc);
       }
       state.variables.push(v.define(vid, inputs, safeEval(body, inputs)));
       for (const o of outputs) {

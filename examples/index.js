@@ -4,6 +4,7 @@ import {inspector} from "./inspector.js";
 import {promise} from "./promise.js";
 import {generator} from "./generator.js";
 import {invalidation} from "./invalidation.js";
+import {clear} from "./clear.js";
 import {syntaxError} from "./syntax-error.js";
 import {runtimeError} from "./runtime-error.js";
 import {randomHistogram} from "./random-histogram.js";
@@ -16,6 +17,7 @@ export const examples = [
   inspector,
   promise,
   generator,
+  clear,
   invalidation,
   syntaxError,
   runtimeError,

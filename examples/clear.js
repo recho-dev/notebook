@@ -1,0 +1,18 @@
+const code = `{
+  let count = 10;
+  
+  const timer = setInterval(() => { 
+    clear();
+    if (count-- <= 0) clearInterval(timer);
+    else doc(count);
+  }, 1000);
+
+  doc(count);
+
+  invalidation.then(() => clearInterval(timer));
+}`;
+
+export const clear = {
+  code,
+  name: "Clear",
+};
