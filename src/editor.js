@@ -55,6 +55,7 @@ function format(value, options) {
 
 export function createEditor(container, options) {
   let {code} = options;
+  let prevCode = null;
   let isRunning = false;
 
   const state = EditorState.create({
@@ -159,6 +160,7 @@ export function createEditor(container, options) {
   function clear(state) {
     if (!isRunning) return;
     state.values = [];
+    onRun();
   }
 
   function split(code) {
@@ -175,7 +177,16 @@ export function createEditor(container, options) {
   }
 
   function run(code) {
+    // If the code is the same as the pervious one, there is no need to to update
+    // the position of blocks. So skip the diffing and just refresh the outputs.
+    if (code === prevCode) {
+      refresh();
+      return;
+    }
+
+    prevCode = code;
     isRunning = true;
+
     const nodes = split(code);
     if (!nodes) return;
     const groups = group(nodes, (n) => code.slice(n.start, n.end));
