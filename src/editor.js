@@ -1,5 +1,5 @@
 import {EditorView, basicSetup} from "codemirror";
-import {EditorState} from "@codemirror/state";
+import {EditorState, Transaction} from "@codemirror/state";
 import {javascript} from "@codemirror/lang-javascript";
 import {transpileJavaScript} from "@observablehq/notebook-kit";
 import {Runtime} from "@observablehq/runtime";
@@ -55,6 +55,7 @@ function format(value, options) {
 
 export function createEditor(container, options) {
   let {code} = options;
+  let isRunning = false;
 
   const state = EditorState.create({
     doc: code,
@@ -73,7 +74,14 @@ export function createEditor(container, options) {
   });
 
   function onChange(update) {
-    if (update.docChanged) code = update.state.doc.toString();
+    if (update.docChanged) {
+      code = update.state.doc.toString();
+      const userEdit = update.transactions.some((tr) => tr.annotation(Transaction.userEvent));
+      // Stop updating the outputs when user edit the code.
+      // Prevent triggering `onRun` by generators, which will parse the code immediately.
+      // This may lead to syntax error if imputing code is not finished.
+      if (userEdit) isRunning = false;
+    }
   }
 
   function onRun() {
@@ -129,7 +137,9 @@ export function createEditor(container, options) {
       fulfilled() {
         // Before blocks are fulfilled, their position might be changed or
         // they might be removed. Run `onRun` to make sure the position of blocks are updated.
-        onRun();
+        // The better way is to sync the position by applying all the changes, from both the
+        // output and the user edits. But it's not easy to implement.
+        if (isRunning) onRun();
       },
       rejected(error) {
         console.error(error);
@@ -140,10 +150,12 @@ export function createEditor(container, options) {
   }
 
   function doc(state, value, options) {
+    if (!isRunning) return;
     state.values.push({value, options});
   }
 
   function clear(state) {
+    if (!isRunning) return;
     state.values = [];
   }
 
@@ -161,6 +173,7 @@ export function createEditor(container, options) {
   }
 
   function run(code) {
+    isRunning = true;
     const nodes = split(code);
     if (!nodes) return;
     const groups = group(nodes, (n) => code.slice(n.start, n.end));
