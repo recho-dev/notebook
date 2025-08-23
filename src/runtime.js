@@ -155,13 +155,6 @@ export function createRuntime(initialCode, view) {
       .map(([_, i]) => i);
 
     const lineOf = (i) => {
-      // const line = code.split("\n")[i];
-      // return {from: i, to: i + line.length};
-      // const docLine = view.state.doc.line(i);
-      // const lines = code.split("\n");
-      // const myLine = {from: i, to: i + lines[i - 1].length};
-      // console.log(docLine.start, docLine.end, myLine.from, myLine.to);
-      // return {from: docLine.from, to: docLine.to + myLine.length};
       const lines = code.split("\n");
       const line = lines[i];
       const from = lines.slice(0, i).join("\n").length;
