@@ -133,6 +133,7 @@ export function createEditor(container, options) {
     return {
       pending() {
         clear(state);
+        if (state.doc) doc(state, "Pending…", {quote: false});
       },
       fulfilled() {
         // Before blocks are fulfilled, their position might be changed or
@@ -218,13 +219,14 @@ export function createEditor(container, options) {
 
     for (const node of enter) {
       const vid = uid();
-      const state = {values: [], variables: [], error: null};
+      const state = {values: [], variables: [], error: null, doc: false};
       node.state = state;
       const cell = code.slice(node.start, node.end);
       const parsed = transpileJavaScript(cell);
       const {inputs, body, outputs} = parsed;
       const v = main.variable(observer(state), {shadow: {}});
       if (inputs.includes("doc")) {
+        state.doc = true;
         let printVersion = -1;
         const vd = new v.constructor(2, v._module);
         vd.define(
