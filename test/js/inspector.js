@@ -1,4 +1,4 @@
-const code = `doc("line1\\nline2");
+export const inspector = `doc("line1\\nline2");
 
 doc([1, 2, 3]);
 
@@ -26,8 +26,3 @@ doc(new Array(100).fill(0));
 doc(new Array(100).fill(0), {limit: 100});
 
 doc(new Array(100).fill(0), {limit: Infinity});`;
-
-export const inspector = {
-  name: "Inspector",
-  code,
-};

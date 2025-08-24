@@ -1,4 +1,9 @@
-const code = `{
+/**
+ * @title Clear
+ * @order 7
+ */
+
+{
   let count = 10;
   
   const timer = setInterval(() => { 
@@ -16,9 +21,4 @@ const code = `{
   doc(count);
 
   invalidation.then(() => clearInterval(timer));
-}`;
-
-export const clear = {
-  code,
-  name: "Clear",
-};
+}
