@@ -3,7 +3,7 @@
  * @order 4
  */
 
-const a = doc(new Promise(resolve => setTimeout(() => resolve(1), 2000)));
+const a = doc(new Promise((resolve) => setTimeout(() => resolve(1), 2000)));
 
 const b = doc(a + 1);
 

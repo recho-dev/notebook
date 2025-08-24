@@ -1,6 +1,5 @@
 /**
  * @title Mandelbrot Set
- * @order 12
  */
 
 const cols = 80;
@@ -16,7 +15,7 @@ const maxIter = 80;
       let [a, b, i] = [0, 0, 0];
       while (i < maxIter) {
         [a, b] = [a * a - b * b + re, 2 * a * b + im];
-        if(a * a + b * b > 4) break;
+        if (a * a + b * b > 4) break;
         i++;
       }
       output += i === maxIter ? "0" : " ";
@@ -27,5 +26,5 @@ const maxIter = 80;
 }
 
 function map(x, d0, d1, r0, r1) {
-  return r0 + (r1 - r0) * (x - d0) / (d1 - d0);
+  return r0 + ((r1 - r0) * (x - d0)) / (d1 - d0);
 }
