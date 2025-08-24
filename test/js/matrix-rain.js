@@ -1,4 +1,4 @@
-const code = `const width = 60;
+export const matrixRain = `const width = 60;
 const height = 25;
 const columns = d3.range(width).map(() => createColumn(height));
 
@@ -59,8 +59,3 @@ const frame = (async function* () {
 })();
 
 const d3 = require("d3");`;
-
-export const matrixRain = {
-  name: "Matrix Rain",
-  code,
-};

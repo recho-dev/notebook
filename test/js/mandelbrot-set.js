@@ -1,4 +1,4 @@
-const code = `const cols = 80;
+export const mandelbrotSet = `const cols = 80;
 const rows = 30;
 const maxIter = 80;
 
@@ -24,8 +24,3 @@ const maxIter = 80;
 function map(x, d0, d1, r0, r1) {
   return r0 + (r1 - r0) * (x - d0) / (d1 - d0);
 }`;
-
-export const mandelbrotSet = {
-  name: "Mandelbrot Set",
-  code,
-};
