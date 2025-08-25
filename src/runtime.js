@@ -51,7 +51,7 @@ function format(value, options) {
   return lines.map((line) => `${PREFIX} ${line}`).join("\n");
 }
 
-export function createRuntime(initialCode, view) {
+export function createRuntime(initialCode) {
   let code = initialCode;
   let prevCode = null;
   let isRunning = false;
