@@ -4,11 +4,17 @@
     "app:dev": "next dev",
     "app:build": "next build",
     "app:start": "next start",
-    "test": "npm run test:format",
-    "test:format": "prettier --check src test app"
+    "test": "npm run test:lint && npm run test:format",
+    "test:format": "prettier --check src test app",
+    "test:lint": "eslint"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.0.1",
+    "eslint": "^9.34.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^16.3.0",
     "prettier": "^3.6.2",
     "vite": "^7.1.3"
   },
