@@ -1,5 +1,5 @@
-import {getAllJSDocs} from "../../../utils.js";
-import {Editor} from "./editor.jsx";
+import {getAllJSDocs} from "../../utils.js";
+import {Editor} from "../../Editor.jsx";
 import {notFound} from "next/navigation";
 
 export async function generateStaticParams() {

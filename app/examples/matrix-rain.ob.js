@@ -1,6 +1,5 @@
 /**
  * @title Matrix Rain
- * @order 13
  */
 
 const width = 60;
@@ -9,7 +8,7 @@ const columns = d3.range(width).map(() => createColumn(height));
 
 {
   frame;
-  
+
   // Create a new buffer.
   const buffer = d3.range(width * height).map(() => " ");
 
@@ -40,7 +39,10 @@ const columns = d3.range(width).map(() => createColumn(height));
     for (let j = 0; j < width; ++j) output += buffer[i * width + j];
     output += i === height - 1 ? "" : "\n";
   }
-  output = output.split("\n").map(d => "  " + d).join("\n");
+  output = output
+    .split("\n")
+    .map((d) => "  " + d)
+    .join("\n");
   doc(output);
 }
 

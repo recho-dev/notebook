@@ -1,5 +1,10 @@
-import {redirect} from "next/navigation";
+import {Editor} from "./Editor.jsx";
 
 export default function Page() {
-  redirect("/docs/js/hello-world");
+  const code = `doc("Hello, world!")`;
+  return (
+    <div>
+      <Editor code={code} />
+    </div>
+  );
 }

@@ -1,6 +1,6 @@
 "use client";
 import {useEffect, useRef} from "react";
-import {createEditor} from "../../../../src/editor.js";
+import {createEditor} from "../src/editor.js";
 
 export function Editor({code}) {
   const containerRef = useRef(null);

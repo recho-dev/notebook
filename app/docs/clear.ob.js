@@ -5,8 +5,8 @@
 
 {
   let count = 10;
-  
-  const timer = setInterval(() => { 
+
+  const timer = setInterval(() => {
     clear();
     if (count-- <= 0) {
       clearInterval(timer);
