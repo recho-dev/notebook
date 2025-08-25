@@ -10,5 +10,5 @@ export default async function Page({params}) {
   const {slug} = await params;
   const example = getAllJSExamples().find((example) => example.slug === slug);
   if (!example) notFound();
-  return <Editor code={example.content} />;
+  return <Editor initialCode={example.content} />;
 }

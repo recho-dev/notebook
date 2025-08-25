@@ -10,5 +10,5 @@ export default async function Page({params}) {
   const {slug} = await params;
   const doc = getAllJSDocs().find((doc) => doc.slug === slug);
   if (!doc) notFound();
-  return <Editor code={doc.content} />;
+  return <Editor initialCode={doc.content} />;
 }

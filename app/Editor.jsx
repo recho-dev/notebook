@@ -2,29 +2,35 @@
 import {useEffect, useRef} from "react";
 import {createEditor} from "../src/editor.js";
 
-export function Editor({code}) {
+export function Editor({initialCode, onUserInput = () => {}}) {
   const containerRef = useRef(null);
   const editorRef = useRef(null);
 
   useEffect(() => {
     if (containerRef.current) {
       containerRef.current.innerHTML = "";
-      editorRef.current = createEditor(containerRef.current, {code});
+      editorRef.current = createEditor(containerRef.current, {code: initialCode});
     }
     return () => {
       if (editorRef.current) {
         editorRef.current.destroy();
       }
     };
-  }, [code]);
+  }, [initialCode]);
+
+  useEffect(() => {
+    if (editorRef.current) {
+      editorRef.current.on("userInput", onUserInput);
+    }
+  }, [initialCode, onUserInput]);
 
   return (
     <div style={{height: "calc(100vh - 115px)"}}>
-      <button style={{marginBottom: "10px"}} onClick={() => editorRef.current.run()}>
-        Run
-      </button>
+      <div style={{display: "flex", marginBottom: "10px"}}>
+        <button onClick={() => editorRef.current.run()}>Run</button>
+      </div>
       <div ref={containerRef} style={{height: "calc(100vh - 115px)", overflow: "auto"}}>
-        <pre>{code}</pre>
+        <pre>{initialCode}</pre>
       </div>
     </div>
   );
