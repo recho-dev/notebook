@@ -264,7 +264,7 @@ export function createRuntime(initialCode, view) {
               doc(state, value, options);
               return value;
             };
-          }
+          },
         );
         v._shadow.set("doc", vd);
       }
@@ -281,7 +281,7 @@ export function createRuntime(initialCode, view) {
               clearVersion = version;
               clear(state);
             };
-          }
+          },
         );
         v._shadow.set("clear", vc);
       }
