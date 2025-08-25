@@ -4,10 +4,12 @@
     "app:dev": "next dev",
     "app:build": "next build",
     "app:start": "next start",
-    "app:lint": "eslint"
+    "test": "npm run test:format",
+    "test:format": "prettier --check src test app"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.0.1",
+    "prettier": "^3.6.2",
     "vite": "^7.1.3"
   },
   "dependencies": {
