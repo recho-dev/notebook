@@ -65,32 +65,34 @@ export default function Page() {
     setActiveId(savedActiveId || savedFiles[0]?.id || null);
   }, []);
 
-  useEffect(() => {
-    saveActiveIdToLocalStorage(activeId);
-  }, [activeId]);
-
-  useEffect(() => {
+  function setAndSaveFiles(files) {
+    setFiles(files);
     saveFilesToLocalStorage(files);
-  }, [files]);
+  }
+
+  function setAndSaveActiveId(activeId) {
+    setActiveId(activeId);
+    saveActiveIdToLocalStorage(activeId);
+  }
 
   function onDelete(id) {
     if (confirm("Are you sure you want to delete this file?")) {
       const index = files.findIndex((f) => f.id === id);
       const nextActiveId = files[index + 1]?.id ?? files[index - 1]?.id ?? null;
       const newFiles = files.filter((f) => f.id !== id);
-      setFiles(newFiles);
-      setActiveId(nextActiveId);
+      setAndSaveFiles(newFiles);
+      setAndSaveActiveId(nextActiveId);
     }
   }
 
   function onNew() {
     const newFile = createDefaultFile();
-    setFiles([newFile, ...files]);
-    setActiveId(newFile.id);
+    setAndSaveFiles([newFile, ...files]);
+    setAndSaveActiveId(newFile.id);
   }
 
   function onSelect(id) {
-    setActiveId(id);
+    setAndSaveActiveId(id);
     setRenameTitle(null);
     setOpen(false);
   }
@@ -116,13 +118,13 @@ export default function Page() {
 
   function onSubmitRename() {
     const newFiles = files.map((f) => (f.id === activeId ? {...f, title: renameTitle} : f));
-    setFiles(newFiles);
+    setAndSaveFiles(newFiles);
     setRenameTitle(null);
   }
 
   function onUserInput(code) {
     const newFiles = files.map((f) => (f.id === activeId ? {...f, content: code} : f));
-    setFiles(newFiles);
+    setAndSaveFiles(newFiles);
   }
 
   function onKeyDown(e) {

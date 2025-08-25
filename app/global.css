@@ -1,11 +1,9 @@
+@import "../src/editor.css";
+
 body {
   width: 100vw;
   height: 100vh;
   margin: 0;
   padding: 0;
   overflow: hidden;
-}
-
-.cm-line {
-  line-height: 1.1 !important;
 }
