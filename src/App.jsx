@@ -16,7 +16,7 @@ export default function App() {
   const containerRef = useRef(null);
   const editorRef = useRef(null);
 
-  const [selected, setSelected] = useState(getInitialValue());
+  const [selected, setSelected] = useState(getInitialValue);
 
   const code = useMemo(() => {
     return examples.find(({name}) => name === selected).code;
@@ -40,8 +40,16 @@ export default function App() {
   return (
     <>
       <h1>Observable Script</h1>
-      <div style={{display: "flex"}}>
-        <ul style={{width: "200px", margin: 0, height: "calc(100vh - 85px)", overflow: "auto"}}>
+      <div
+        style={{
+          display: "grid",
+          width: "100%",
+          gridTemplateColumns: "200px minmax(0, 1fr)",
+          minHeight: "0",
+          flex: "1",
+        }}
+      >
+        <ul style={{margin: 0}}>
           {examples.map(({name}) => (
             <li
               key={name}
@@ -52,13 +60,22 @@ export default function App() {
             </li>
           ))}
         </ul>
-        <div style={{width: "calc(100% - 200px)"}}>
-          <button style={{marginBottom: "10px"}} onClick={() => editorRef.current.run()}>
-            Run
-          </button>
-          <div style={{height: "calc(100vh - 115px)", overflow: "auto"}}>
-            <div ref={containerRef}></div>
-          </div>
+        <div
+          style={{
+            width: "100%",
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.75rem",
+            boxSizing: "border-box",
+          }}
+        >
+          <nav style={{display: "flex", flexDirection: "row", alignItems: "center", gap: "0.5rem"}}>
+            <button style={{}} onClick={() => editorRef.current.runtime.run()}>
+              Run
+            </button>
+          </nav>
+          <div ref={containerRef} style={{width: "100%", minHeight: "0", flex: "1"}}></div>
         </div>
       </div>
     </>
