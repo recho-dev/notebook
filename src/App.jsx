@@ -71,7 +71,7 @@ export default function App() {
           }}
         >
           <nav style={{display: "flex", flexDirection: "row", alignItems: "center", gap: "0.5rem"}}>
-            <button style={{}} onClick={() => editorRef.current.runtime.run()}>
+            <button style={{}} onClick={() => editorRef.current.run()}>
               Run
             </button>
           </nav>
