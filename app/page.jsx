@@ -11,7 +11,7 @@ function createDefaultFile() {
     id: uid(),
     title: "Hello, world!",
     created: new Date().toISOString(),
-    content: `doc("Hello, world!");`,
+    content: `echo("Hello, world!");`,
   };
 }
 

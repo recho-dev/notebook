@@ -7,15 +7,15 @@ const d3 = await require("d3");
 const count = 200;
 const width = 50;
 
-const randomInt = doc(d3.randomInt(0, width));
+const randomInt = echo(d3.randomInt(0, width));
 
-const numbers = doc(d3.range(count).map(randomInt));
+const numbers = echo(d3.range(count).map(randomInt));
 
-const groups = doc(d3.group(numbers, (d) => d));
+const groups = echo(d3.group(numbers, (d) => d));
 
-const bins = doc(d3.range(width).map((_, i) => (groups.has(i) ? groups.get(i).length : 0)));
+const bins = echo(d3.range(width).map((_, i) => (groups.has(i) ? groups.get(i).length : 0)));
 
-const height = doc(d3.max(bins));
+const height = echo(d3.max(bins));
 
 {
   let output = "";
@@ -27,5 +27,5 @@ const height = doc(d3.max(bins));
     }
     output += i === height - 1 ? "" : "\n";
   }
-  doc(output);
+  echo(output);
 }

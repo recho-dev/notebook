@@ -43,7 +43,7 @@ const columns = d3.range(width).map(() => createColumn(height));
     .split("\n")
     .map((d) => "  " + d)
     .join("\n");
-  doc(output);
+  echo(output);
 }
 
 function createColumn(height) {

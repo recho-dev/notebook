@@ -1,1 +1,1 @@
-export const helloWorld = `doc("Hello World");`;
+export const helloWorld = `echo("Hello World");`;

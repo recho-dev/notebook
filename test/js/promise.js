@@ -1,9 +1,9 @@
-export const promise = `const a = doc(new Promise(resolve => setTimeout(() => resolve(1), 2000)));
+export const promise = `const a = echo(new Promise(resolve => setTimeout(() => resolve(1), 2000)));
 
-const b = doc(a + 1);
+const b = echo(a + 1);
 
 {
-  doc(1);
-  doc(a + 2);
-  doc(b + 3);
+  echo(1);
+  echo(a + 2);
+  echo(b + 3);
 }`;

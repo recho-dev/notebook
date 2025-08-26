@@ -3,14 +3,14 @@
  * @order 5
  */
 
-const now = doc(
+const now = echo(
   (function* () {
     for (let i = 0; true; ++i) {
       yield i;
     }
-  })()
+  })(),
 );
 
-const x = doc(Math.abs(~~(Math.sin(now / 100) * 22)));
+const x = echo(Math.abs(~~(Math.sin(now / 100) * 22)));
 
-doc("~".repeat(x) + "(๑•̀ㅂ•́)و✧", {quote: false});
+echo("~".repeat(x) + "(๑•̀ㅂ•́)و✧", {quote: false});

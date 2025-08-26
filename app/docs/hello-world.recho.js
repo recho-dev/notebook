@@ -3,4 +3,4 @@
  * @order 1
  */
 
-doc("hello world");
+echo("hello world");
