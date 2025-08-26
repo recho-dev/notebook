@@ -2,8 +2,8 @@ import "./global.css";
 import {Nav} from "./Nav.jsx";
 
 export const metadata = {
-  title: "Observable Script",
-  description: "Observable Script",
+  title: "Recho",
+  description: "Recho",
 };
 
 export default function Layout({children}) {
