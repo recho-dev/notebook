@@ -35,7 +35,7 @@ export default defineConfig([
     },
   },
   {
-    ignores: ["**/*.ob.js"],
+    ignores: ["**/*.recho.js"],
   },
   eslintConfigPrettier,
 ]);

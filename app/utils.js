@@ -17,11 +17,11 @@ export function getAllJSDocs() {
   const dir = path.join(process.cwd(), "app/docs/");
   const files = fs.readdirSync(dir);
   return files
-    .filter((file) => file.endsWith(".ob.js"))
+    .filter((file) => file.endsWith(".recho.js"))
     .map((file) => {
       const content = fs.readFileSync(path.join(dir, file), "utf8");
       const meta = parseJSMeta(content);
-      return {...meta, content, slug: file.replace(".ob.js", "")};
+      return {...meta, content, slug: file.replace(".recho.js", "")};
     });
 }
 
@@ -29,10 +29,10 @@ export function getAllJSExamples() {
   const dir = path.join(process.cwd(), "app/examples");
   const files = fs.readdirSync(dir);
   return files
-    .filter((file) => file.endsWith(".ob.js"))
+    .filter((file) => file.endsWith(".recho.js"))
     .map((file) => {
       const content = fs.readFileSync(path.join(dir, file), "utf8");
       const meta = parseJSMeta(content);
-      return {...meta, content, slug: file.replace(".ob.js", "")};
+      return {...meta, content, slug: file.replace(".recho.js", "")};
     });
 }
