@@ -17,7 +17,6 @@ export function outputProtection() {
     tr.changes.iterChanges((fromA, toA) => {
       if (shouldReject) return;
 
-
       if (fromA === toA) {
         const line = tr.startState.doc.lineAt(fromA);
         if (lineNumberSet.has(line.number)) shouldReject = true;
