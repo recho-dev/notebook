@@ -1,4 +1,9 @@
-export const inspector = `echo("line1\\nline2");
+/**
+ * @title Inspector
+ * @order 3
+ */
+
+echo("line1\nline2");
 
 echo([1, 2, 3]);
 
@@ -25,4 +30,4 @@ echo(new Array(100).fill(0));
 
 echo(new Array(100).fill(0), {limit: 100});
 
-echo(new Array(100).fill(0), {limit: Infinity});`;
+echo(new Array(100).fill(0), {limit: Infinity});

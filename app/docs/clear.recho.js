@@ -14,11 +14,11 @@
         clear();
       }, 1000);
     } else {
-      doc(count);
+      echo(count);
     }
   }, 1000);
 
-  doc(count);
+  echo(count);
 
   invalidation.then(() => clearInterval(timer));
 }

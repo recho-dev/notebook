@@ -22,7 +22,7 @@ const maxIter = 80;
     }
     output += y === rows - 1 ? "" : "\n";
   }
-  doc(output);
+  echo(output);
 }
 
 function map(x, d0, d1, r0, r1) {

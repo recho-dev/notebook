@@ -102,7 +102,7 @@ export function createRuntime(initialCode) {
     return {
       pending() {
         clear(state);
-        if (state.doc) doc(state, "Pending…", {quote: false});
+        if (state.doc) echo(state, "Pending…", {quote: false});
       },
       fulfilled() {
         // Before blocks are fulfilled, their position might be changed or
@@ -114,7 +114,7 @@ export function createRuntime(initialCode) {
       rejected(error) {
         console.error(error);
         clear(state);
-        doc(state, error);
+        echo(state, error);
       },
     };
   }
@@ -172,7 +172,7 @@ export function createRuntime(initialCode) {
     return changes;
   }
 
-  function doc(state, value, options) {
+  function echo(state, value, options) {
     if (!isRunning) return;
     state.values.push({value, options});
     rerun(code);
@@ -248,31 +248,31 @@ export function createRuntime(initialCode) {
       node.state = state;
       const {inputs, body, outputs} = node.transpiled;
       const v = main.variable(observer(state), {shadow: {}});
-      if (inputs.includes("doc")) {
+      if (inputs.includes("echo")) {
         state.doc = true;
         let docVersion = -1;
         const vd = new v.constructor(2, v._module);
         vd.define(
-          inputs.filter((i) => i !== "doc" && i !== "clear"),
+          inputs.filter((i) => i !== "echo" && i !== "clear"),
           () => {
             const version = v._version; // Capture version on input change.
             return (value, options) => {
-              if (version < docVersion) throw new Error("stale doc");
-              else if (state.variables[0] !== v) throw new Error("stale doc");
+              if (version < docVersion) throw new Error("stale echo");
+              else if (state.variables[0] !== v) throw new Error("stale echo");
               else if (version > docVersion) clear(state);
               docVersion = version;
-              doc(state, value, options);
+              echo(state, value, options);
               return value;
             };
           },
         );
-        v._shadow.set("doc", vd);
+        v._shadow.set("echo", vd);
       }
       if (inputs.includes("clear")) {
         let clearVersion = -1;
         const vc = new v.constructor(2, v._module);
         vc.define(
-          inputs.filter((i) => i !== "clear" && i !== "doc"),
+          inputs.filter((i) => i !== "clear" && i !== "echo"),
           () => {
             const version = v._version;
             return () => {
