@@ -17,8 +17,6 @@ export function outputProtection() {
     tr.changes.iterChanges((fromA, toA) => {
       if (shouldReject) return;
 
-      console.log("Change detected", fromA, toA);
-      console.log("Line numbers: ", lineNumberSet);
 
       if (fromA === toA) {
         const line = tr.startState.doc.lineAt(fromA);
