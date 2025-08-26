@@ -53,7 +53,7 @@ export default function Page() {
   const [activeId, setActiveId] = useState(null);
   const [renameTitle, setRenameTitle] = useState(null);
   const [open, setOpen] = useState(false);
-  const initialCode = useMemo(() => files.find((f) => f.id === activeId)?.content ?? null, [activeId, files]);
+  const initialCode = useMemo(() => files.find((f) => f.id === activeId)?.content ?? null, [activeId]);
   const activeFile = useMemo(() => files.find((f) => f.id === activeId), [activeId, files]);
   const inputRef = useRef(null);
 
