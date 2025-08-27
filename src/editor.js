@@ -42,8 +42,6 @@ export function createEditor(container, options) {
     parent: container,
   });
 
-  runtime.run();
-
   function dispatch(changes) {
     // Mark this transaction as from runtime so that it will not be filtered out.
     view.dispatch({changes, annotations: [Transaction.remote.of("runtime")]});
@@ -67,6 +65,7 @@ export function createEditor(container, options) {
   return {
     run: () => runtime.run(),
     on: (event, callback) => dispatcher.on(event, callback),
+    getCode: () => view.state.doc.toString(),
     destroy: () => {
       runtime.destroy();
       view.destroy();

@@ -10,6 +10,7 @@ export function Editor({initialCode, onUserInput = () => {}}) {
     if (containerRef.current) {
       containerRef.current.innerHTML = "";
       editorRef.current = createEditor(containerRef.current, {code: initialCode});
+      editorRef.current.run();
     }
     return () => {
       if (editorRef.current) {
@@ -26,10 +27,10 @@ export function Editor({initialCode, onUserInput = () => {}}) {
 
   return (
     <div style={{height: "calc(100vh - 115px)"}}>
-      <div style={{display: "flex", marginBottom: "10px"}}>
+      <div>
         <button onClick={() => editorRef.current.run()}>Run</button>
       </div>
-      <div ref={containerRef} style={{height: "calc(100vh - 115px)", overflow: "auto"}}>
+      <div ref={containerRef} style={{height: "100%", overflow: "auto"}}>
         <pre>{initialCode}</pre>
       </div>
     </div>
