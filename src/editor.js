@@ -65,7 +65,6 @@ export function createEditor(container, options) {
   return {
     run: () => runtime.run(),
     on: (event, callback) => dispatcher.on(event, callback),
-    getCode: () => view.state.doc.toString(),
     destroy: () => {
       runtime.destroy();
       view.destroy();
