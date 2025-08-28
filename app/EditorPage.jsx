@@ -1,10 +1,9 @@
 "use client";
-import {useState, useEffect, useRef, useCallback} from "react";
+import {useState, useEffect, useRef, useCallback, useSyncExternalStore} from "react";
+import {notFound, useRouter} from "next/navigation";
 import {Editor} from "./Editor.jsx";
-import {notFound} from "next/navigation";
 import {getSketchById, createSketch, addSketch, saveSketch} from "./api.js";
-import {useRouter} from "next/navigation";
-import {setDirty, getDirty, getCount} from "./globals.js";
+import {editorStore} from "./store.js";
 
 const UNSET = Symbol("UNSET");
 
@@ -15,10 +14,10 @@ export function EditorPage({id}) {
   const [isAdded, setIsAdded] = useState(id);
   const [initialCode, setInitialCode] = useState(null);
   const titleRef = useRef(null);
-  const count = getCount();
+  const store = useSyncExternalStore(editorStore.subscribe, editorStore.getSnapshot, editorStore.getServerSnapshot);
 
   const onSave = useCallback(() => {
-    setDirty(false);
+    editorStore.setDirty(false);
     if (isAdded) {
       saveSketch(sketch);
     } else {
@@ -33,15 +32,15 @@ export function EditorPage({id}) {
     setSketch(initialSketch);
     setInitialCode(initialSketch.content);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count]);
+  }, [store.count]);
 
   useEffect(() => {
     const onBeforeUnload = (e) => {
-      if (getDirty()) e.preventDefault();
+      if (store.isDirty) e.preventDefault();
     };
     window.addEventListener("beforeunload", onBeforeUnload);
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
-  }, []);
+  }, [store.isDirty]);
 
   useEffect(() => {
     const onKeyDown = (e) => {
@@ -65,7 +64,7 @@ export function EditorPage({id}) {
       setSketch(newSketch);
     } else {
       setSketch(newSketch);
-      setDirty(true);
+      editorStore.setDirty(true);
     }
   }
 
@@ -80,11 +79,8 @@ export function EditorPage({id}) {
   function onTitleChange(e) {
     const newSketch = {...sketch, title: e.target.value};
     setSketch(newSketch);
-    if (isAdded) {
-      saveSketch(newSketch);
-    } else {
-      setDirty(true);
-    }
+    if (isAdded) saveSketch(newSketch);
+    else editorStore.setDirty(true);
   }
 
   return (
