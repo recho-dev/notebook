@@ -1,28 +1,43 @@
-let data = {count: 0, isDirty: false};
-const initialData = {...data};
-const listeners = new Set();
-
-function emitChange() {
+function emitChange(listeners) {
   for (const listener of listeners) listener();
 }
 
-export const editorStore = {
+let count = 0;
+const counterListeners = new Set();
+
+export const countStore = {
   increment() {
-    data = {...data, count: data.count + 1};
-    emitChange();
-  },
-  setDirty(dirty) {
-    data = {...data, isDirty: dirty};
-    emitChange();
+    count++;
+    emitChange(counterListeners);
   },
   subscribe(listener) {
-    listeners.add(listener);
-    return () => listeners.delete(listener);
+    counterListeners.add(listener);
+    return () => counterListeners.delete(listener);
   },
   getSnapshot() {
-    return data;
+    return count;
   },
   getServerSnapshot() {
-    return initialData;
+    return 0;
+  },
+};
+
+let isDirty = false;
+const dirtyListeners = new Set();
+
+export const isDirtyStore = {
+  setDirty(dirty) {
+    isDirty = dirty;
+    emitChange(dirtyListeners);
+  },
+  subscribe(listener) {
+    dirtyListeners.add(listener);
+    return () => dirtyListeners.delete(listener);
+  },
+  getSnapshot() {
+    return isDirty;
+  },
+  getServerSnapshot() {
+    return false;
   },
 };

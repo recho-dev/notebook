@@ -1,20 +1,24 @@
 "use client";
 import {useSyncExternalStore} from "react";
 import {useRouter} from "next/navigation";
-import {editorStore} from "./store.js";
+import {isDirtyStore, countStore} from "./store.js";
 
 export function SafeLink({href, children}) {
   const router = useRouter();
-  const store = useSyncExternalStore(editorStore.subscribe, editorStore.getSnapshot, editorStore.getServerSnapshot);
+  const isDirty = useSyncExternalStore(
+    isDirtyStore.subscribe,
+    isDirtyStore.getSnapshot,
+    isDirtyStore.getServerSnapshot,
+  );
 
   const handleClick = (e) => {
     e.preventDefault();
-    if (store.isDirty) {
+    if (isDirty) {
       e.preventDefault();
       const confirmLeave = window.confirm("Your changes will be lost.");
       if (!confirmLeave) return;
     }
-    if (href === "/") editorStore.increment();
+    if (href === "/") countStore.increment();
     router.push(href);
   };
 
