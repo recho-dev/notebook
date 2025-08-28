@@ -21,14 +21,16 @@ export function EditorPage({id}) {
     if (isAdded) {
       saveSketch(sketch);
     } else {
+      const id = sketch.id;
       addSketch(sketch);
-      setIsAdded(true);
-      router.replace(`/sketches/${sketch.id}`);
+      setIsAdded(id);
+      // Just update the url, no need to reload the page.
+      window.history.pushState(null, "", `/sketches/${id}`);
     }
   }, [sketch, isAdded, router]);
 
   useEffect(() => {
-    const initialSketch = isAdded ? getSketchById(id) : createSketch();
+    const initialSketch = isAdded ? getSketchById(isAdded) : createSketch();
     setSketch(initialSketch);
     setInitialCode(initialSketch.content);
     // eslint-disable-next-line react-hooks/exhaustive-deps
