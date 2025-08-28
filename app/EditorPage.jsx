@@ -32,7 +32,7 @@ export function EditorPage({id}) {
     setSketch(initialSketch);
     setInitialCode(initialSketch.content);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [store.count]);
+  }, []);
 
   useEffect(() => {
     const onBeforeUnload = (e) => {
