@@ -1,4 +1,4 @@
-const data = {count: 0, isDirty: false};
+let data = {count: 0, isDirty: false};
 const initialData = {...data};
 const listeners = new Set();
 
@@ -8,11 +8,11 @@ function emitChange() {
 
 export const editorStore = {
   increment() {
-    data.count++;
+    data = {...data, count: data.count + 1};
     emitChange();
   },
   setDirty(dirty) {
-    data.isDirty = dirty;
+    data = {...data, isDirty: dirty};
     emitChange();
   },
   subscribe(listener) {
