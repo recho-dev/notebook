@@ -1,14 +1,17 @@
 {
   "scripts": {
+    "vercel-build": "next build",
     "dev": "vite",
     "app:dev": "next dev",
     "app:build": "next build",
+    "app:build-cloudflare": "npx @cloudflare/next-on-pages",
     "app:start": "next start",
     "test": "npm run test:lint && npm run test:format",
     "test:format": "prettier --check src test app",
     "test:lint": "eslint"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.14",
     "eslint": "^9.34.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.37.5",
