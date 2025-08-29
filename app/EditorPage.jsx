@@ -1,17 +1,16 @@
 "use client";
 import {useState, useEffect, useRef, useCallback, useSyncExternalStore} from "react";
-import {notFound, useRouter} from "next/navigation";
+import {notFound} from "next/navigation";
 import {Editor} from "./Editor.jsx";
 import {getSketchById, createSketch, addSketch, saveSketch} from "./api.js";
 import {isDirtyStore, countStore} from "./store.js";
 
 const UNSET = Symbol("UNSET");
 
-export function EditorPage({id}) {
-  const router = useRouter();
+export function EditorPage({id: initialId}) {
   const [sketch, setSketch] = useState(UNSET);
   const [showInput, setShowInput] = useState(false);
-  const [isAdded, setIsAdded] = useState(id);
+  const [id, setId] = useState(initialId);
   const [initialCode, setInitialCode] = useState(null);
   const titleRef = useRef(null);
   const count = useSyncExternalStore(countStore.subscribe, countStore.getSnapshot, countStore.getServerSnapshot);
@@ -20,22 +19,26 @@ export function EditorPage({id}) {
     isDirtyStore.getSnapshot,
     isDirtyStore.getServerSnapshot,
   );
+  const prevCount = useRef(id ? count : null); // Last saved count.
+  const isAdded = prevCount.current === count; // Whether the sketch is added to the storage.
 
   const onSave = useCallback(() => {
     isDirtyStore.setDirty(false);
     if (isAdded) {
       saveSketch(sketch);
     } else {
-      const id = sketch.id;
       addSketch(sketch);
-      setIsAdded(id);
-      // Just update the url, no need to reload the page.
-      window.history.pushState(null, "", `/sketches/${id}`);
+      prevCount.current = count;
+      const id = sketch.id;
+      setId(id); // Force re-render.
+      window.history.pushState(null, "", `/sketches/${id}`); // Just update the url, no need to reload the page.
     }
-  }, [sketch, isAdded, router]);
+  }, [sketch]);
 
+  // This effect is triggered when the count changes,
+  // which happens when user clicks the "New" nav link.
   useEffect(() => {
-    const initialSketch = isAdded ? getSketchById(isAdded) : createSketch();
+    const initialSketch = isAdded ? getSketchById(id) : createSketch();
     setSketch(initialSketch);
     setInitialCode(initialSketch.content);
     // eslint-disable-next-line react-hooks/exhaustive-deps
