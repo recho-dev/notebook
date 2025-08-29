@@ -28,6 +28,7 @@ async function render() {
   const editorContainer = document.createElement("div");
   const code = jsTests[select.value];
   const editor = createEditor(editorContainer, {code});
+  editor.run();
   const button = document.createElement("button");
   button.textContent = "Run";
   button.onclick = () => editor.run();

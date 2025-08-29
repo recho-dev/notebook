@@ -1,12 +1,15 @@
-import Link from "next/link";
+import {SafeLink} from "./SafeLink.jsx";
 
 export function Nav() {
   return (
     <header style={{display: "flex", gap: "10px", alignItems: "center"}}>
-      <h1>Recho</h1>
-      <Link href="/">Editor</Link>
-      <Link href="/docs">Docs</Link>
-      <Link href="/examples">Examples</Link>
+      <SafeLink href="/">
+        <h1>Recho</h1>
+      </SafeLink>
+      <SafeLink href="/sketches">Sketches</SafeLink>
+      <SafeLink href="/docs">Learn</SafeLink>
+      <SafeLink href="/examples">Discover</SafeLink>
+      <SafeLink href="/">New</SafeLink>
     </header>
   );
 }

@@ -42,8 +42,6 @@ export function createEditor(container, options) {
     parent: container,
   });
 
-  runtime.run();
-
   function dispatch(changes) {
     // Mark this transaction as from runtime so that it will not be filtered out.
     view.dispatch({changes, annotations: [Transaction.remote.of("runtime")]});
