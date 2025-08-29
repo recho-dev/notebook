@@ -29,11 +29,17 @@ async function render() {
   const code = jsTests[select.value];
   const editor = createEditor(editorContainer, {code});
   editor.run();
-  const button = document.createElement("button");
-  button.textContent = "Run";
-  button.onclick = () => editor.run();
-  button.style.marginBottom = "10px";
-  container.appendChild(button);
+  const runButton = document.createElement("button");
+  runButton.textContent = "Run";
+  runButton.onclick = () => editor.run();
+  runButton.style.marginBottom = "10px";
+  container.appendChild(runButton);
+
+  const stopButton = document.createElement("button");
+  stopButton.textContent = "Stop";
+  stopButton.onclick = () => editor.stop();
+  container.appendChild(stopButton);
+
   container.appendChild(editorContainer);
 }
 
