@@ -12,9 +12,7 @@ export function createEditor(container, options) {
   const {code} = options;
   const dispatcher = d3Dispatch("userInput");
 
-  const runtime = createRuntime(code);
-
-  runtime.onChanges(dispatch);
+  const runtimeRef = {current: null};
 
   const state = EditorState.create({
     doc: code,
@@ -27,7 +25,7 @@ export function createEditor(container, options) {
       keymap.of([
         {
           key: "Mod-s",
-          run: () => runtime.run(),
+          run: () => runtimeRef.current.run(),
           preventDefault: true,
         },
       ]),
@@ -42,6 +40,11 @@ export function createEditor(container, options) {
     parent: container,
   });
 
+  function initRuntime() {
+    runtimeRef.current = createRuntime(view.state.doc.toString());
+    runtimeRef.current.onChanges(dispatch);
+  }
+
   function dispatch(changes) {
     // Mark this transaction as from runtime so that it will not be filtered out.
     view.dispatch({changes, annotations: [Transaction.remote.of("runtime")]});
@@ -50,23 +53,30 @@ export function createEditor(container, options) {
   function onChange(update) {
     if (update.docChanged) {
       const code = update.state.doc.toString();
-      runtime.setCode(code);
+      runtimeRef.current?.setCode(code);
       const userEdit = update.transactions.some((tr) => tr.annotation(Transaction.userEvent));
       // Stop updating the outputs when user edit the code.
       // Prevent triggering `run` by generators, which will parse the code immediately.
       // This may lead to syntax error if inputting code is not finished.
       if (userEdit) {
-        runtime.setIsRunning(false);
+        runtimeRef.current?.setIsRunning(false);
         dispatcher.call("userInput", null, code);
       }
     }
   }
 
   return {
-    run: () => runtime.run(),
+    run: () => {
+      if (!runtimeRef.current) initRuntime();
+      runtimeRef.current.run();
+    },
+    stop: () => {
+      runtimeRef.current?.destroy();
+      runtimeRef.current = null;
+    },
     on: (event, callback) => dispatcher.on(event, callback),
     destroy: () => {
-      runtime.destroy();
+      runtimeRef.current?.destroy();
       view.destroy();
     },
   };

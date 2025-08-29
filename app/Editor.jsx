@@ -29,6 +29,7 @@ export function Editor({initialCode, onUserInput = () => {}}) {
     <div style={{height: "calc(100vh - 115px)"}}>
       <div>
         <button onClick={() => editorRef.current.run()}>Run</button>
+        <button onClick={() => editorRef.current.stop()}>Stop</button>
       </div>
       <div ref={containerRef} style={{height: "100%", overflow: "auto"}}>
         <pre>{initialCode}</pre>
