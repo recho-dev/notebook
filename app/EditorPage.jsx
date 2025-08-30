@@ -33,6 +33,7 @@ export function EditorPage({id: initialId}) {
       setId(id); // Force re-render.
       window.history.pushState(null, "", `/sketches/${id}`); // Just update the url, no need to reload the page.
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sketch]);
 
   // This effect is triggered when the count changes,

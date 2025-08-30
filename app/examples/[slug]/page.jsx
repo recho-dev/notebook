@@ -10,5 +10,12 @@ export default async function Page({params}) {
   const {slug} = await params;
   const example = getAllJSExamples().find((example) => example.slug === slug);
   if (!example) notFound();
-  return <Editor initialCode={example.content} />;
+  return (
+    <div>
+      <a href={`https://github.com/recho-dev/recho/pull/${example.pull_request}`} target="_blank" rel="noreferrer">
+        Comment
+      </a>
+      <Editor initialCode={example.content} />
+    </div>
+  );
 }
