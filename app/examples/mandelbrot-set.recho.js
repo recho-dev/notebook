@@ -1,5 +1,6 @@
 /**
  * @title Mandelbrot Set
+ * @pull_request 1
  */
 
 const cols = 80;
