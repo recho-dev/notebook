@@ -18,6 +18,7 @@ export function Editor({initialCode, onUserInput = () => {}, onBeforeEachRun = (
         editorRef.current.destroy();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialCode]);
 
   useEffect(() => {
