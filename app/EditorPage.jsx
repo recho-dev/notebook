@@ -10,6 +10,7 @@ const UNSET = Symbol("UNSET");
 export function EditorPage({id: initialId}) {
   const [sketch, setSketch] = useState(UNSET);
   const [showInput, setShowInput] = useState(false);
+  const [autoRun, setAutoRun] = useState(false);
   const [id, setId] = useState(initialId);
   const [initialCode, setInitialCode] = useState(null);
   const titleRef = useRef(null);
@@ -21,6 +22,7 @@ export function EditorPage({id: initialId}) {
   );
   const prevCount = useRef(id ? count : null); // Last saved count.
   const isAdded = prevCount.current === count; // Whether the sketch is added to the storage.
+  const timer = useRef(null);
 
   const onSave = useCallback(() => {
     isDirtyStore.setDirty(false);
@@ -42,6 +44,7 @@ export function EditorPage({id: initialId}) {
     const initialSketch = isAdded ? getSketchById(id) : createSketch();
     setSketch(initialSketch);
     setInitialCode(initialSketch.content);
+    setAutoRun(initialSketch.autoRun);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [count]);
 
@@ -94,6 +97,21 @@ export function EditorPage({id: initialId}) {
     else isDirtyStore.setDirty(true);
   }
 
+  // If long-running code is detected, set autoRun to false
+  // to prevent the browser from freezing on infinite loops
+  // and can't continue to edit the code.
+  function onBeforeEachRun() {
+    if (!isAdded) return;
+    if (timer.current) clearTimeout(timer.current);
+    const newSketch = {...sketch, autoRun: false};
+    saveSketch(newSketch);
+    timer.current = setTimeout(() => {
+      const newSketch = {...sketch, autoRun: true};
+      saveSketch(newSketch);
+      timer.current = null;
+    }, 100);
+  }
+
   return (
     <div>
       <div>
@@ -107,7 +125,13 @@ export function EditorPage({id: initialId}) {
           )}
         </span>
       </div>
-      <Editor initialCode={initialCode} key={sketch.id} onUserInput={onUserInput} />
+      <Editor
+        initialCode={initialCode}
+        key={sketch.id}
+        onUserInput={onUserInput}
+        onBeforeEachRun={onBeforeEachRun}
+        autoRun={autoRun}
+      />
     </div>
   );
 }

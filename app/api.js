@@ -16,6 +16,7 @@ export function createSketch() {
     createdAt: null,
     updatedAt: null,
     content: `echo("Hello, world!");`,
+    autoRun: true,
   };
 }
 
