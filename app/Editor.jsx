@@ -2,7 +2,7 @@
 import {useEffect, useRef, useState} from "react";
 import {createEditor} from "../src/editor.js";
 
-export function Editor({initialCode, onUserInput = () => {}}) {
+export function Editor({initialCode, onUserInput = () => {}, onBeforeEachRun = () => {}, autoRun = true}) {
   const containerRef = useRef(null);
   const editorRef = useRef(null);
   const [needRerun, setNeedRerun] = useState(false);
@@ -11,13 +11,14 @@ export function Editor({initialCode, onUserInput = () => {}}) {
     if (containerRef.current) {
       containerRef.current.innerHTML = "";
       editorRef.current = createEditor(containerRef.current, {code: initialCode});
-      editorRef.current.run();
+      if (autoRun) onRun();
     }
     return () => {
       if (editorRef.current) {
         editorRef.current.destroy();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialCode]);
 
   useEffect(() => {
@@ -32,6 +33,7 @@ export function Editor({initialCode, onUserInput = () => {}}) {
   }, [initialCode, onUserInput]);
 
   function onRun() {
+    onBeforeEachRun();
     setNeedRerun(false);
     editorRef.current.run();
   }
