@@ -21,15 +21,15 @@ export function Editor({initialCode, onUserInput = () => {}}) {
   }, [initialCode]);
 
   useEffect(() => {
+    const onInput = (code) => {
+      onUserInput(code);
+      setNeedRerun(true);
+    };
+
     if (editorRef.current) {
       editorRef.current.on("userInput", onInput);
     }
   }, [initialCode, onUserInput]);
-
-  function onInput(code) {
-    onUserInput(code);
-    setNeedRerun(true);
-  }
 
   function onRun() {
     setNeedRerun(false);
