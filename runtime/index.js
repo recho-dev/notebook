@@ -3,13 +3,13 @@ import {Runtime} from "@observablehq/runtime";
 import inspector from "object-inspect";
 import {parse} from "acorn";
 import {group} from "d3-array";
-import {require} from "d3-require";
 import {dispatch as d3Dispatch} from "d3-dispatch";
+import * as stdlib from "./stdlib.js";
 
 const PREFIX = "//➜";
 
 const BUILTINS = {
-  require: () => require,
+  recho: () => stdlib,
 };
 
 function uid() {

@@ -3,13 +3,7 @@
  * @order 5
  */
 
-const now = echo(
-  (function* () {
-    for (let i = 0; true; ++i) {
-      yield i;
-    }
-  })(),
-);
+const now = echo(recho.now());
 
 const x = echo(Math.abs(~~(Math.sin(now / 100) * 22)));
 

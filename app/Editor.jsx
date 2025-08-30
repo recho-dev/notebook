@@ -1,6 +1,6 @@
 "use client";
 import {useEffect, useRef, useState} from "react";
-import {createEditor} from "../src/editor.js";
+import {createEditor} from "../editor/index.js";
 
 export function Editor({initialCode, onUserInput = () => {}, onBeforeEachRun = () => {}, autoRun = true}) {
   const containerRef = useRef(null);

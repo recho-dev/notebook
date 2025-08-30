@@ -7,11 +7,11 @@
     "app:build-cloudflare": "npx @cloudflare/next-on-pages",
     "app:start": "next start",
     "test": "npm run test:lint && npm run test:format",
-    "test:format": "prettier --check src test app",
+    "test:format": "prettier --check editor runtime test app",
     "test:lint": "eslint"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "^1.13.14",
+    "@cloudflare/next-on-pages": "^1.13.15",
     "eslint": "^9.34.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.37.5",
@@ -27,7 +27,7 @@
     "@codemirror/language-data": "^6.5.1",
     "@codemirror/state": "^6.5.2",
     "@codemirror/view": "^6.38.1",
-    "@observablehq/notebook-kit": "^1.1.0",
+    "@observablehq/notebook-kit": "^1.2.0",
     "@observablehq/runtime": "^6.0.0",
     "acorn": "^8.15.0",
     "codemirror": "^6.0.2",

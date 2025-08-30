@@ -59,11 +59,6 @@ function randomChar() {
   return String.fromCharCode(d3.randomInt(32, 127)());
 }
 
-const frame = (async function* () {
-  for (let i = 0; true; ++i) {
-    yield i;
-    await new Promise((resolve) => setTimeout(resolve, 1000 / 15));
-  }
-})();
+const frame = recho.interval(1000 / 15);
 
-const d3 = require("d3");
+const d3 = recho.require("d3");

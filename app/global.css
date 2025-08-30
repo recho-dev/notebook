@@ -1,4 +1,4 @@
-@import "../src/editor.css";
+@import "../editor/index.css";
 
 body {
   width: 100vw;
