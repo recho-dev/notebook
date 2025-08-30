@@ -1,5 +1,5 @@
 import * as jsTests from "./js/index.js";
-import {createEditor} from "../src/editor.js";
+import {createEditor} from "../editor/index.js";
 
 // Select
 const select = createSelect(() => {

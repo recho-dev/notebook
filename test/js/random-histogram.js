@@ -1,4 +1,4 @@
-export const randomHistogram = `const d3 = await require("d3");
+export const randomHistogram = `const d3 = await recho.require("d3");
 
 const count = 200;
 const width = 50;

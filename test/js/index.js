@@ -5,6 +5,7 @@ export {promise} from "./promise.js";
 export {generator} from "./generator.js";
 export {invalidation} from "./invalidation.js";
 export {clear} from "./clear.js";
+export {interval} from "./interval.js";
 export {syntaxError} from "./syntax-error.js";
 export {syntaxError2} from "./syntax-error2.js";
 export {runtimeError} from "./runtime-error.js";

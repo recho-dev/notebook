@@ -3,7 +3,7 @@
  * @pull_request 3
  */
 
-const d3 = await require("d3");
+const d3 = await recho.require("d3");
 
 const count = 200;
 const width = 50;

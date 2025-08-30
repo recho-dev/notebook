@@ -1,9 +1,5 @@
-export const generator = `const now = echo((function* () {
-  for (let i = 0; true; ++i) {
-    yield i;
-  }
-})());
+export const generator = `const now = echo(recho.now());
 
-const x = echo(Math.abs(~~(Math.sin(now / 100) * 22)));
+const x = echo(Math.abs(~~(Math.sin(now / 1000) * 22)));
 
 echo('~'.repeat(x) + '(๑•̀ㅂ•́)و✧', {quote: false});`;

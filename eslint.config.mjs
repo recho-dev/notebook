@@ -6,7 +6,7 @@ import hooksPlugin from "eslint-plugin-react-hooks";
 
 export default defineConfig([
   {
-    files: ["src/**/*.js", "test/**/*.js", "app/**/*.js", "app/**/*.jsx"],
+    files: ["editor/**/*.js", "runtime/**/*.js", "test/**/*.js", "app/**/*.js", "app/**/*.jsx"],
     plugins: {
       react: reactPlugin,
       "react-hooks": hooksPlugin,

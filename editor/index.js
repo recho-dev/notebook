@@ -2,10 +2,10 @@ import {EditorView, basicSetup} from "codemirror";
 import {EditorState, Transaction} from "@codemirror/state";
 import {keymap} from "@codemirror/view";
 import {javascript} from "@codemirror/lang-javascript";
-import {createRuntime} from "./runtime.js";
-import {outputDecoration} from "./editors/decoration.js";
-import {outputLines} from "./editors/outputLines.js";
-import {outputProtection} from "./editors/protection.js";
+import {createRuntime} from "../runtime/index.js";
+import {outputDecoration} from "./decoration.js";
+import {outputLines} from "./outputLines.js";
+import {outputProtection} from "./protection.js";
 import {dispatch as d3Dispatch} from "d3-dispatch";
 
 export function createEditor(container, options) {
