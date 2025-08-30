@@ -19,10 +19,15 @@ export function Nav() {
       <SafeLink href="/sketches">Sketches</SafeLink>
       <SafeLink href="/docs">Docs</SafeLink>
       <SafeLink href="/examples">Examples</SafeLink>
-      <a href="https://github.com/recho-dev/recho" target="_blank">
+      <a href="https://github.com/recho-dev/recho" target="_blank" rel="noreferrer">
         GitHub
       </a>
-      <a href="https://github.com/recho-dev/recho/new/main/app/examples" onClick={handleUpload} target="_blank">
+      <a
+        href="https://github.com/recho-dev/recho/new/main/app/examples"
+        onClick={handleUpload}
+        target="_blank"
+        rel="noreferrer"
+      >
         Share
       </a>
       <SafeLink href="/">New</SafeLink>

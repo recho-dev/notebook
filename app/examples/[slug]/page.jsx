@@ -12,7 +12,7 @@ export default async function Page({params}) {
   if (!example) notFound();
   return (
     <div>
-      <a href={`https://github.com/recho-dev/recho/pull/${example.pull_request}`} target="_blank">
+      <a href={`https://github.com/recho-dev/recho/pull/${example.pull_request}`} target="_blank" rel="noreferrer">
         Comment
       </a>
       <Editor initialCode={example.content} />
