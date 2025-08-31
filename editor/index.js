@@ -31,7 +31,7 @@ export function createEditor(container, options) {
       ]),
       outputLines,
       outputDecoration,
-      outputProtection(),
+      // outputProtection(),
     ],
   });
 

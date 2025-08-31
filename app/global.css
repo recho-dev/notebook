@@ -1,19 +1,19 @@
 @import "tailwindcss";
 @import "../editor/index.css";
 
-body {
-  width: 100vw;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
+button {
+  cursor: pointer;
 }
 
-#root {
-  padding: 1rem;
-  box-sizing: border-box;
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
+.cm-gutters {
+  background-color: transparent !important;
+  border-right: none !important;
+}
+
+.cm-editor {
+  min-height: 332px;
+}
+
+.cm-editor.cm-focused {
+  outline: none !important;
 }

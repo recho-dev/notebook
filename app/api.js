@@ -6,7 +6,7 @@ const FILE_NAME = "obs-files";
 function generateProjectName() {
   const adj = predicates[~~(Math.random() * predicates.length)];
   const obj = objects[~~(Math.random() * objects.length)];
-  return `${adj} ${obj}`;
+  return `${adj}-${obj}.js`;
 }
 
 export function createSketch() {

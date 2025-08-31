@@ -18,6 +18,7 @@ export function SafeLink({href, children, className, ...props}) {
       const confirmLeave = window.confirm("Your changes will be lost.");
       if (!confirmLeave) return;
     }
+    isDirtyStore.setDirty(false);
     if (href === "/") countStore.increment();
     router.push(href);
   };

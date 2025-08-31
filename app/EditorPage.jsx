@@ -1,9 +1,11 @@
 "use client";
 import {useState, useEffect, useRef, useCallback, useSyncExternalStore} from "react";
 import {notFound} from "next/navigation";
+import {Pencil} from "lucide-react";
 import {Editor} from "./Editor.jsx";
 import {getSketchById, createSketch, addSketch, saveSketch} from "./api.js";
 import {isDirtyStore, countStore} from "./store.js";
+import {cn} from "./cn.js";
 
 const UNSET = Symbol("UNSET");
 
@@ -113,25 +115,42 @@ export function EditorPage({id: initialId}) {
   }
 
   return (
-    <div>
-      <div>
-        <button onClick={onSave}>{isAdded ? "Save" : "Create"}</button>
-        {!showInput && <button onClick={onRename}>Rename</button>}
-        <span>
-          {showInput ? (
-            <input type="text" value={sketch.title} onChange={onTitleChange} onBlur={onTitleBlur} ref={titleRef} />
-          ) : (
-            sketch.title
-          )}
-        </span>
-      </div>
+    <div className={cn("max-w-screen-lg mx-auto my-10")}>
       <Editor
         initialCode={initialCode}
         key={sketch.id}
         onUserInput={onUserInput}
         onBeforeEachRun={onBeforeEachRun}
         autoRun={autoRun}
+        toolBarStart={
+          <div className={cn("flex items-center gap-2")}>
+            {showInput || !isAdded ? (
+              <input
+                type="text"
+                value={sketch.title}
+                onChange={onTitleChange}
+                onBlur={onTitleBlur}
+                ref={titleRef}
+                className={cn("border border-gray-200 rounded-md px-3 py-1 text-sm bg-white")}
+              />
+            ) : (
+              <span className={cn("text-sm px-3 py-1 border border-gray-200 rounded-md bg-white")}>{sketch.title}</span>
+            )}
+            {!showInput && isAdded && (
+              <button onClick={onRename}>
+                <Pencil className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        }
       />
+      <div className={cn("mt-4 flex justify-end")}>
+        {!isAdded && (
+          <button onClick={onSave} className={cn("bg-green-700 text-white rounded-md px-3 py-1 text-sm")}>
+            Create
+          </button>
+        )}
+      </div>
     </div>
   );
 }
