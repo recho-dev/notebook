@@ -3,7 +3,7 @@ import {useSyncExternalStore} from "react";
 import {useRouter} from "next/navigation";
 import {isDirtyStore, countStore} from "./store.js";
 
-export function SafeLink({href, children}) {
+export function SafeLink({href, children, className, ...props}) {
   const router = useRouter();
   const isDirty = useSyncExternalStore(
     isDirtyStore.subscribe,
@@ -23,7 +23,7 @@ export function SafeLink({href, children}) {
   };
 
   return (
-    <a href={href} onClick={handleClick}>
+    <a href={href} onClick={handleClick} className={className} {...props}>
       {children}
     </a>
   );
