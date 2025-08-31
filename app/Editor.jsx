@@ -1,6 +1,7 @@
 "use client";
 import {useEffect, useRef, useState} from "react";
-import {Play, Square} from "lucide-react";
+import {Play, Square, RefreshCcw} from "lucide-react";
+import {Tooltip} from "react-tooltip";
 import {createEditor} from "../editor/index.js";
 import {cn} from "./cn.js";
 
@@ -55,15 +56,39 @@ export function Editor({
     editorRef.current.stop();
   }
 
+  function onRerun() {
+    setNeedRerun(false);
+    editorRef.current.stop();
+    editorRef.current.run();
+  }
+
   return (
     <div className={cn("w-full border border-gray-200 rounded-md")}>
       <div className={cn("flex justify-between items-center p-2 border-b border-gray-200 bg-gray-100")}>
         {toolBarStart}
         <div className={cn("flex items-center gap-3")}>
-          <button onClick={onRun}>
+          <button
+            onClick={onRun}
+            data-tooltip-id="action-tooltip"
+            data-tooltip-content="Run Updated Code"
+            data-tooltip-place="bottom"
+          >
             <Play className={cn(styles.iconButton, needRerun && "fill-black")} />
           </button>
-          <button onClick={onStop}>
+          <button
+            onClick={onRerun}
+            data-tooltip-id="action-tooltip"
+            data-tooltip-content="Re-run Sketch"
+            data-tooltip-place="bottom"
+          >
+            <RefreshCcw className={cn(styles.iconButton)} />
+          </button>
+          <button
+            onClick={onStop}
+            data-tooltip-id="action-tooltip"
+            data-tooltip-content="Stop Updating"
+            data-tooltip-place="bottom"
+          >
             <Square className={cn(styles.iconButton)} />
           </button>
         </div>
@@ -71,6 +96,7 @@ export function Editor({
       <div ref={containerRef}>
         <pre>{initialCode}</pre>
       </div>
+      <Tooltip id="action-tooltip" />
     </div>
   );
 }

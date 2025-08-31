@@ -2,6 +2,7 @@ import {EditorView, basicSetup} from "codemirror";
 import {EditorState, Transaction} from "@codemirror/state";
 import {keymap} from "@codemirror/view";
 import {javascript} from "@codemirror/lang-javascript";
+import {githubLight} from "@uiw/codemirror-theme-github";
 import {createRuntime} from "../runtime/index.js";
 import {outputDecoration} from "./decoration.js";
 import {outputLines} from "./outputLines.js";
@@ -19,8 +20,13 @@ export function createEditor(container, options) {
     extensions: [
       basicSetup,
       javascript(),
+      githubLight,
       EditorView.lineWrapping,
-      EditorView.theme({"&": {fontSize: "14px", fontFamily: "monospace"}}),
+      EditorView.theme({
+        "&": {fontSize: "14px", fontFamily: "monospace"},
+        ".cm-content": {whiteSpace: "pre"},
+        ".cm-line": {wordWrap: "normal"},
+      }),
       EditorView.updateListener.of(onChange),
       keymap.of([
         {

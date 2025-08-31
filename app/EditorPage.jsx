@@ -124,6 +124,19 @@ export function EditorPage({id: initialId}) {
         autoRun={autoRun}
         toolBarStart={
           <div className={cn("flex items-center gap-2")}>
+            {!isAdded && (
+              <button
+                onClick={onSave}
+                className={cn("bg-green-700 text-white rounded-md px-3 py-1 text-sm hover:bg-green-800")}
+              >
+                Create
+              </button>
+            )}
+            {!showInput && isAdded && (
+              <button onClick={onRename}>
+                <Pencil className="w-4 h-4" />
+              </button>
+            )}
             {showInput || !isAdded ? (
               <input
                 type="text"
@@ -134,23 +147,11 @@ export function EditorPage({id: initialId}) {
                 className={cn("border border-gray-200 rounded-md px-3 py-1 text-sm bg-white")}
               />
             ) : (
-              <span className={cn("text-sm px-3 py-1 border border-gray-200 rounded-md bg-white")}>{sketch.title}</span>
-            )}
-            {!showInput && isAdded && (
-              <button onClick={onRename}>
-                <Pencil className="w-4 h-4" />
-              </button>
+              <span className={cn("text-sm py-1 border border-gray-100 rounded-md")}>{sketch.title}</span>
             )}
           </div>
         }
       />
-      <div className={cn("mt-4 flex justify-end")}>
-        {!isAdded && (
-          <button onClick={onSave} className={cn("bg-green-700 text-white rounded-md px-3 py-1 text-sm")}>
-            Create
-          </button>
-        )}
-      </div>
     </div>
   );
 }
