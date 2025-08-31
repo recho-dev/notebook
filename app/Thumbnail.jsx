@@ -1,16 +1,12 @@
-import {codeToHtml} from "shiki";
 import {load} from "cheerio";
+import {cn} from "./cn.js";
 
 function removeEmptyLines(string) {
   const [first, ...rest] = string.split("\n").filter((line) => line.trim() !== "");
   return first + rest.join("\n");
 }
 
-export async function Thumbnail({code, outputStartLine}) {
-  const html = await codeToHtml(code, {
-    lang: "javascript",
-    theme: "github-light",
-  });
+export function Thumbnail({html, outputStartLine = null}) {
   if (outputStartLine === null) return <div dangerouslySetInnerHTML={{__html: html}} />;
   const $ = load(html);
   const lines = $("span.line");
@@ -19,5 +15,5 @@ export async function Thumbnail({code, outputStartLine}) {
       $(lines[i]).remove();
     }
   }
-  return <div dangerouslySetInnerHTML={{__html: removeEmptyLines($.html())}} />;
+  return <div dangerouslySetInnerHTML={{__html: removeEmptyLines($.html())}} className={cn("w-full h-full")} />;
 }

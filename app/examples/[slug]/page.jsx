@@ -19,8 +19,9 @@ export default async function Page({params}) {
       </div>
       <Editor
         initialCode={example.content}
+        key={example.title}
         toolBarStart={
-          <div className={cn("flex items-center")}>
+          <div className={cn("flex items-center")} key={example.slug}>
             <a
               href={`https://github.com/recho-dev/recho/pull/${example.pull_request}`}
               target="_blank"

@@ -1,7 +1,7 @@
-import {Thumbnail} from "../Thumbnail.jsx";
 import {getAllJSExamples} from "../utils.js";
 import {cn} from "../cn.js";
 import {Meta} from "../Meta.js";
+import {ThumbnailServer} from "../ThumbnailServer.js";
 
 export default function Page() {
   const examples = getAllJSExamples();
@@ -14,7 +14,7 @@ export default function Page() {
             <Meta example={example} />
             <div className={cn("w-full pt-[62.5%] relative  border border-gray-200 rounded-md overflow-hidden")}>
               <div className={cn("absolute inset-0 p-3")}>
-                <Thumbnail code={example.content} outputStartLine={example.outputStartLine} />
+                <ThumbnailServer code={example.content} outputStartLine={example.outputStartLine} />
               </div>
             </div>
           </div>
