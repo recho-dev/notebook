@@ -6,11 +6,12 @@ button {
 }
 
 .cm-gutters {
-  background-color: transparent !important;
+  background-color: white !important;
   border-right: none !important;
+  padding-left: 8px !important;
 }
 
-.cm-editor {
+.editor-page .cm-editor {
   min-height: 332px;
 }
 
