@@ -94,7 +94,7 @@ export function Editor({
         </div>
       </div>
       <div ref={containerRef}>
-        <pre>{initialCode}</pre>
+        <pre className={cn("text-sm")}>{initialCode}</pre>
       </div>
       <Tooltip id="action-tooltip" />
     </div>

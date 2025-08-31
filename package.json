@@ -39,6 +39,7 @@
     "@observablehq/runtime": "^6.0.0",
     "@uiw/codemirror-theme-github": "^4.25.1",
     "acorn": "^8.15.0",
+    "cheerio": "^1.1.2",
     "codemirror": "^6.0.2",
     "d3-array": "^3.2.4",
     "d3-dispatch": "^3.0.1",
@@ -48,6 +49,7 @@
     "object-inspect": "^1.13.4",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "shiki": "^3.12.0",
     "short-uuid": "^5.2.0"
   }
 }

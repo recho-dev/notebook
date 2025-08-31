@@ -2,6 +2,7 @@ import {notFound} from "next/navigation";
 import {getAllJSExamples} from "../../utils.js";
 import {Editor} from "../../Editor.jsx";
 import {cn} from "../../cn.js";
+import {Meta} from "../../Meta.js";
 
 export async function generateStaticParams() {
   return getAllJSExamples().map((example) => ({slug: example.slug}));
@@ -13,6 +14,9 @@ export default async function Page({params}) {
   if (!example) notFound();
   return (
     <div className={cn("max-w-screen-lg mx-auto my-10")}>
+      <div className={cn("mb-6")}>
+        <Meta example={example} />
+      </div>
       <Editor
         initialCode={example.content}
         toolBarStart={
@@ -25,7 +29,6 @@ export default async function Page({params}) {
             >
               Comment
             </a>
-            <span className={cn("text-sm px-3 py-1 border border-gray-100 rounded-md")}>{example.title}</span>
           </div>
         }
       />

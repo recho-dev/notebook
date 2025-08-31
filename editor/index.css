@@ -10,17 +10,17 @@
   .cm-output-line:first-child,
   :not(.cm-output-line) + .cm-output-line {
     /* The first of a contiguous sequence. */
-    /*padding-top: 1px;*/
+    /* padding-top: 1px;
     margin-top: 0px;
-    /* border-top: 2px solid #dfdfdf; */
+    border-top: 2px solid #dfdfdf; */
   }
 
   .cm-output-line:last-child,
   .cm-output-line:not(:last-child):not(:has(+ .cm-output-line)) {
     /* The last element of a contiguous sequence. */
-    /*padding-bottom: 1px;*/
+    /* padding-bottom: 1px;
     margin-bottom: 0px;
-    /* border-bottom: 2px solid #dfdfdf; */
+    border-bottom: 2px solid #dfdfdf; */
   }
 
   /* Set the background pattern for output lines. */

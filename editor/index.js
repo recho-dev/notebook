@@ -37,6 +37,7 @@ export function createEditor(container, options) {
       ]),
       outputLines,
       outputDecoration,
+      // Disable this for now, because it prevents copying/pasting the code.
       // outputProtection(),
     ],
   });

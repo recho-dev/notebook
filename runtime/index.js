@@ -5,8 +5,9 @@ import {parse} from "acorn";
 import {group} from "d3-array";
 import {dispatch as d3Dispatch} from "d3-dispatch";
 import * as stdlib from "./stdlib.js";
+import {OUTPUT_MARK} from "./constant.js";
 
-const PREFIX = "//➜";
+const PREFIX = `//${OUTPUT_MARK}`;
 
 const BUILTINS = {
   recho: () => stdlib,

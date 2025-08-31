@@ -1,12 +1,40 @@
 /**
  * @title Matrix Rain
+ * @author Bairui Su
+ * @created 2025-08-31
  * @pull_request 2
+ * @github pearmini
  */
 
 const width = 60;
 const height = 25;
 const columns = d3.range(width).map(() => createColumn(height));
 
+//➜              w       $  R        |       @      2         !
+//➜        j     M          &        C              m        ,
+//➜         _#   D          9 z      L         ?    Z=
+//➜         !d   `          [        *         g    g     3
+//➜         t|   [      -  BS  E     k e      u<    J :  o6      j
+//➜         I*   !      j  R$ p7     p I&D    k,      j  ?1      M
+//➜      k  j#   W O D  (      ,   > a s#     XY   9' .  XK y    )
+//➜      a  $\  *n [B   W  W   F    6[ w>  R  AOL   p j  _B U    Z
+//➜      X  /1     NX9  K      ~     7  Z /u  b_    o H ,:u=$    6
+//➜    Btb* rE a    yD  i    n ^     ks , S!  |?      &  ?$ l    a
+//➜    $ 3  @  y    ro  9       b    Oh ! I-  ^7      x  =t     X
+//➜    8 n  <  F    8ZG -       +    8i 2 .j  j       bx ,tf     G
+//➜    _ 8  t  3    GH& T u           S K y   M   !   Ln 45Y   K L
+//➜    }    d  ca   @ h   4           T 7 6   T   (   !y_hx7   P r
+//➜    u    i  /    FH0   =      K    v P     `   e   <[ XjD  <6 u
+//➜   M%    V  {    vg    |      V    4 q     7 [ R   ;   [@  =; \
+//➜    R       y    [:    }      ) `v S       [ %     /   g-  u= 3
+//➜    g       $    UH    g      & rD @       b H     =    o  4+ R
+//➜    9       g    96           W c  ~         t          *  mq
+//➜            ;    vI           )    p          \             M
+//➜            )    wc           A                 ~
+//➜                  d           _          =      D
+//➜                  `           ~          q      #
+//➜                  |           m                 e
+//➜                  e           W                 ^
 {
   frame;
 
