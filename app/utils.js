@@ -41,6 +41,9 @@ function findFirstOutputRange(content) {
       }
     }
   }
+  if (startLine !== null && endLine === null) {
+    endLine = lines.length;
+  }
   return {startLine, endLine};
 }
 
