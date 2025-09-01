@@ -1,13 +1,14 @@
 import {EditorView, basicSetup} from "codemirror";
 import {EditorState, Transaction} from "@codemirror/state";
 import {keymap} from "@codemirror/view";
-import {javascript} from "@codemirror/lang-javascript";
+import {javascript, javascriptLanguage} from "@codemirror/lang-javascript";
 import {githubLight} from "@uiw/codemirror-theme-github";
 import {createRuntime} from "../runtime/index.js";
 import {outputDecoration} from "./decoration.js";
 import {outputLines} from "./outputLines.js";
 import {outputProtection} from "./protection.js";
 import {dispatch as d3Dispatch} from "d3-dispatch";
+import {rechoCompletion} from "./completion.js";
 
 export function createEditor(container, options) {
   const {code} = options;
@@ -35,6 +36,7 @@ export function createEditor(container, options) {
           preventDefault: true,
         },
       ]),
+      javascriptLanguage.data.of({autocomplete: rechoCompletion}),
       outputLines,
       outputDecoration,
       // Disable this for now, because it prevents copying/pasting the code.
