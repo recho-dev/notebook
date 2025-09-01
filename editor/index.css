@@ -1,30 +1,43 @@
 .cm-editor {
   width: 100%;
   height: 100%;
+
+  --output-border-color: #19130029;
+  --output-content-color: #21201c;
+
   /* border: 1px solid #ccc; */
 
   .cm-line {
-    /* line-height: 1.1 !important; */
+    .cm-output-line-prefix {
+      opacity: 0.5;
+      font-weight: bold;
+    }
+
+    .cm-output-line-content > * {
+      color: var(--output-content-color);
+    }
   }
 
   .cm-output-line:first-child,
   :not(.cm-output-line) + .cm-output-line {
     /* The first of a contiguous sequence. */
-    /* padding-top: 1px;
-    margin-top: 0px;
-    border-top: 2px solid #dfdfdf; */
+    /*padding-top: 1px;*/
+    /*margin-top: -1px;*/
+    border-top: 1px dashed var(--output-border-color);
   }
 
   .cm-output-line:last-child,
   .cm-output-line:not(:last-child):not(:has(+ .cm-output-line)) {
     /* The last element of a contiguous sequence. */
-    /* padding-bottom: 1px;
-    margin-bottom: 0px;
-    border-bottom: 2px solid #dfdfdf; */
+    /*padding-bottom: 1px;*/
+    /*margin-bottom: -1px;*/
+    border-bottom: 1px dashed var(--output-border-color);
   }
 
   /* Set the background pattern for output lines. */
   .cm-output-line {
-    /* background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%237d7d7d' fill-opacity='0.4' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E"); */
+    line-height: 1.25;
+    border-left: 1px dashed var(--output-border-color);
+    /*background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%237d7d7d' fill-opacity='0.4' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");*/
   }
 }
