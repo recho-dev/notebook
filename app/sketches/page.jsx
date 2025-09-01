@@ -23,13 +23,14 @@ export default function Page() {
 
   if (isEmpty) {
     return (
-      <div className={cn("max-w-screen-lg mx-auto my-10 flex items-center justify-center")}>
-        <span>
-          <span className={cn("mr-2")}>No sketches found.</span>
-          <Link href="/" className={cn("bg-green-700 text-white rounded-md px-3 py-1 text-sm hover:bg-green-800")}>
-            New
-          </Link>
-        </span>
+      <div className={cn("text-center mt-20")}>
+        <p className={cn("mt-4")}>No sketches found.</p>
+        <Link
+          href="/"
+          className={cn("mt-4", "inline-block bg-black text-white rounded-md px-3 py-1 text-sm hover:bg-gray-800")}
+        >
+          New
+        </Link>
       </div>
     );
   }
