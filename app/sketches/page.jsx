@@ -54,7 +54,7 @@ export default function Page() {
               <Trash className={cn("w-4 h-4")} />
             </button>
           </div>
-          <div className={cn("w-full  border border-gray-200 rounded-md overflow-hidden max-h-[180px] px-3 py-2")}>
+          <div className={cn("w-full  border border-gray-200 rounded-md overflow-hidden max-h-[180px] px-3")}>
             <ThumbnailClient code={sketch.content} />
           </div>
         </div>

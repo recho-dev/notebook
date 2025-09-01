@@ -13,7 +13,7 @@ export default function Page() {
           <div key={example.slug}>
             <Meta example={example} />
             <div className={cn("w-full pt-[62.5%] relative  border border-gray-200 rounded-md overflow-hidden")}>
-              <div className={cn("absolute inset-0 p-3")}>
+              <div className={cn("absolute inset-0 px-3")}>
                 <ThumbnailServer code={example.content} outputStartLine={example.outputStartLine} />
               </div>
             </div>
