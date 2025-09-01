@@ -76,25 +76,26 @@ class TogglePlugin {
             node.name == "BooleanLiteral" &&
             node.matchContext(["CallExpression", "ArgList"]) &&
             node.node.prevSibling.name === "(" &&
-            node.node.nextSibling.name === ")" &&
-            node.node.parent.firstChild.name === "MemberExpression" &&
-            node.node.parent.firstChild.firstChild.name === "Identifier"
-            // node.node.parent.firstChild.lastChild.name === "Identifier"
+            node.node.nextSibling.name === ")"
           ) {
-            console.log("parent's parent", node.node.parent.parent);
-            console.group("Found a BooleanLiteral");
-            let currentNode = node.node;
-            while (currentNode) {
-              console.log(currentNode.name);
-              currentNode = currentNode.parent;
-            }
-            console.groupEnd();
-            let isTrue = view.state.doc.sliceString(node.from, node.to) == "true";
-            let deco = Decoration.widget({
-              widget: new ToggleWidget(isTrue),
-              side: -1,
-            });
-            widgets.push(deco.range(node.from));
+            // Check if the callee is `recho.toggle`.
+            // We do not consider the case of shadowing.
+            const memberExpression = node.node.parent.parent.firstChild;
+            if (memberExpression.name !== "MemberExpression") return;
+            const variableNameNode = memberExpression.firstChild;
+            const propertyNameNode = memberExpression.lastChild;
+            if (variableNameNode.name !== "VariableName") return;
+            if (propertyNameNode.name !== "PropertyName") return;
+            // If the API is changed, we need to update the comparison here.
+            if (view.state.doc.sliceString(variableNameNode.from, variableNameNode.to) !== "recho") return;
+            if (view.state.doc.sliceString(propertyNameNode.from, propertyNameNode.to) !== "toggle") return;
+            const text = view.state.doc.sliceString(node.from, node.to);
+            widgets.push(
+              Decoration.widget({
+                widget: new ToggleWidget(text === "true"),
+                side: -1,
+              }).range(node.from),
+            );
           }
         },
       });
