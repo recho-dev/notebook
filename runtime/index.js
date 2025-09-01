@@ -196,12 +196,6 @@ export function createRuntime(initialCode) {
     const nodes = split(code);
     if (!nodes) return;
 
-    console.group("Nodes");
-    for (const node of nodes) {
-      console.log(node);
-    }
-    console.groupEnd();
-
     for (const node of nodes) {
       const cell = code.slice(node.start, node.end);
       const transpiled = transpile(cell);

@@ -5,7 +5,27 @@
   --output-border-color: #19130029;
   --output-content-color: #21201c;
 
-  /* border: 1px solid #ccc; */
+  .cm-boolean-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding-right: 0.125rem;
+    vertical-align: text-top;
+
+    > input {
+      width: 0.9rem;
+      height: 0.9rem;
+    }
+  }
+
+  /*.cm-number-slider {
+    display: inline-flex;
+    align-items: center;
+    padding-right: 0.125rem;
+    > input {
+      width: 2.5rem;
+    }
+  }*/
 
   .cm-line {
     .cm-output-line-prefix {
