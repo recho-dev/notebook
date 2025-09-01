@@ -23,7 +23,7 @@ export function createEditor(container, options) {
       githubLight,
       EditorView.lineWrapping,
       EditorView.theme({
-        "&": {fontSize: "12px", fontFamily: "monospace"},
+        "&": {fontSize: "14px", fontFamily: "monospace"},
         ".cm-content": {whiteSpace: "pre"},
         ".cm-line": {wordWrap: "normal"},
       }),
