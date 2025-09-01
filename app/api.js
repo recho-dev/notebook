@@ -13,8 +13,8 @@ export function createSketch() {
   return {
     id: generate(),
     title: generateProjectName(),
-    createdAt: null,
-    updatedAt: null,
+    created: null,
+    updated: null,
     content: `echo("Hello, world!");`,
     autoRun: true,
   };
@@ -27,7 +27,7 @@ function saveSketches(sketches) {
 export function getSketches() {
   const files = localStorage.getItem(FILE_NAME);
   if (!files) return [];
-  return JSON.parse(files).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+  return JSON.parse(files).sort((a, b) => new Date(b.updated) - new Date(a.updated));
 }
 
 export function clearSketchesFromLocalStorage() {
@@ -50,13 +50,13 @@ export function deleteSketch(id) {
 export function addSketch(sketch) {
   const sketches = getSketches();
   const time = new Date().toISOString();
-  const newSketch = {...sketch, createdAt: time, updatedAt: time};
+  const newSketch = {...sketch, created: time, updated: time};
   saveSketches([...sketches, newSketch]);
 }
 
 export function saveSketch(sketch) {
   const sketches = getSketches();
-  const updatedSketch = {...sketch, updatedAt: new Date().toISOString()};
+  const updatedSketch = {...sketch, updated: new Date().toISOString()};
   const newSketches = sketches.map((f) => (f.id === sketch.id ? updatedSketch : f));
   saveSketches(newSketches);
 }

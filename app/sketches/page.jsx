@@ -43,9 +43,7 @@ export default function Page() {
               <Link href={`/sketches/${sketch.id}`} className={cn("font-semibold hover:underline text-blue-500")}>
                 <span>{sketch.title}</span>
               </Link>
-              <div className={cn("text-sm text-gray-500")}>
-                Created {new Date(sketch.createdAt).toLocaleDateString()}
-              </div>
+              <div className={cn("text-sm text-gray-500")}>Created {new Date(sketch.created).toLocaleDateString()}</div>
             </div>
             <button
               onClick={() => onDelete(sketch.id)}
