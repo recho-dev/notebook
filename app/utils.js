@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import {OUTPUT_MARK} from "../runtime/constant.js";
 
 function parseJSMeta(content) {
   const match = content.match(/^\/\*\*([\s\S]*?)\*\//);
@@ -25,6 +26,27 @@ export function getAllJSDocs() {
     });
 }
 
+function findFirstOutputRange(content) {
+  const lines = content.split("\n");
+  let startLine = null;
+  let endLine = null;
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].startsWith(`//${OUTPUT_MARK}`)) {
+      if (startLine === null) startLine = i + 1;
+      else endLine = i + 1;
+    } else {
+      if (startLine !== null) {
+        endLine = i + 1;
+        break;
+      }
+    }
+  }
+  if (startLine !== null && endLine === null) {
+    endLine = lines.length;
+  }
+  return {startLine, endLine};
+}
+
 export function getAllJSExamples() {
   const dir = path.join(process.cwd(), "app/examples");
   const files = fs.readdirSync(dir);
@@ -33,6 +55,13 @@ export function getAllJSExamples() {
     .map((file) => {
       const content = fs.readFileSync(path.join(dir, file), "utf8");
       const meta = parseJSMeta(content);
-      return {...meta, content, slug: file.replace(".recho.js", "")};
+      const {startLine, endLine} = findFirstOutputRange(content);
+      return {
+        ...meta,
+        content,
+        slug: file.replace(".recho.js", ""),
+        outputStartLine: meta.thumbnail ?? startLine,
+        outputEndLine: endLine,
+      };
     });
 }

@@ -1,6 +1,7 @@
+import {notFound} from "next/navigation";
 import {getAllJSDocs} from "../../utils.js";
 import {Editor} from "../../Editor.jsx";
-import {notFound} from "next/navigation";
+import {cn} from "../../cn.js";
 
 export async function generateStaticParams() {
   return getAllJSDocs().map((doc) => ({slug: doc.slug}));
@@ -10,5 +11,9 @@ export default async function Page({params}) {
   const {slug} = await params;
   const doc = getAllJSDocs().find((doc) => doc.slug === slug);
   if (!doc) notFound();
-  return <Editor initialCode={doc.content} />;
+  return (
+    <div className={cn("mx-4 my-4")}>
+      <Editor initialCode={doc.content} />
+    </div>
+  );
 }

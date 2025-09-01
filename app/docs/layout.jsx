@@ -1,20 +1,13 @@
-import Link from "next/link";
+import {Sidebar} from "../Sidebar.js";
+import {cn} from "../cn.js";
 import {getAllJSDocs} from "../utils.js";
 
 export default function Layout({children}) {
   const docs = getAllJSDocs();
   return (
-    <div style={{display: "flex"}}>
-      <ul style={{width: "200px", margin: 0, height: "calc(100vh - 85px)", overflow: "auto"}}>
-        {docs
-          .sort((a, b) => a.order - b.order)
-          .map((doc) => (
-            <Link href={`/docs/${doc.slug}`} key={doc.title}>
-              <li>{doc.title}</li>
-            </Link>
-          ))}
-      </ul>
-      <div style={{width: "calc(100% - 200px)"}}>{children}</div>
+    <div className={cn("flex", "h-[calc(100vh-65px)] overflow-auto")}>
+      <Sidebar docs={docs} />
+      <div className={cn("flex-1", "overflow-auto")}>{children}</div>
     </div>
   );
 }

@@ -1,7 +1,8 @@
 import {syntaxTree} from "@codemirror/language";
 import {StateField} from "@codemirror/state";
+import {OUTPUT_MARK} from "../runtime/constant.js";
 
-const OUTPUT_MARK_CODE_POINT = "➜".codePointAt(0);
+const OUTPUT_MARK_CODE_POINT = OUTPUT_MARK.codePointAt(0);
 
 /** @type {StateField<{number: number, from: number, to: number}[]>} */
 export const outputLinesField = StateField.define({
