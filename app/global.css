@@ -4,8 +4,8 @@
 @import "@fontsource-variable/spline-sans-mono";
 
 @theme {
-  --default-font-family: "Inter";
-  --font-mono: "Spline Sans Mono";
+  --default-font-family: "Inter Variable";
+  --font-mono: "Spline Sans Mono Variable";
 }
 
 button {
