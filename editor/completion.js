@@ -43,6 +43,27 @@ const builtinFunctions = [
     info: "Imports one or more JavaScript packages. The import specifiers must be valid npm package names with optional version specifiers.",
     apply: toApplyCompletion('recho.require("$")'),
   },
+  {
+    label: "toggle",
+    detail: "(value: boolean)",
+    type: "function",
+    info: "Display an interactive toggle in the editor.",
+    apply: toApplyCompletion("recho.toggle($)"),
+  },
+  {
+    label: "slider",
+    detail: "(value: number, options?: { min?: number, max?: number, step?: number })",
+    type: "function",
+    info: "Display an interactive slider in the editor.",
+    apply: toApplyCompletion("recho.slider($)"),
+  },
+  {
+    label: "mask",
+    detail: "(value: string)",
+    type: "function",
+    info: "Mask a string value in the editor",
+    apply: toApplyCompletion("recho.mask($)"),
+  },
 ];
 
 /**
