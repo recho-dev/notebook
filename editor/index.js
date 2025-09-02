@@ -1,7 +1,7 @@
 import {EditorView, basicSetup} from "codemirror";
 import {EditorState, Transaction} from "@codemirror/state";
 import {keymap} from "@codemirror/view";
-import {javascript} from "@codemirror/lang-javascript";
+import {javascript, javascriptLanguage} from "@codemirror/lang-javascript";
 import {githubLight} from "@uiw/codemirror-theme-github";
 import {createRuntime} from "../runtime/index.js";
 import {outputDecoration} from "./decoration.js";
@@ -9,6 +9,7 @@ import {outputLines} from "./outputLines.js";
 import {outputProtection} from "./protection.js";
 import {dispatch as d3Dispatch} from "d3-dispatch";
 import {controls} from "./controls/index.js";
+import {rechoCompletion} from "./completion.js";
 
 export function createEditor(container, options) {
   const {code} = options;
@@ -24,7 +25,7 @@ export function createEditor(container, options) {
       githubLight,
       EditorView.lineWrapping,
       EditorView.theme({
-        "&": {fontSize: "12px", fontFamily: "monospace"},
+        "&": {fontSize: "14px", fontFamily: "monospace"},
         ".cm-content": {whiteSpace: "pre"},
         ".cm-line": {wordWrap: "normal"},
       }),
@@ -36,6 +37,7 @@ export function createEditor(container, options) {
           preventDefault: true,
         },
       ]),
+      javascriptLanguage.data.of({autocomplete: rechoCompletion}),
       outputLines,
       outputDecoration,
       controls(runtimeRef),

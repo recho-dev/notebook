@@ -70,7 +70,8 @@ export function EditorPage({id: initialId}) {
     if (showInput) titleRef.current.focus();
   }, [showInput]);
 
-  if (sketch === UNSET) return <div>Loading...</div>;
+  if (sketch === UNSET) return <div className={cn("max-w-screen-lg mx-auto my-10 editor-page")}>Loading...</div>;
+
   if (!sketch) return notFound();
 
   function onUserInput(code) {
