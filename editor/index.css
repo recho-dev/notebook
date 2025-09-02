@@ -3,6 +3,26 @@
   height: 100%;
   /* border: 1px solid #ccc; */
 
+  .cm-content,
+  .cm-lineNumbers,
+  .cm-tooltip.cm-tooltip-autocomplete > ul {
+    @apply font-mono;
+  }
+
+  .cm-tooltip {
+    background: #f9f9f8;
+    border-color: #dad9d6;
+    border-radius: 0.25rem;
+  }
+
+  .cm-tooltip.cm-completionInfo {
+    @apply font-sans;
+
+    &.cm-completionInfo-right {
+      transform: translateX(0.25rem);
+    }
+  }
+
   .cm-line {
     /* line-height: 1.1 !important; */
   }
