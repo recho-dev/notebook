@@ -1,5 +1,12 @@
 @import "tailwindcss";
 @import "../editor/index.css";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/spline-sans-mono";
+
+@theme {
+  --default-font-family: "Inter";
+  --font-mono: "Spline Sans Mono";
+}
 
 button {
   cursor: pointer;
