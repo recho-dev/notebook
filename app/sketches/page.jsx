@@ -4,6 +4,7 @@ import Link from "next/link";
 import {Trash} from "lucide-react";
 import {ThumbnailClient} from "../ThumbnailClient.js";
 import {getSketches, deleteSketch} from "../api.js";
+import {findFirstOutputRange} from "../shared.js";
 import {cn} from "../cn.js";
 
 export default function Page() {
@@ -54,7 +55,7 @@ export default function Page() {
             </button>
           </div>
           <div className={cn("w-full  border border-gray-200 rounded-md overflow-hidden max-h-[180px] px-3")}>
-            <ThumbnailClient code={sketch.content} />
+            <ThumbnailClient code={sketch.content} outputStartLine={findFirstOutputRange(sketch.content).startLine} />
           </div>
         </div>
       ))}
