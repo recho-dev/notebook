@@ -10,6 +10,7 @@ import {outputLines} from "./outputLines.js";
 import {outputProtection} from "./protection.js";
 import {dispatch as d3Dispatch} from "d3-dispatch";
 import {rechoCompletion} from "./completion.js";
+import {docStringTag} from "./docStringTag.js";
 
 export function createEditor(container, options) {
   const {code} = options;
@@ -47,6 +48,7 @@ export function createEditor(container, options) {
       outputDecoration,
       // Disable this for now, because it prevents copying/pasting the code.
       // outputProtection(),
+      docStringTag,
     ],
   });
 
