@@ -38,6 +38,7 @@
     "@codemirror/view": "^6.38.1",
     "@fontsource-variable/inter": "^5.2.6",
     "@fontsource-variable/spline-sans-mono": "^5.2.6",
+    "@lezer/highlight": "^1.2.1",
     "@observablehq/notebook-kit": "^1.2.0",
     "@observablehq/runtime": "^6.0.0",
     "@uiw/codemirror-theme-github": "^4.25.1",
