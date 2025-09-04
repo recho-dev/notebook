@@ -27,7 +27,9 @@ export const docStringTag = ViewPlugin.fromClass(
           enter: ({type, from, to}) => {
             if (type.name === "BlockComment") {
               const text = view.state.doc.sliceString(from, to);
-              let regex = /(@[a-zA-Z_]+)/g;
+              // Need space before and after the tag,
+              // it does not have to be at the beginning of the line.
+              let regex = /\s+(@[a-zA-Z_]+)\s+/g;
               let m;
               while ((m = regex.exec(text))) {
                 const tagStart = from + m.index;
