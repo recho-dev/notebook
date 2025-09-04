@@ -15,6 +15,7 @@ export function EditorPage({id: initialId}) {
   const [autoRun, setAutoRun] = useState(false);
   const [id, setId] = useState(initialId);
   const [initialCode, setInitialCode] = useState(null);
+  const [title, setTitle] = useState("");
   const titleRef = useRef(null);
   const count = useSyncExternalStore(countStore.subscribe, countStore.getSnapshot, countStore.getServerSnapshot);
   const isDirty = useSyncExternalStore(
@@ -47,6 +48,7 @@ export function EditorPage({id: initialId}) {
     setSketch(initialSketch);
     setInitialCode(initialSketch.content);
     setAutoRun(initialSketch.autoRun);
+    setTitle(initialSketch.title);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [count]);
 
@@ -87,17 +89,29 @@ export function EditorPage({id: initialId}) {
 
   function onRename() {
     setShowInput(true);
+    setTitle(sketch.title);
   }
 
+  // Only submit rename when blur with valid title.
   function onTitleBlur() {
     setShowInput(false);
-  }
-
-  function onTitleChange(e) {
-    const newSketch = {...sketch, title: e.target.value};
+    // The title can't be empty.
+    if (!title) return setTitle(sketch.title);
+    const newSketch = {...sketch, title};
     setSketch(newSketch);
     if (isAdded) saveSketch(newSketch);
     else isDirtyStore.setDirty(true);
+  }
+
+  function onTitleChange(e) {
+    setTitle(e.target.value);
+  }
+
+  function onTitleKeyDown(e) {
+    if (e.key === "Enter") {
+      onTitleBlur();
+      titleRef.current.blur();
+    }
   }
 
   // If long-running code is detected, set autoRun to false
@@ -141,9 +155,10 @@ export function EditorPage({id: initialId}) {
             {showInput || !isAdded ? (
               <input
                 type="text"
-                value={sketch.title}
+                value={title}
                 onChange={onTitleChange}
                 onBlur={onTitleBlur}
+                onKeyDown={onTitleKeyDown}
                 ref={titleRef}
                 className={cn("border border-gray-200 rounded-md px-3 py-1 text-sm bg-white")}
               />
