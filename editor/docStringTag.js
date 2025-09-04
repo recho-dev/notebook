@@ -19,32 +19,28 @@ export const docStringTag = ViewPlugin.fromClass(
       let widgets = [];
       let tree = syntaxTree(view.state);
 
-      // Get the visible viewport range
-      const viewport = view.viewport;
-      const viewportFrom = viewport.from;
-      const viewportTo = viewport.to;
-
-      tree.iterate({
-        enter: ({type, from, to}) => {
-          if (type.name === "BlockComment") {
-            // Only process block comments that intersect with the viewport
-            if (to >= viewportFrom && from <= viewportTo) {
+      for (const {from, to} of view.visibleRanges) {
+        tree.iterate({
+          // Only iterate tree nodes that intersect with the viewport.
+          from,
+          to,
+          enter: ({type, from, to}) => {
+            if (type.name === "BlockComment") {
               const text = view.state.doc.sliceString(from, to);
               let regex = /(@[a-zA-Z_]+)/g;
               let m;
               while ((m = regex.exec(text))) {
                 const tagStart = from + m.index;
                 const tagEnd = tagStart + m[0].length;
-
                 // Only add decoration if the tag is within or intersects the viewport
-                if (tagEnd >= viewportFrom && tagStart <= viewportTo) {
+                if (tagEnd >= from && tagStart <= to) {
                   widgets.push(docTagDeco.range(tagStart, tagEnd));
                 }
               }
             }
-          }
-        },
-      });
+          },
+        });
+      }
 
       return Decoration.set(widgets, true);
     }
