@@ -1,5 +1,5 @@
 import {notFound} from "next/navigation";
-import {getAllJSDocs} from "../../utils.js";
+import {getAllJSDocs, removeJSMeta} from "../../utils.js";
 import {Editor} from "../../Editor.jsx";
 import {cn} from "../../cn.js";
 
@@ -22,7 +22,7 @@ export default async function Page({params}) {
   if (!doc) notFound();
   return (
     <div className={cn("mx-4 my-4")}>
-      <Editor initialCode={doc.content} />
+      <Editor initialCode={removeJSMeta(doc.content)} />
     </div>
   );
 }
