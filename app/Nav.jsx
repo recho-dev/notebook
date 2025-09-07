@@ -1,6 +1,7 @@
 "use client";
 
 import {usePathname} from "next/navigation";
+import {useState, useEffect} from "react";
 import {SafeLink} from "./SafeLink.jsx";
 import {cn} from "./cn.js";
 import {Plus, Share, Github} from "lucide-react";
@@ -15,6 +16,7 @@ const styles = {
 
 export function Nav() {
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
 
   function handleUpload(e) {
     e.preventDefault();
@@ -27,6 +29,11 @@ export function Nav() {
   function isSelected(path) {
     return pathname.startsWith(path);
   }
+
+  useEffect(() => {
+    if (pathname === "/examples") setOpen(true);
+    else setOpen(false);
+  }, [pathname]);
 
   return (
     <header className={cn("flex justify-between items-center p-4 border-b border-gray-200")}>
@@ -59,8 +66,10 @@ export function Nav() {
           target="_blank"
           rel="noreferrer"
           className={cn(styles.link)}
-          data-tooltip-id="nav-tooltip"
+          data-tooltip-id="examples-tooltip"
           data-tooltip-content="Share to Examples"
+          onMouseEnter={() => setOpen(true)}
+          onMouseLeave={() => setOpen(false)}
         >
           <Share className={cn(styles.linkIcon)} />
         </a>
@@ -77,6 +86,7 @@ export function Nav() {
         </a>
       </div>
       <Tooltip id="nav-tooltip" className={cn(styles.tooltip)} />
+      <Tooltip id="examples-tooltip" className={cn(styles.tooltip)} isOpen={open} />
     </header>
   );
 }
