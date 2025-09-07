@@ -3,6 +3,11 @@ import {cn} from "../cn.js";
 import {Meta} from "../Meta.js";
 import {ThumbnailServer} from "../ThumbnailServer.js";
 
+export const metadata = {
+  title: "Examples | Recho",
+  description: "Examples | Recho",
+};
+
 export default function Page() {
   const examples = getAllJSExamples();
   const sortedExamples = examples.sort((a, b) => new Date(b.created) - new Date(a.created));

@@ -53,6 +53,13 @@ export function EditorPage({id: initialId}) {
   }, [count]);
 
   useEffect(() => {
+    // Use setTimeout to avoid changing to default title.
+    setTimeout(() => {
+      document.title = `${isAdded ? sketch.title : "New"} | Recho`;
+    }, 100);
+  }, [sketch, isAdded]);
+
+  useEffect(() => {
     const onBeforeUnload = (e) => {
       if (isDirty) e.preventDefault();
     };
