@@ -2,7 +2,9 @@
 
 > We want to live in the editor forever. — [Luyu Cheng](https://luyu.computer/)
 
-[**Recho**](https://recho.dev/) is a free, [open-source](/LICENCE), reactive code scratchpad that echoes output inline with your code — enabling beginners, developers, artists, and anyone curious to quickly code and explore through text experiments/art. Built on the reactive model of [Observable Notebook Kit](https://github.com/observablehq/notebook-kit), Recho makes coding accessible, interactive, and playful, turning every string output into a creative, in-situ experience - discover the sketches of tomorrow!
+[**Recho**](https://recho.dev/) is a free, [open-source](/LICENCE), reactive code scratchpad that echoes output inline with your code — enabling beginners, developers, artists, and anyone curious to quickly code and explore through text experiments/art. Built on the reactive model of [Observable Notebook Kit](https://github.com/observablehq/notebook-kit), Recho makes coding accessible, interactive, and playful, turning every string output into a creative, in-situ experience - discover the sketches of tomorrow.
+
+Hackers and painters, let's paint by code!
 
 ## A Quick Example
 

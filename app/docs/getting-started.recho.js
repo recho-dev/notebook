@@ -48,7 +48,7 @@ const foo = echo(function add(a, b) {
  * Refer to https://recho.dev/docs/inline-echoing for more details.
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *                             Blocks Organizing
+ *                             Blocks Management
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * Blocks are the fundamentals of Recho's reactive system. Each top-level
@@ -91,7 +91,7 @@ const c = "I'll be executed first!";
  * Refer to https://recho.dev/docs/blocks-organizing for more details.
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *                              Fluid Animation
+ *                             Animations Authoring
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * Recho provides two built-in functions to create fluid animations. The first
@@ -154,7 +154,7 @@ const sum = echo(numbers.reduce((a, b) => a + scale * b, 0));
  * Refer to https://recho.dev/docs/asynchronous-operations for more details.
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *                          Libraries Requiring
+ *                           Libraries Requiring
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * Recho allows you to import external browser-based libraries using the
@@ -173,7 +173,7 @@ echo(d3.range(10));
  * https://recho.dev/docs/libraries-requiring for more details.
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *                          Errors Handling
+ *                           Errors Handling
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * Errors are echoed as normal output. For runtime errors, they will be
@@ -204,5 +204,5 @@ echo(d3.range(10));
  *
  * Of course, we'll not stop you if you want to dive into the details of Recho.
  *
- * Hackers and artists, let's code!
+ * Hackers and painters, let's paint by code!
  */
