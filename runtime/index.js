@@ -38,7 +38,7 @@ function isMultiline(value) {
   return lines.length > 1;
 }
 
-function inspect(value, {limit = 200, quote = "single", indent = null} = {}) {
+function inspect(value, {limit = 200, quote = "double", indent = null} = {}) {
   if (isMultiline(value)) return value;
   if (typeof value === "string" && !quote) return value;
   const string = inspector(value, {indent, quoteStyle: quote});

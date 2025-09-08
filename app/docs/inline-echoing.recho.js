@@ -151,3 +151,38 @@ const array1000 = echo(
   new Array(1000).fill(0).map((_, i) => i),
   {limit: 100},
 );
+
+/**
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *                           Echoing Multiple Values
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * You can call `echo` multiple times to echo multiple values in ForStatement,
+ * BlockStatement, and more. The values will be joined by a newline.
+ */
+
+for (let i = 0; i < 3; i++) echo(i);
+
+{
+  echo(1);
+  echo(2);
+  echo(3);
+}
+
+/**
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *                           Clearing Output
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * You can call `clear` to clear the output of the current block. For example,
+ * click the 🔁 button to see the output being cleared after 1 second.
+ */
+
+{
+  echo("hello world");
+  setTimeout(() => clear(), 1000);
+}
+
+/**
+ * Refer to https://recho.dev/docs/reactive-blocks for more details.
+ */

@@ -48,7 +48,7 @@ const foo = echo(function add(a, b) {
  * Refer to https://recho.dev/docs/inline-echoing for more details.
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *                             Blocks Management
+ *                             Reactive Blocks
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * Blocks are the fundamentals of Recho's reactive system. Each top-level
@@ -88,7 +88,7 @@ const c = "I'll be executed first!";
 /**
  * !! NOTE: You should not use **let** to define top-level variables for now !!
  *
- * Refer to https://recho.dev/docs/blocks-organizing for more details.
+ * Refer to https://recho.dev/docs/reactive-blocks for more details.
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *                             Animations Authoring
@@ -113,8 +113,9 @@ const x = echo(Math.abs(~~(Math.sin(now / 1000) * 22)));
 echo("~".repeat(x) + "(๑•̀ㅂ•́)و✧");
 
 /**
- * The second one is `recho.interval(milliseconds)`, which returns a generator that yields
- * values at a specified interval. For example, let's create a counter:
+ * The second one is `recho.interval(milliseconds)`, which returns a generator
+ * that yields values at a specified interval. For example, let's create a
+ * counter:
  */
 
 const counter = recho.interval(1000);
@@ -129,9 +130,9 @@ echo(counter);
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * There are some asynchronous operations that you need to handle, such as
- * fetching data from an API, requiring external packages, or waiting for a user
- * action. These operations can be represented as promises in JavaScript. If a
- * top-level variable is a promise, the value is the resolved value of the
+ * fetching data from an API, requiring external packages, or waiting for a
+ * user action. These operations can be represented as promises in JavaScript.
+ * If a top-level variable is a promise, the value is the resolved value of the
  * promise, instead of the promise itself.
  */
 
