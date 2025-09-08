@@ -38,10 +38,10 @@ function isMultiline(value) {
   return lines.length > 1;
 }
 
-function inspect(value, {limit = 200, quote = true, ...rest} = {}) {
+function inspect(value, {limit = 200, quote = "single", indent = null} = {}) {
   if (isMultiline(value)) return value;
   if (typeof value === "string" && !quote) return value;
-  const string = inspector(value, rest);
+  const string = inspector(value, {indent, quoteStyle: quote});
   if (string.length > limit) return string.slice(0, limit) + "…";
   return string;
 }
