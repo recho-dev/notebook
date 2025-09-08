@@ -177,9 +177,9 @@ echo(d3.range(10));
  *                           Errors Handling
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * Errors are echoed as normal output. For runtime errors, they will be
- * positioned above the block that caused the error. For syntax errors, they
- * will be positioned at the beginning of the sketch.
+ * Errors are echoed as normal output. For syntax errors, they will be 
+ * positioned at the beginning of the sketch. For runtime errors, they will be
+ * positioned above the block that caused the error. 
  */
 
 {
