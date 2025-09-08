@@ -155,7 +155,7 @@ const sum = echo(numbers.reduce((a, b) => a + scale * b, 0));
  * Refer to https://recho.dev/docs/asynchronous-operations for more details.
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *                           Libraries Requiring
+ *                           Libraries Imports
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * Recho allows you to import external browser-based libraries using the
@@ -177,9 +177,9 @@ echo(d3.range(10));
  *                           Errors Handling
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * Errors are echoed as normal output. For syntax errors, they will be 
+ * Errors are echoed as normal output. For syntax errors, they will be
  * positioned at the beginning of the sketch. For runtime errors, they will be
- * positioned above the block that caused the error. 
+ * positioned above the block that caused the error.
  */
 
 {
