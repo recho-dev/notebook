@@ -147,10 +147,7 @@ const indentedObject = echo({a: 1, b: 2, c: 3}, {indent: 2});
  * must be a positive integer, Infinity, defaults to 200.
  */
 
-const array1000 = echo(
-  new Array(1000).fill(0).map((_, i) => i),
-  {limit: 100},
-);
+const array1000 = echo(new Array(1000).fill(0), {limit: 80});
 
 /**
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
