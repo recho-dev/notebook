@@ -2,7 +2,7 @@
  * @title Running Race
  * @author Bairui Su
  * @created 2025-09-09
- * @pull_request 13
+ * @pull_request 82
  * @github pearmini
  * @thumbnail_start 26
  */
