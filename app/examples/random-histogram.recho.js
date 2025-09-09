@@ -15,12 +15,12 @@
  * I usually create pixel-based visualizations, so this time I want to try
  * something different with Recho: create a text-based histogram.
  *
- * The idea is to use d3 to generate some random numbers, group them by their
+ * The idea is to use D3 to generate some random numbers, group them by their
  * values, and then draw a histogram with █ characters. You can teak the values
  * of `count` and `width` to see how the histogram looks like. Also, you can
  * click the 🔁 button to generate a new histogram.
  *
- * This example is a good demonstration that how to use d3 in Recho. It also
+ * This example is a good demonstration that how to use D3 in Recho. It also
  * shows how Recho make data transformations easier by echoing intermediate
  * results.
  */
