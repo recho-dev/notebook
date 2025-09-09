@@ -6,7 +6,7 @@ const highlight = Decoration.line({attributes: {class: "cm-output-line"}});
 
 function createWidgets(lines) {
   const builder = new RangeSetBuilder();
-  for (const {from} of lines) {
+  for (const {from, to} of lines) {
     builder.add(from, from, highlight);
   }
   return builder.finish();
