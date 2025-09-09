@@ -45,7 +45,7 @@ const d3Math = recho.require("d3-random", "d3-array");
 echo(d3Math.range(10).map(d3Math.randomInt(0, 10)));
 
 /**
- * !! NOTE Not all the libraries are importable with `recho.require`. !!
+ * !! NOTE: Not all the libraries are importable with `recho.require`. !!
  *
  * If you see the following error when you try to import a library, it means
  * that the library is not satisfied the constraints of `d3-require`. (We use

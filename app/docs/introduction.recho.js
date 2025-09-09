@@ -27,8 +27,8 @@
  * experiments/art.
  *
  * Built on the reactive model of Observable Notebook Kit[3], Recho makes
- * coding accessible, interactive, and playful, turning every string output into
- * a creative, in-situ experience - discover the sketches of tomorrow!
+ * coding accessible, interactive, and playful, turning every string output
+ * into a creative, in-situ experience - discover the sketches of tomorrow!
  *
  * Here is a quick example[4] to showcase Recho. A block of code is written to
  * explore the algorithm behind Mandelbrot set[5], generating a string called
@@ -42,36 +42,6 @@ const cols = 80;
 const rows = 30;
 const maxIter = 80;
 
-//➜
-//➜
-//➜                                                        0
-//➜                                                      0000
-//➜                                                      0000
-//➜                                              0       000
-//➜                                              00  000000000000
-//➜                                              00000000000000000000
-//➜                                              0000000000000000000
-//➜                                            0000000000000000000000
-//➜                                          00000000000000000000000000
-//➜                                0  0       000000000000000000000000
-//➜                                00000000  00000000000000000000000000
-//➜                               0000000000 0000000000000000000000000
-//➜                              00000000000 000000000000000000000000
-//➜             000000000000000000000000000000000000000000000000000
-//➜                              00000000000 000000000000000000000000
-//➜                               0000000000 0000000000000000000000000
-//➜                                00000000  00000000000000000000000000
-//➜                                0  0       000000000000000000000000
-//➜                                          00000000000000000000000000
-//➜                                            0000000000000000000000
-//➜                                              0000000000000000000
-//➜                                              00000000000000000000
-//➜                                              00  000000000000
-//➜                                              0       000
-//➜                                                      0000
-//➜                                                      0000
-//➜                                                        0
-//➜
 {
   let output = "";
   for (let y = 0; y < rows; y++) {
