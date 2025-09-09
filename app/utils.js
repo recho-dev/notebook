@@ -43,7 +43,7 @@ export function getAllJSExamples() {
         ...meta,
         content,
         slug: file.replace(".recho.js", ""),
-        outputStartLine: meta.thumbnail ?? startLine,
+        outputStartLine: meta.thumbnail_start ?? startLine,
         outputEndLine: endLine,
       };
     });

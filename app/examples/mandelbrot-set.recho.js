@@ -4,7 +4,7 @@
  * @created 2025-08-31
  * @pull_request 1
  * @github pearmini
- * @thumbnail 23
+ * @thumbnail_start 23
  */
 
 const cols = 80;
