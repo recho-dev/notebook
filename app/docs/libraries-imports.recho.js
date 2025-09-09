@@ -14,6 +14,7 @@
 
 const now = recho.now();
 
+//➜ 1757422790999
 echo(now);
 
 /**
@@ -31,6 +32,7 @@ const d3Time = recho.require("d3-time");
 const start = new Date(2025, 8, 1);
 const end = new Date(2025, 9, 1);
 
+//➜ 30
 echo(d3Time.timeDay.count(start, end));
 
 /**
@@ -39,6 +41,7 @@ echo(d3Time.timeDay.count(start, end));
 
 const d3Math = recho.require("d3-random", "d3-array");
 
+//➜ [ 4, 1, 1, 7, 1, 0, 8, 3, 1, 5 ]
 echo(d3Math.range(10).map(d3Math.randomInt(0, 10)));
 
 /**
@@ -49,6 +52,7 @@ echo(d3Math.range(10).map(d3Math.randomInt(0, 10)));
  * `d3-require` under the hood.)
  */
 
+//➜ { [RuntimeError: invalid module] input: "figlet", [Symbol(next.console.error.digest)]: "NEXT_CONSOLE_ERROR" }
 echo(figlet);
 
 const figlet = recho.require("figlet");

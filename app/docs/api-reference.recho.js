@@ -26,14 +26,22 @@
  * @returns {any} The value.
  */
 
+//➜ "Hello, World!"
 echo("Hello, World!");
 
+//➜ 'Hello, World!'
 echo("Hello, World!", {quote: "single"});
 
+//➜ Hello, World!
 echo("Hello, World!", {quote: false});
 
+//➜ {
+//➜   a: 1,
+//➜   b: 2
+//➜ }
 echo({a: 1, b: 2}, {indent: 2});
 
+//➜ [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
 echo(new Array(100).fill(0), {limit: 80});
 
 /**
@@ -61,6 +69,7 @@ echo(new Array(100).fill(0), {limit: 80});
  * @returns {Promise<void>}
  */
 
+//➜ 9
 {
   let count = echo(10);
 
@@ -87,6 +96,7 @@ echo(new Array(100).fill(0), {limit: 80});
 
 const now = recho.now();
 
+//➜ 1757422825350
 echo(now);
 
 /**
@@ -102,6 +112,7 @@ echo(now);
 
 const interval = recho.interval(1000);
 
+//➜ 1
 echo(interval);
 
 /**
@@ -120,6 +131,7 @@ echo(interval);
 
 const Noise = recho.require("perlin-noise-3d");
 
+//➜ [ 0.5428002520733116, 0.5424832952636395, 0.5414633391270067, 0.5397183031066122…
 {
   const noise = new Noise();
   const values = [];
@@ -131,4 +143,5 @@ const Noise = recho.require("perlin-noise-3d");
 
 const d3 = recho.require("d3-array", "d3-random");
 
+//➜ [ 6, 4, 1, 2, 5, 3, 3, 0, 6, 2 ]
 echo(d3.range(10).map(d3.randomInt(0, 10)));

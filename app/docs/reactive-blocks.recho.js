@@ -20,12 +20,18 @@
  * block always appears above the block.
  */
 
+//➜ 1
 const declaration = echo(1);
 
+//➜ 0.13787417441979044
 echo(Math.random());
 
+//➜ 0
+//➜ 1
+//➜ 2
 for (let i = 0; i < 3; i++) echo(i);
 
+//➜ "Odd"
 if (Date.now() % 2 === 0) echo("Even");
 else echo("Odd");
 
@@ -35,6 +41,7 @@ else echo("Odd");
  * "z" and then echo them. We can do this:
  */
 
+//➜ "abcdefghijklmnopqrstuvwxyz"
 {
   let output = "";
   for (let i = 0; i < 26; i++) output += String.fromCharCode(97 + i);
@@ -56,6 +63,7 @@ const alphabet = (() => {
   return output;
 })();
 
+//➜ "abcdefghijklmnopqrstuvwxyz"
 echo(alphabet);
 
 /**
@@ -72,6 +80,7 @@ echo(alphabet);
  * Since `sum` depends on `a` and `b`, it will be evaluated after `a` and `b`.
  */
 
+//➜ 3
 const sum = echo(a + b);
 const a = 1;
 const b = 2;
@@ -92,8 +101,10 @@ const b = 2;
  * button, the `random` block will still display the same random value.
  */
 
+//➜ 1
 const constant = echo(1);
 
+//➜ 0.6058679147506848
 const random = echo(Math.random());
 
 /**
@@ -105,6 +116,7 @@ const random = echo(Math.random());
  * the invalidation promise to register a disposal hook.
  */
 
+//➜ 9
 {
   let count = echo(10);
 

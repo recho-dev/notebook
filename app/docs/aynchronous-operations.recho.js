@@ -17,6 +17,7 @@
 
 const string = await new Promise((resolve) => setTimeout(() => resolve("I'm a string!"), 1000));
 
+//➜ "I'm a string!"
 echo(string);
 
 /**
@@ -28,8 +29,10 @@ echo(string);
  * block (`echo(string2)`) will implicitly await it and use the resolved value.
  */
 
+//➜ Promise [Promise] {}
 const string2 = echo(new Promise((resolve) => setTimeout(() => resolve("I'm a string!"), 1000)));
 
+//➜ "I'm a string!"
 echo(string2);
 
 /**
@@ -39,6 +42,8 @@ echo(string2);
  * `string4` is the resolved value of the promise.
  */
 
+//➜ Promise [Promise] {}
+//➜ "I'm a string!"
 {
   const string3 = new Promise((resolve) => setTimeout(() => resolve("I'm a string!"), 1000));
   echo(string3);
@@ -53,6 +58,7 @@ echo(string2);
 
 const d3 = recho.require("d3");
 
+//➜ [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
 echo(d3.range(10));
 
 /**

@@ -33,6 +33,7 @@ const i = (async function* () {
   }
 })();
 
+//➜ 1
 echo(i);
 
 /**
@@ -40,6 +41,7 @@ echo(i);
  * is a moving turtle animation.
  */
 
+//➜ "                                     🐢"
 {
   const x = 40 - (i % 40);
   const turtle = "🐢".padStart(x);
@@ -60,6 +62,11 @@ const human = recho.interval(500);
 const car = recho.interval(10);
 const rocket = recho.interval(2);
 
+//➜                                     🐌💨
+//➜                                    🐢💨
+//➜                                🚶‍♂️💨
+//➜                      🚗💨
+//➜                                    🚀💨
 {
   const x = (count) => 40 - (count % 40);
   echo("🐌💨".padStart(x(snail)), {quote: false});
@@ -76,14 +83,17 @@ const rocket = recho.interval(2);
 
 const now = recho.now();
 
+//➜ 1757422760841
 echo(now);
 
 /**
  * This is a convenient way to create smoother animations.
  */
 
+//➜ 1
 const x = echo(Math.abs(~~(Math.sin(now / 1000) * 22)));
 
+//➜ ~(๑•̀ㅂ•́)و✧
 echo("~".repeat(x) + "(๑•̀ㅂ•́)و✧", {quote: false});
 
 /**
@@ -103,6 +113,7 @@ echo("~".repeat(x) + "(๑•̀ㅂ•́)و✧", {quote: false});
  * `setInterval` function.
  */
 
+//➜ "                                     🐢"
 {
   let i = 0;
 

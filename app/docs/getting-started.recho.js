@@ -22,6 +22,7 @@
  * To echo output, you can use the `echo` function:
  */
 
+//➜ "Hello, World!"
 echo("Hello, World!");
 
 /**
@@ -29,6 +30,7 @@ echo("Hello, World!");
  * variable like this:
  */
 
+//➜ "Hello, World!"
 const message = echo("Hello, World!");
 
 /**
@@ -36,10 +38,13 @@ const message = echo("Hello, World!");
  * functions, classes, maps, sets, dates, and more.
  */
 
+//➜ [ 1, 2, 3 ]
 const array = echo([1, 2, 3]);
 
+//➜ { a: 1, b: 2 }
 const object = echo({a: 1, b: 2});
 
+//➜ [Function: add]
 const foo = echo(function add(a, b) {
   return a + b;
 });
@@ -61,6 +66,7 @@ const foo = echo(function add(a, b) {
 
 const a = 1;
 
+//➜ 2
 const b = echo(a + 1);
 
 /**
@@ -68,6 +74,7 @@ const b = echo(a + 1);
  * together for complex echoing.
  */
 
+//➜ "abcdefghij"
 {
   let output = "";
   for (let i = 0; i < 10; i++) {
@@ -81,6 +88,7 @@ const b = echo(a + 1);
  * automatically execute the blocks in the correct order.
  */
 
+//➜ "I'll be executed first!"
 echo(c);
 
 const c = "I'll be executed first!";
@@ -101,6 +109,7 @@ const c = "I'll be executed first!";
 
 const now = recho.now();
 
+//➜ 1757422717279
 echo(now);
 
 /**
@@ -108,8 +117,10 @@ echo(now);
  * variable will be re-evaluated, resulting in a fluid animation.
  */
 
+//➜ 7
 const x = echo(Math.abs(~~(Math.sin(now / 1000) * 22)));
 
+//➜ "~~~~~~~(๑•̀ㅂ•́)و✧"
 echo("~".repeat(x) + "(๑•̀ㅂ•́)و✧");
 
 /**
@@ -120,6 +131,7 @@ echo("~".repeat(x) + "(๑•̀ㅂ•́)و✧");
 
 const counter = recho.interval(1000);
 
+//➜ 4
 echo(counter);
 
 /**
@@ -137,6 +149,7 @@ echo(counter);
 
 const string = await new Promise((resolve) => setTimeout(() => resolve("I'm a string!"), 1000));
 
+//➜ "I'm a string!"
 echo(string);
 
 /**
@@ -148,6 +161,7 @@ echo(string);
 const numbers = new Promise((resolve) => setTimeout(() => resolve([1, 2, 3]), 1000));
 const scale = 2;
 
+//➜ 12
 const sum = echo(numbers.reduce((a, b) => a + scale * b, 0));
 
 /**
@@ -166,6 +180,7 @@ const sum = echo(numbers.reduce((a, b) => a + scale * b, 0));
 
 const d3 = recho.require("d3");
 
+//➜ [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
 echo(d3.range(10));
 
 /**
@@ -181,6 +196,7 @@ echo(d3.range(10));
  * positioned above the block that caused the error.
  */
 
+//➜ { [TypeError: Assignment to constant variable.] [Symbol(next.console.error.digest)]: "NEXT_CONSOLE_ERROR" }
 {
   const a = 1;
   a = 2;

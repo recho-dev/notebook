@@ -3,6 +3,7 @@
  * @order 8
  */
 
+//➜ { [SyntaxError: Identifier directly after number (17:9)] pos: 611, loc: Position { line: 17, column: 9 }, raisedAt: 611, [Symbol(next.console.error.digest)]: "NEXT_CONSOLE_ERROR" }
 /**
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *                           Errors Handling
@@ -31,7 +32,6 @@
  * cleared!
  */
 
-//➜ { [TypeError: Assignment to constant variable.] [Symbol(next.console.error.digest)]: "NEXT_CONSOLE_ERROR" }
 {
   const a = 1;
   a = 2;
