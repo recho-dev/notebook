@@ -4,7 +4,7 @@
  * @created 2025-08-31
  * @pull_request 3
  * @github pearmini
- * @thumbnail 29
+ * @thumbnail_start 29
  */
 
 const d3 = await recho.require("d3");
