@@ -1,9 +1,34 @@
 /**
  * @title Matrix Rain
  * @author Bairui Su
- * @created 2025-08-31
- * @pull_request 2
+ * @created 2025-08-22
+ * @pull_request 12
  * @github pearmini
+ */
+
+/**
+ * ============================================================================
+ * =                            Matrix Rain                                   =
+ * ============================================================================
+ *
+ * Matrix train is a classic effect in ASCII art and in the Matrix movie. So I
+ * want to use Recho to create a simplified version. This example also provides
+ * a way to render **shapes** in Recho.
+ *
+ * My implementation is basically a **particle system**. Each column of the
+ * matrix is a particle. Each particle has a lifespan, a initial y position, 
+ * and a set of characters. The following rules are applied to each particle:
+ *
+ * - If a particle is dead (lifespan < 0), it will be reset,
+ * - otherwise, if the lifespan is less than the length of the characters, the
+ *   column will fade out, say to change characters to spaces successively,
+ * - otherwise, the column will blink by replacing with new characters.
+ *
+ * Because there is no graphics API in Recho, we need to render the matrix
+ * manually by creating a buffer and updating it, instead of concatenating
+ * strings directly.
+ *
+ * Feel free to teak the `width` and `height` to see the changes!
  */
 
 const width = 60;
@@ -78,7 +103,7 @@ function createColumn(height) {
   const length = d3.randomInt(lifespan)();
   const chars = d3.range(length).map(randomChar);
   const y = d3.randomInt(0, 10)();
-  return {lifespan, length, chars, y};
+  return {lifespan, chars, y};
 }
 
 function randomChar() {
