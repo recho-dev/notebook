@@ -126,7 +126,7 @@ const Noise = recho.require("perlin-noise-3d");
   for (let i = 0; i < 100; i++) {
     values.push(noise.get(i / 100, i / 100, i / 100));
   }
-  echo(values);
+  echo(values, {limit: 80});
 }
 
 const d3 = recho.require("d3-array", "d3-random");

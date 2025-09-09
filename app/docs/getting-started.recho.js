@@ -132,11 +132,10 @@ echo(counter);
  * There are some asynchronous operations that you need to handle, such as
  * fetching data from an API, requiring external packages, or waiting for a
  * user action. These operations can be represented as promises in JavaScript.
- * If a top-level variable is a promise, the value is the resolved value of the
- * promise, instead of the promise itself.
+ * In Recho, top-level await is supported.
  */
 
-const string = new Promise((resolve) => setTimeout(() => resolve("I'm a string!"), 1000));
+const string = await new Promise((resolve) => setTimeout(() => resolve("I'm a string!"), 1000));
 
 echo(string);
 
