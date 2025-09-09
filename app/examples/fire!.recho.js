@@ -2,7 +2,7 @@
  * @title 火炎焱燚 (Fire!)
  * @created 2025-09-03
  * @author Bairui Su
- * @pull_request 14
+ * @pull_request 83
  * @github pearmini
  * @thumbnail_start 37
  */
