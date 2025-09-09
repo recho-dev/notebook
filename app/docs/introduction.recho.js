@@ -1,16 +1,43 @@
-# Recho: Reactive Echo
+/**
+ * @title Introduction
+ * @order 1
+ */
 
-> We want to live in the editor forever. — [Luyu Cheng](https://luyu.computer/)
+/**
+ *            __        __   _                            _
+ *            \ \      / /__| | ___ ___  _ __ ___   ___  | |_ ___
+ *             \ \ /\ / / _ \ |/ __/ _ \| '_ ` _ \ / _ \ | __/ _ \
+ *              \ V  V /  __/ | (_| (_) | | | | | |  __/ | || (_) |
+ *               \_/\_/ \___|_|\___\___/|_| |_| |_|\___|  \__\___/
+ *                       ____           _             _
+ *                      |  _ \ ___  ___| |__   ___   | |
+ *                      | |_) / _ \/ __| '_ \ / _ \  | |
+ *                      |  _ <  __/ (__| | | | (_) | |_|
+ *                      |_| \_\___|\___|_| |_|\___/  (_)
+ *
+ * ============================================================================
+ * =                            Introduction                                  =
+ * ============================================================================
+ *
+ * > We want to live in the editor forever. — Luyu Cheng[1]
+ *
+ * **Recho**[2] is a free, open-source, reactive code scratchpad that echoes
+ * output inline with your code as comments — enabling beginners, developers,
+ * artists, and anyone curious to quickly code and explore through text
+ * experiments/art.
+ *
+ * Built on the reactive model of Observable Notebook Kit[3], Recho makes
+ * coding accessible, interactive, and playful, turning every string output into
+ * a creative, in-situ experience - discover the sketches of tomorrow!
+ *
+ * Here is a quick example[4] to showcase Recho. A block of code is written to
+ * explore the algorithm behind Mandelbrot set[5], generating a string called
+ * `output`. After calling `echo(output)`, the output appears above the code
+ * block as comments. By tweaking the values of `cols`, `rows`, and `maxIter`,
+ * the output updates reactively for further explorations. Check out more live
+ * examples[6] to see what you can create with Recho.
+ */
 
-[**Recho**](https://recho.dev/) is a free, [open-source](/LICENCE), reactive code scratchpad that echoes output inline with your code as comments — enabling beginners, developers, artists, and anyone curious to quickly code and explore through text experiments/art. Built on the reactive model of [Observable Notebook Kit](https://github.com/observablehq/notebook-kit), Recho makes coding accessible, interactive, and playful, turning every string output into a creative, in-situ experience - discover the sketches of tomorrow.
-
-Hackers and painters, let's paint by code!
-
-## A Quick Example
-
-Here is a [quick example](https://recho.dev/examples/mandelbrot-set) to showcase Recho. A block of code is written to explore the algorithm behind [Mandelbrot set](https://en.wikipedia.org/wiki/Mandelbrot_set), generating a string called _output_. After calling _echo(output)_, the output appears above the code block as comments. By tweaking the values of _cols_, _rows_, and _maxIter_, the output updates reactively for further explorations. Check out more [live examples](https://recho.dev/examples) to see what you can create with Recho.
-
-```js
 const cols = 80;
 const rows = 30;
 const maxIter = 80;
@@ -67,12 +94,14 @@ const maxIter = 80;
 function map(x, d0, d1, r0, r1) {
   return r0 + ((r1 - r0) * (x - d0)) / (d1 - d0);
 }
-```
 
-## Why Recho?
-
-## What's Next?
-
-## License
-
-ISC@[Recho](https://github.com/recho-dev).
+/**
+ * Want to paint with code? Get started[6] with Recho now!
+ *
+ * - [1] https://luyu.computer/
+ * - [2] https://recho.dev/
+ * - [3] https://github.com/observablehq/notebook-kit
+ * - [4] https://recho.dev/examples/mandelbrot-set
+ * - [5] https://en.wikipedia.org/wiki/Mandelbrot_set
+ * - [6] https://recho.dev/docs/getting-started
+ */

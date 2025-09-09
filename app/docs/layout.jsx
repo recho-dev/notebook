@@ -2,6 +2,11 @@ import {Sidebar} from "../Sidebar.js";
 import {cn} from "../cn.js";
 import {getAllJSDocs} from "../utils.js";
 
+export const metadata = {
+  title: "Docs | Recho",
+  description: "Docs | Recho",
+};
+
 export default function Layout({children}) {
   const docs = getAllJSDocs();
   return (

@@ -16,6 +16,10 @@ export default function Page() {
     setSketches(sketches);
   }, []);
 
+  useEffect(() => {
+    document.title = "Sketches | Recho";
+  }, []);
+
   function onDelete(id) {
     deleteSketch(id);
     const newSketches = sketches.filter((sketch) => sketch.id !== id);

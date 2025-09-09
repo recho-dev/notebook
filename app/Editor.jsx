@@ -15,6 +15,7 @@ export function Editor({
   onBeforeEachRun = () => {},
   autoRun = true,
   toolBarStart = null,
+  pinToolbar = true,
 }) {
   const containerRef = useRef(null);
   const editorRef = useRef(null);
@@ -64,7 +65,12 @@ export function Editor({
 
   return (
     <div className={cn("w-full border border-gray-200 rounded-md")}>
-      <div className={cn("flex justify-between items-center p-2 border-b border-gray-200 bg-gray-100")}>
+      <div
+        className={cn(
+          "flex justify-between items-center p-2 border-b border-gray-200 bg-gray-100",
+          pinToolbar && "sticky top-0 z-10",
+        )}
+      >
         {toolBarStart}
         <div className={cn("flex items-center gap-3")}>
           <button

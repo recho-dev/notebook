@@ -14,6 +14,10 @@ function parseJSMeta(content) {
   return meta;
 }
 
+export function removeJSMeta(content) {
+  return content.replace(/^\/\*\*([\s\S]*?)\*\//, "").trimStart();
+}
+
 export function getAllJSDocs() {
   const dir = path.join(process.cwd(), "app/docs/");
   const files = fs.readdirSync(dir);
