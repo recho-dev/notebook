@@ -4,13 +4,13 @@
  */
 
 /**
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *                           Asynchronous Operations
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * ============================================================================
+ * =                            Asynchronous Operations                       =
+ * ============================================================================
  *
  * Asynchronous operations happen often in JavaScript, say fetching data from
  * an API, importing external packages, or waiting for a user action. These
- * operations can be represented as promises in JavaScript.
+ * operations can be represented as promises[1] in JavaScript.
  *
  * In Recho, top-level await is supported.
  */
@@ -60,5 +60,6 @@ echo(d3.range(10));
  *                           References
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- *  - [1] https://observablehq.com/framework/reactivity#promises
+ * - [1] https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise
+ * - [2] https://observablehq.com/framework/reactivity#promises
  */

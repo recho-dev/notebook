@@ -39,16 +39,20 @@ const message = echo("Hello, World!");
 const text = echo("The quick brown fox jumps over the lazy dog. The dog was not amused.");
 
 /** 1. Normalize: lowercase + remove punctuation */
+
 const clean = echo(text.toLowerCase().replace(/[.,!?]/g, ""));
 
 /** 2. Split into words */
+
 const words = echo(clean.split(/\s+/));
 
 /** 3. Remove stopwords */
+
 const filtered = echo(words.filter((w) => !stopwords.includes(w)));
 const stopwords = ["the", "was", "not", "over"];
 
 /** 4. Count frequencies */
+
 const frequencies = echo(
   filtered.reduce((acc, w) => {
     acc[w] = (acc[w] || 0) + 1;
