@@ -1,13 +1,31 @@
 /**
  * @title Random Histogram
  * @author Bairui Su
- * @created 2025-08-31
- * @pull_request 3
+ * @created 2025-08-22
+ * @pull_request 7
  * @github pearmini
- * @thumbnail_start 29
+ * @thumbnail_start 48
  */
 
-const d3 = await recho.require("d3");
+/**
+ * ============================================================================
+ * =                            Random Histogram                              =
+ * ============================================================================
+ *
+ * I usually create pixel-based visualizations, so this time I want to try
+ * something different with Recho: create a text-based histogram.
+ *
+ * The idea is to use D3 to generate some random numbers, group them by their
+ * values, and then draw a histogram with █ characters. You can teak the values
+ * of `count` and `width` to see how the histogram looks like. Also, you can
+ * click the 🔁 button to generate a new histogram.
+ *
+ * This example is a good demonstration that how to use D3 in Recho. It also
+ * shows how Recho make data transformations easier by echoing intermediate
+ * results.
+ */
+
+const d3 = recho.require("d3");
 
 const count = 200;
 const width = 50;
