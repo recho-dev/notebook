@@ -19,21 +19,35 @@ const builtinFunctions = [
     label: "echo",
     type: "function",
     detail: "(value: any)",
-    info: "Prints a value in the document.",
+    info: "Echos the output above the current block.",
     apply: toApplyCompletion("echo($)"),
+  },
+  {
+    label: "clear",
+    type: "function",
+    detail: "()",
+    info: "Clears the output of the current block.",
+    apply: toApplyCompletion("clear()"),
+  },
+  {
+    label: "invalidation",
+    type: "function",
+    detail: "()",
+    info: "Returns a promise that resolves before re-running the current block.",
+    apply: toApplyCompletion("invalidation()"),
   },
   {
     label: "now",
     type: "function",
     detail: "()",
-    info: "Creates a generator that yields the current time continuously.",
+    info: "Returns a generator that yields the current time continuously.",
     apply: toApplyCompletion("recho.now()"),
   },
   {
     label: "interval",
     type: "function",
     detail: "(intervalInMilliseconds: number)",
-    info: "Creates a generator that yields values at a specified interval.",
+    info: "Returns a generator that yields values at a specified interval.",
     apply: toApplyCompletion("recho.interval($)"),
   },
   {
@@ -79,6 +93,20 @@ export function rechoCompletion(context) {
       from: nodeBefore.from,
       validFor: /^(?:\w*)?$/,
       options: builtinFunctions,
+    };
+  } else if (nodeBefore.name === "BlockComment") {
+    return {
+      from: nodeBefore.from,
+      validFor: /^(?:\w*)?$/,
+      options: [
+        {
+          label: "/**",
+          type: "comment",
+          detail: " */",
+          info: "Enters a comment block.",
+          apply: toApplyCompletion("/**\n * $\n */"),
+        },
+      ],
     };
   } else {
     return null;

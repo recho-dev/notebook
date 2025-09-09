@@ -32,6 +32,15 @@ importers:
       '@codemirror/view':
         specifier: ^6.38.1
         version: 6.38.1
+      '@fontsource-variable/inter':
+        specifier: ^5.2.6
+        version: 5.2.6
+      '@fontsource-variable/spline-sans-mono':
+        specifier: ^5.2.6
+        version: 5.2.6
+      '@lezer/highlight':
+        specifier: ^1.2.1
+        version: 1.2.1
       '@observablehq/notebook-kit':
         specifier: ^1.2.0
         version: 1.2.0(@types/markdown-it@14.1.2)(@types/node@16.18.11)(jiti@2.5.1)(lightningcss@1.30.1)
@@ -734,6 +743,12 @@ packages:
 
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
+
+  '@fontsource-variable/inter@5.2.6':
+    resolution: {integrity: sha512-jks/bficUPQ9nn7GvXvHtlQIPudW7Wx8CrlZoY8bhxgeobNxlQan8DclUJuYF2loYRrGpfrhCIZZspXYysiVGg==}
+
+  '@fontsource-variable/spline-sans-mono@5.2.6':
+    resolution: {integrity: sha512-g7fUsbV7N4e5ZfdUnRgAZ5/CuYx8YDt3QC7MOHjjkeqkFf9GX37rud6ftvY+n9bmMxM+ePwXPIOsCSbaSoFM+w==}
 
   '@fontsource/inter@5.2.6':
     resolution: {integrity: sha512-CZs9S1CrjD0jPwsNy9W6j0BhsmRSQrgwlTNkgQXTsAeDRM42LBRLo3eo9gCzfH4GvV7zpyf78Ozfl773826csw==}
@@ -3555,7 +3570,6 @@ packages:
 
   path-match@1.2.4:
     resolution: {integrity: sha512-UWlehEdqu36jmh4h5CWJ7tARp1OEVKGHKm6+dg9qMq5RKUTV5WJrGgaZ3dN2m7WFAXDbjlHzvJvL/IUpy84Ktw==}
-    deprecated: This package is archived and no longer maintained. For support, visit https://github.com/expressjs/express/discussions
 
   path-parse@1.0.7:
     resolution: {integrity: sha512-LDJzPVEEEPR+y48z93A0Ed0yXb8pAByGWo/k5YYdYgpY2/2EsOsksJrq7lOHxryrVOn1ejG6oAp8ahvOIQD8sw==}
@@ -5040,6 +5054,10 @@ snapshots:
       '@floating-ui/utils': 0.2.10
 
   '@floating-ui/utils@0.2.10': {}
+
+  '@fontsource-variable/inter@5.2.6': {}
+
+  '@fontsource-variable/spline-sans-mono@5.2.6': {}
 
   '@fontsource/inter@5.2.6': {}
 

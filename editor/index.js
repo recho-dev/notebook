@@ -2,7 +2,8 @@ import {EditorView, basicSetup} from "codemirror";
 import {EditorState, Transaction} from "@codemirror/state";
 import {keymap} from "@codemirror/view";
 import {javascript, javascriptLanguage} from "@codemirror/lang-javascript";
-import {githubLight} from "@uiw/codemirror-theme-github";
+import {githubLightInit} from "@uiw/codemirror-theme-github";
+import {tags as t} from "@lezer/highlight";
 import {createRuntime} from "../runtime/index.js";
 import {outputDecoration} from "./decoration.js";
 import {outputLines} from "./outputLines.js";
@@ -10,6 +11,7 @@ import {outputProtection} from "./protection.js";
 import {dispatch as d3Dispatch} from "d3-dispatch";
 import {controls} from "./controls/index.js";
 import {rechoCompletion} from "./completion.js";
+import {docStringTag} from "./docStringTag.js";
 
 export function createEditor(container, options) {
   const {code} = options;
@@ -22,7 +24,12 @@ export function createEditor(container, options) {
     extensions: [
       basicSetup,
       javascript(),
-      githubLight,
+      githubLightInit({
+        styles: [
+          {tag: [t.variableName], color: "#1f2328"},
+          {tag: [t.function(t.variableName)], color: "#6f42c1"},
+        ],
+      }),
       EditorView.lineWrapping,
       EditorView.theme({
         "&": {fontSize: "14px", fontFamily: "monospace"},
@@ -43,6 +50,7 @@ export function createEditor(container, options) {
       controls(runtimeRef),
       // Disable this for now, because it prevents copying/pasting the code.
       // outputProtection(),
+      docStringTag,
     ],
   });
 

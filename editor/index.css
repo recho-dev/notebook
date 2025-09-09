@@ -1,3 +1,5 @@
+@reference "tailwindcss";
+
 .cm-editor {
   width: 100%;
   height: 100%;
@@ -26,6 +28,28 @@
       width: 2.5rem;
     }
   }*/
+
+  /* border: 1px solid #ccc; */
+
+  .cm-content,
+  .cm-lineNumbers,
+  .cm-tooltip.cm-tooltip-autocomplete > ul {
+    @apply font-mono;
+  }
+
+  .cm-tooltip {
+    background: #f9f9f8;
+    border-color: #dad9d6;
+    border-radius: 0.25rem;
+  }
+
+  .cm-tooltip.cm-completionInfo {
+    @apply font-sans;
+
+    &.cm-completionInfo-right {
+      transform: translateX(0.25rem);
+    }
+  }
 
   .cm-line {
     .cm-output-line-prefix {
@@ -59,5 +83,9 @@
     line-height: 1.25;
     border-left: 1px dashed var(--output-border-color);
     /*background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%237d7d7d' fill-opacity='0.4' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");*/
+  }
+
+  .cm-doc-tag span {
+    color: #cf222e !important;
   }
 }
