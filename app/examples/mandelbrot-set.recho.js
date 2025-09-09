@@ -1,10 +1,10 @@
 /**
  * @title Mandelbrot Set
  * @author Bairui Su
- * @created 2025-08-31
- * @pull_request 1
+ * @created 2025-08-21
+ * @pull_request 79
  * @github pearmini
- * @thumbnail_start 23
+ * @thumbnail_start 42
  */
 
 /**
