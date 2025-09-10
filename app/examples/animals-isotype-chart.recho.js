@@ -1,5 +1,5 @@
 /**
- * @title How to Create a Animals Isotype Chart?
+ * @title How to Create an Animals Isotype Chart?
  * @created 2025-09-03
  * @author Bairui Su
  * @pull_request 84
