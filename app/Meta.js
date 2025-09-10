@@ -10,13 +10,10 @@ export function Meta({example}) {
         className={cn("w-8 h-8 rounded-full")}
       />
       <div>
-        <div className={cn("flex items-center gap-2")}>
-          <span className={cn("ellipsis line-clamp-1")}>{example.author}</span>
-          <span>/</span>
-          <Link
-            href={`/examples/${example.slug}`}
-            className={cn("text-blue-500 hover:underline font-semibold ellipsis line-clamp-1")}
-          >
+        <div className={cn("flex items-center gap-2 ellipsis line-clamp-1")}>
+          <span>{example.author}</span>
+          <span> / </span>
+          <Link href={`/examples/${example.slug}`} className={cn("text-blue-500 hover:underline font-semibold")}>
             <span>{example.title}</span>
           </Link>
         </div>
