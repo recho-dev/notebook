@@ -18,7 +18,7 @@
  * Recho is suitable for Isotype Chart (Unit Chart), because it allows you to
  * encode data as characters easily. This sketch shows how to create a animals
  * isotype chart step by step. It's also a good example to show that Recho is
- * powerful in in echoing intermediate results, helping you to understand the
+ * powerful in echoing intermediate results, helping you to understand the
  * data and the process of creating the chart.
  *
  * The final chart looks like below, which tells us about the live stock of
@@ -70,8 +70,8 @@ const data = [
  *                            Importing D3
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * Then we import D3 to help us with the data processing. In Reecho, you can
- * typically use `recho.require` to import an external library.
+ * Then we import D3 to help us with the data processing. In Recho, you can
+ * typically use `recho.require(name)` to import an external library.
  *
  * > Ref. https://recho.dev/docs/libraries-imports
  * > Ref. https://d3js.org/
@@ -84,11 +84,11 @@ const d3 = recho.require("d3");
  *                          Generating the bars
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * We'll get started with generating the bars. There are three main tasks:
+ * We'll get started with generating the bars. There are three main tasks here:
  *
- * 1. Map animals types to their corresponding emojis.
- * 2. Map the counts to the number of emojis.
- * 3. Generate the bars based on the emojis and the number.
+ * 1. Mapping animals types to their corresponding emojis.
+ * 2. Mapping the counts to the number of emojis.
+ * 3. Generating the bars based on the emojis and the number.
  *
  * Here is the implementation:
  */
@@ -108,7 +108,7 @@ const V = echo(data.map((d) => Math.round(d.count / 1e6)));
 //➜ [ "🐖 ", "🐄 🐄 🐄 🐄 ", "🐑 🐑 🐑 🐑 🐑 🐑 🐑 🐑 🐑 🐑 🐑 ", "🐖 🐖 🐖 🐖 🐖 🐖 ", "🐄 🐄 🐄 🐄 🐄 🐄 🐄 🐄 🐄 🐄 ", "🐑 🐑 🐑 🐑 🐑 🐑 🐑 " ]
 const bars = echo(I.map((i) => `${E[i]} `.repeat(V[i])));
 
-/** This is the bars we got so far. */
+/** This is the chart we got so far. */
 
 //➜ 🐖
 //➜ 🐄 🐄 🐄 🐄
@@ -140,7 +140,7 @@ const labels = echo(data.map((d) => d.animal.padStart(marginLeft, " ")));
 //➜ [ "    pigs -| 🐖 ", "  cattle -| 🐄 🐄 🐄 🐄 ", "   sheep -| 🐑 🐑 🐑 🐑 🐑 🐑 🐑 🐑 🐑 🐑 🐑 ", "    pigs -| 🐖 🐖 🐖 🐖 🐖 🐖 ", "  cattle -| 🐄 🐄 🐄 🐄 🐄 🐄 🐄 🐄 🐄 🐄 ", "   sheep -| 🐑 🐑 🐑 …
 const rows = echo(I.map((i) => "  " + labels[i] + " -| " + bars[i]));
 
-/** Now the bars look like this. */
+/** Now the chart looks like this. */
 
 //➜     pigs -| 🐖
 //➜   cattle -| 🐄 🐄 🐄 🐄
@@ -159,7 +159,6 @@ echo(rows.join("\n"));
  * multiple charts. The first one is for Great Britain, and the second one is
  * for United States. In order to differentiate the two charts, we need to add
  * the titles and some spacing.
- *
  */
 
 //➜ 45
