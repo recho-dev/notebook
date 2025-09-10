@@ -15,8 +15,20 @@
     vertical-align: text-top;
 
     > input {
-      width: 0.9rem;
-      height: 0.9rem;
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+
+  .cm-radio-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: text-top;
+
+    > input {
+      width: 1rem;
+      height: 1rem;
     }
   }
 

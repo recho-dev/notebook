@@ -5,3 +5,7 @@ export function toggle(value) {
 export function slider(value, min, max) {
   return value;
 }
+
+export function radio(index, ...values) {
+  return values[index];
+}
