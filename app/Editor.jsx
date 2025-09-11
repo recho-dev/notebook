@@ -102,7 +102,7 @@ export function Editor({
       <div ref={containerRef}>
         <pre className={cn("text-sm hidden")}>{initialCode}</pre>
       </div>
-      <Tooltip id="action-tooltip" />
+      <Tooltip id="action-tooltip" className={cn("z-999")} />
     </div>
   );
 }
