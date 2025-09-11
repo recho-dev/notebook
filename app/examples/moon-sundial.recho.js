@@ -1,5 +1,5 @@
 /**
- * @title Moon Sundial
+ * @title Moondial: Moon Sundial
  * @author Bairui Su
  * @created 2025-09-12
  * @pull_request 87
@@ -8,7 +8,7 @@
 
 /**
  * ============================================================================
- * =                            Moon Sundial                                  =
+ * =                        Moondial: Moon Sundial                            =
  * ============================================================================
  *
  * I'm taking a class called **Time**. The first assignment is to create a
@@ -31,8 +31,8 @@
  * Based on these features, a sundial to me is **a device that maps the time to
  * visual patterns formed by shadows**. So I think why not create a moon
  * sundial? It uses shadows from a matrix of moons and the phases of the moon
- * relies on the time. Then I based on Mike's "Beesandbombs"[1] to create the
- * following piece.
+ * relies on the time. Then I based on Mike's "Beesandbombs"[1] to create this
+ * **Moondial**.
  *
  * This piece is a good example of how to use emojis to create animations in
  * Recho. Also, theoretically speaking, you can tell time based the pattern of
