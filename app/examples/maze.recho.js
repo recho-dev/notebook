@@ -20,7 +20,7 @@
  * from entrance to exit. The visualization shows:
  *
  * - Maze walls rendered with Unicode box-drawing characters
- * - Animated pathfinding with a ghost character (𜱊) moving along the solution
+ * - Animated pathfinding with a filled circle (●) moving along the solution
  * - Automatic maze regeneration when the path animation completes
  *
  * The rendering system manually constructs a character grid using proper
@@ -40,7 +40,7 @@
 //➜ │ └─┘ │ │ ┌─┘ │ │ │ ├───┬─┘ ┌───┴── │
 //➜ │     │ │ │   │   │ │   │   │       │
 //➜ ├─────┤ │ │ ┌─┘ ┌─┤ │ │ │ │ │ ──┬───┤
-//➜ │     │ │ │ │   │ │  𜱊│ │ │ │   │   │
+//➜ │     │ │ │ │   │ │  ●│ │ │ │   │   │
 //➜ │ ┌───┘ │ │ │ ──┘ ├───┘ │ │ └─┐ ├── │
 //➜ │ │     │   │     │     │ │   │ │   │
 //➜ │ │ ──┬─┴───┴───┐ │ ────┴─┤ ──┤ │ ──┤
@@ -256,7 +256,7 @@ const chars = {
   teeRight: "├",
   cross: "┼",
   space: " ",
-  ghost: "𜱊",
+  ghost: "●",
   startMarker: " ",
   endMarker: " ",
 };
