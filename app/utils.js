@@ -39,6 +39,9 @@ export function getAllJSExamples() {
       const content = fs.readFileSync(path.join(dir, file), "utf8");
       const meta = parseJSMeta(content);
       const {startLine, endLine} = findFirstOutputRange(content);
+      if (!meta) {
+        throw new Error(`No meta found in ${file}`);
+      }
       return {
         ...meta,
         content,
