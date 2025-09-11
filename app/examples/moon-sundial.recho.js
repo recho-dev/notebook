@@ -28,9 +28,11 @@
  * 1. It tells the time using the sun's position.
  * 2. It casts a shadow from an object.
  *
- * So I think why not create a moon sundial? It uses shadows from a matrix of
- * moons and the phases of the moon relies on the time. Then I based on Mike's
- * "Beesandbombs"[1] to create the following piece.
+ * Based on these features, a sundial to me is **a device that maps the time to
+ * visual patterns formed by shadows**. So I think why not create a moon
+ * sundial? It uses shadows from a matrix of moons and the phases of the moon
+ * relies on the time. Then I based on Mike's "Beesandbombs"[1] to create the
+ * following piece.
  *
  * This piece is a good example of how to use emojis to create animations in
  * Recho. Also, theoretically speaking, you can tell time based the pattern of
