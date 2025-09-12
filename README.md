@@ -69,10 +69,6 @@ function map(x, d0, d1, r0, r1) {
 }
 ```
 
-## Why Recho?
-
-## What's Next?
-
 ## License
 
 ISC@[Recho](https://github.com/recho-dev).
