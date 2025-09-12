@@ -1,11 +1,20 @@
 import {notFound} from "next/navigation";
-import {getAllJSExamples} from "../../utils.js";
+import {getAllJSExamples, removeJSMeta} from "../../utils.js";
 import {Editor} from "../../Editor.jsx";
 import {cn} from "../../cn.js";
 import {Meta} from "../../Meta.js";
 
 export async function generateStaticParams() {
   return getAllJSExamples().map((example) => ({slug: example.slug}));
+}
+
+export async function generateMetadata({params}) {
+  const {slug} = await params;
+  const example = getAllJSExamples().find((example) => example.slug === slug);
+  if (!example) notFound();
+  return {
+    title: `${example.title} | Recho`,
+  };
 }
 
 export default async function Page({params}) {
@@ -18,7 +27,7 @@ export default async function Page({params}) {
         <Meta example={example} />
       </div>
       <Editor
-        initialCode={example.content}
+        initialCode={removeJSMeta(example.content)}
         key={example.title}
         toolBarStart={
           <div className={cn("flex items-center")} key={example.slug}>

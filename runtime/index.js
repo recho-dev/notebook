@@ -38,10 +38,10 @@ function isMultiline(value) {
   return lines.length > 1;
 }
 
-function inspect(value, {limit = 200, quote = true, ...rest} = {}) {
+function inspect(value, {limit = 200, quote = "double", indent = null} = {}) {
   if (isMultiline(value)) return value;
   if (typeof value === "string" && !quote) return value;
-  const string = inspector(value, rest);
+  const string = inspector(value, {indent, quoteStyle: quote});
   if (string.length > limit) return string.slice(0, limit) + "…";
   return string;
 }
@@ -244,6 +244,7 @@ export function createRuntime(initialCode) {
       for (const variable of variables) variable.delete();
     }
 
+    // @ref https://github.com/observablehq/notebook-kit/blob/02914e034fd21a50ebcdca08df57ef5773864125/src/runtime/define.ts#L33
     for (const node of enter) {
       const vid = uid();
       const state = {values: [], variables: [], error: null, doc: false};

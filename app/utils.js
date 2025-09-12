@@ -14,6 +14,10 @@ function parseJSMeta(content) {
   return meta;
 }
 
+export function removeJSMeta(content) {
+  return content.replace(/^\/\*\*([\s\S]*?)\*\//, "").trimStart();
+}
+
 export function getAllJSDocs() {
   const dir = path.join(process.cwd(), "app/docs/");
   const files = fs.readdirSync(dir);
@@ -35,11 +39,14 @@ export function getAllJSExamples() {
       const content = fs.readFileSync(path.join(dir, file), "utf8");
       const meta = parseJSMeta(content);
       const {startLine, endLine} = findFirstOutputRange(content);
+      if (!meta) {
+        throw new Error(`No meta found in ${file}`);
+      }
       return {
         ...meta,
         content,
         slug: file.replace(".recho.js", ""),
-        outputStartLine: meta.thumbnail ?? startLine,
+        outputStartLine: meta.thumbnail_start ?? startLine,
         outputEndLine: endLine,
       };
     });
