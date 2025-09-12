@@ -4,8 +4,6 @@
 
 [**Recho**](https://recho.dev/) is a free, [open-source](/LICENCE), reactive code scratchpad that echoes output inline with your code as comments — enabling beginners, developers, artists, and anyone curious to quickly code and explore through text experiments/art. Built on the reactive model of [Observable Notebook Kit](https://github.com/observablehq/notebook-kit), Recho makes coding accessible, interactive, and playful, turning every string output into a creative, in-situ experience - discover the sketches of tomorrow.
 
-Hackers and painters, let's paint by code!
-
 ## A Quick Example 🚀
 
 Here is a [quick example](https://recho.dev/examples/mandelbrot-set) to showcase Recho. A block of code is written to explore the algorithm behind [Mandelbrot set](https://en.wikipedia.org/wiki/Mandelbrot_set), generating a string called _output_. After calling _echo(output)_, the output appears above the code block as comments. By tweaking the values of _cols_, _rows_, and _maxIter_, the output updates reactively for further explorations. Check out more [live examples](https://recho.dev/examples) to see what you can create with Recho.
@@ -71,16 +69,28 @@ function map(x, d0, d1, r0, r1) {
 
 ## Editor 📝
 
+The quickest way to get started with Recho.
+
 https://recho.dev/
 
 ## Documentation 📚
+
+Learn how to use Recho with our comprehensive guides.
 
 https://recho.dev/docs/introduction
 
 ## Examples 🖼️
 
+See what you can create and draw some inspiration!
+
 https://recho.dev/examples
+
+## Contributing 🙏
+
+We have a bundle of features that we would like you to help us build together!
+
+https://github.com/recho-dev/recho/issues
 
 ## License 📄
 
-ISC@[Recho](https://github.com/recho-dev).
+ISC © [Recho](https://github.com/recho-dev)
