@@ -6,7 +6,7 @@
 
 Hackers and painters, let's paint by code!
 
-## A Quick Example
+## A Quick Example 🚀
 
 Here is a [quick example](https://recho.dev/examples/mandelbrot-set) to showcase Recho. A block of code is written to explore the algorithm behind [Mandelbrot set](https://en.wikipedia.org/wiki/Mandelbrot_set), generating a string called _output_. After calling _echo(output)_, the output appears above the code block as comments. By tweaking the values of _cols_, _rows_, and _maxIter_, the output updates reactively for further explorations. Check out more [live examples](https://recho.dev/examples) to see what you can create with Recho.
 
@@ -69,6 +69,18 @@ function map(x, d0, d1, r0, r1) {
 }
 ```
 
-## License
+## Editor 📝
+
+https://recho.dev/
+
+## Documentation 📚
+
+https://recho.dev/docs/introduction
+
+## Examples 🖼️
+
+https://recho.dev/examples
+
+## License 📄
 
 ISC@[Recho](https://github.com/recho-dev).
