@@ -32,8 +32,8 @@
  * Adjust the `year` parameter to view moon phases for different years!
  *
  * [1]: https://www.npmjs.com/package/suncalc
- * [1]: https://observablehq.com/@mbostock/phases-of-the-moon
- * [2]: https://www.moma.org/explore/inside_out/2012/10/16/a-paean-to-the-phases-of-the-moon/
+ * [2]: https://observablehq.com/@mbostock/phases-of-the-moon
+ * [3]: https://www.moma.org/explore/inside_out/2012/10/16/a-paean-to-the-phases-of-the-moon/
  */
 
 const year = 2025;
