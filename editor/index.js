@@ -4,6 +4,7 @@ import {keymap} from "@codemirror/view";
 import {javascript, javascriptLanguage} from "@codemirror/lang-javascript";
 import {githubLightInit} from "@uiw/codemirror-theme-github";
 import {tags as t} from "@lezer/highlight";
+import {indentWithTab} from "@codemirror/commands";
 import {createRuntime} from "../runtime/index.js";
 import {outputDecoration} from "./decoration.js";
 import {outputLines} from "./outputLines.js";
@@ -42,6 +43,7 @@ export function createEditor(container, options) {
           run: () => runtimeRef.current.run(),
           preventDefault: true,
         },
+        indentWithTab,
       ]),
       javascriptLanguage.data.of({autocomplete: rechoCompletion}),
       outputLines,
