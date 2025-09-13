@@ -56,6 +56,7 @@ export function createRuntime(initialCode) {
   let code = initialCode;
   let prevCode = null;
   let isRunning = false;
+  let noSyntaxError = false;
 
   const runtime = new Runtime(BUILTINS);
   const main = runtime.module();
@@ -133,9 +134,9 @@ export function createRuntime(initialCode) {
     }
   }
 
-  function transpile(code) {
+  function transpile(cell, code) {
     try {
-      return transpileJavaScript(code);
+      return transpileJavaScript(cell);
     } catch (error) {
       console.error(error);
       const changes = removeChanges(code);
@@ -186,12 +187,14 @@ export function createRuntime(initialCode) {
   }
 
   function rerun(code) {
-    // If the code is the same as the pervious one, there is no need to to update
-    // the position of blocks. So skip the diffing and just refresh the outputs.
-    if (code === prevCode) return refresh(code);
+    // If the code is the same as the pervious one, and the previous code has no syntax error,
+    // there is no need to to update the position of blocks. So skip the diffing and just
+    // refresh the outputs.
+    if (code === prevCode && noSyntaxError) return refresh(code);
 
     prevCode = code;
     isRunning = true;
+    noSyntaxError = false;
 
     const nodes = split(code);
     if (!nodes) return;
@@ -199,10 +202,11 @@ export function createRuntime(initialCode) {
     // Debug logging removed for production.
     for (const node of nodes) {
       const cell = code.slice(node.start, node.end);
-      const transpiled = transpile(cell);
+      const transpiled = transpile(cell, code);
       node.transpiled = transpiled;
     }
     if (nodes.some((n) => !n.transpiled)) return;
+    noSyntaxError = true;
 
     const groups = group(nodes, (n) => code.slice(n.start, n.end));
     const enter = [];
