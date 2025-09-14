@@ -12,6 +12,7 @@ import {outputProtection} from "./protection.js";
 import {dispatch as d3Dispatch} from "d3-dispatch";
 import {rechoCompletion} from "./completion.js";
 import {docStringTag} from "./docStringTag.js";
+import {commentLink} from "./commentLink.js";
 
 export function createEditor(container, options) {
   const {code} = options;
@@ -51,6 +52,7 @@ export function createEditor(container, options) {
       // Disable this for now, because it prevents copying/pasting the code.
       // outputProtection(),
       docStringTag,
+      commentLink,
     ],
   });
 
