@@ -64,6 +64,8 @@ export function createEditor(container, options) {
   function initRuntime() {
     runtimeRef.current = createRuntime(view.state.doc.toString());
     runtimeRef.current.onChanges(dispatch);
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
   }
 
   function dispatch(changes) {
@@ -86,6 +88,18 @@ export function createEditor(container, options) {
     }
   }
 
+  // Stop running when press cmd key. This is useful when we want to open a link
+  // in the comment by cmd + click. If we don't stop running, the links consistently
+  // create and destroy, and there is no way to click them. This also makes sense
+  // when we want to copy/paste/select code using the shortcut with cmd key.
+  function onKeyDown(e) {
+    if (e.metaKey || e.ctrlKey) runtimeRef.current?.setIsRunning(false);
+  }
+
+  function onKeyUp(e) {
+    runtimeRef.current?.setIsRunning(true);
+  }
+
   return {
     run: () => {
       if (!runtimeRef.current) initRuntime();
@@ -94,10 +108,14 @@ export function createEditor(container, options) {
     stop: () => {
       runtimeRef.current?.destroy();
       runtimeRef.current = null;
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
     },
     on: (event, callback) => dispatcher.on(event, callback),
     destroy: () => {
       runtimeRef.current?.destroy();
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
       view.destroy();
     },
   };
