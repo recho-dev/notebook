@@ -8,11 +8,11 @@
 - [Documentation](https://recho.dev/docs/introduction) 📚 - Learn how to use Recho with our comprehensive guides.
 - [Examples](https://recho.dev/examples) 🖼️ - See what you can create and draw some inspiration!
 - [Sharing](/CONTRIBUTING.md#contributing-to-recho) 🎨 - Follow the instructions to open a [pull request](https://github.com/recho-dev/recho/new/main/app/examples) to share your sketches!
-- [Contributing](https://github.com/recho-dev/recho/issues) 🙏 - We have a bunch of things that we would like you to help us build together!
+- [Contributing](/CONTRIBUTING.md) 🙏 - We have [a bunch of things](https://github.com/recho-dev/recho/issues) that we would like you to help us build together!
 
 ## Why Recho 💡
 
-We want to make code more accessible and hopefully, more playful. Inspired by [P5.js Editor](https://editor.p5js.org/) and [Observable Notebook](https://observablehq.com/), we realize that _well-designed libraries don't necessarily make code accessible—the code environment does_! So here is Recho: **a lighter way to code, creatively**. We offer you a lighter beginning:
+We want to make code more accessible and hopefully, more playful. Inspired by [P5.js Editor](https://editor.p5js.org/) and [Observable Notebook](https://observablehq.com/), we realize that _well-designed libraries don't necessarily make code accessible—the code environment does_! So here is Recho: **a lighter way to code**. We offer you a lighter beginning:
 
 - **Lighter Input** - We use vanilla JavaScript, and you don't have to learn extra libraries or browser specific APIs to get started with. It can help you focus more on general coding concepts and algorithms themselves.
 - **Lighter Output** - We embrace text-based output—a universal and timeless interface. It's concise, intuitive, and efficient, which keeps your attention on the essence of code rather than the overhead of visuals.
