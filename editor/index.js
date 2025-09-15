@@ -17,7 +17,6 @@ import {commentLink} from "./commentLink.js";
 export function createEditor(container, options) {
   const {code} = options;
   const dispatcher = d3Dispatch("userInput");
-
   const runtimeRef = {current: null};
 
   const state = EditorState.create({
@@ -56,10 +55,9 @@ export function createEditor(container, options) {
     ],
   });
 
-  const view = new EditorView({
-    state,
-    parent: container,
-  });
+  const view = new EditorView({state, parent: container});
+
+  let isStopByMetaKey = false;
 
   function initRuntime() {
     runtimeRef.current = createRuntime(view.state.doc.toString());
@@ -93,11 +91,18 @@ export function createEditor(container, options) {
   // create and destroy, and there is no way to click them. This also makes sense
   // when we want to copy/paste/select code using the shortcut with cmd key.
   function onKeyDown(e) {
-    if (e.metaKey || e.ctrlKey) runtimeRef.current?.setIsRunning(false);
+    if (e.metaKey || e.ctrlKey) {
+      if (runtimeRef.current?.isRunning()) isStopByMetaKey = true;
+      runtimeRef.current?.setIsRunning(false);
+    }
   }
 
   function onKeyUp(e) {
-    runtimeRef.current?.setIsRunning(true);
+    const key = e.key;
+    if ((key === "Meta" || key === "Control") && isStopByMetaKey) {
+      isStopByMetaKey = false;
+      runtimeRef.current?.setIsRunning(true);
+    }
   }
 
   return {

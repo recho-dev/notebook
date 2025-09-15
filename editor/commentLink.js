@@ -1,6 +1,8 @@
 import {syntaxTree} from "@codemirror/language";
 import {Decoration, ViewPlugin, WidgetType} from "@codemirror/view";
 
+const isWindows = navigator.userAgent.includes("Windows");
+
 class LinkWidget extends WidgetType {
   constructor(url) {
     super();
@@ -14,7 +16,7 @@ class LinkWidget extends WidgetType {
     link.target = "_blank";
     link.rel = "noopener noreferrer";
     link.className = "cm-comment-link";
-    link.title = "Open in a new tab (Cmd + Click)";
+    link.title = `Open in a new tab (${isWindows ? "Ctrl" : "Cmd"} + Click)`;
 
     // Prevent default click behavior - only open on Cmd+Click
     link.addEventListener("click", (e) => !e.metaKey && !e.ctrlKey && e.preventDefault());

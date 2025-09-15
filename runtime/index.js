@@ -305,5 +305,5 @@ export function createRuntime(initialCode) {
     rerun(code);
   }
 
-  return {setCode, setIsRunning, run, onChanges, destroy};
+  return {setCode, setIsRunning, run, onChanges, destroy, isRunning: () => isRunning};
 }
