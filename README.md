@@ -8,7 +8,7 @@
 - [Documentation](https://recho.dev/docs/introduction) 📚 - Learn how to use Recho with our comprehensive guides.
 - [Examples](https://recho.dev/examples) 🖼️ - See what you can create and draw some inspiration!
 - [Sharing](/CONTRIBUTING.md#contributing-to-recho) 🎨 - Follow the instructions to open a [pull request](https://github.com/recho-dev/recho/new/main/app/examples) to share your sketches!
-- [Contributing](https://github.com/recho-dev/recho/issues) 🙏 - We have a bunch of things that we would like you to help us build together!
+- [Contributing](/CONTRIBUTING.md) 🙏 - We have [a bunch of things](https://github.com/recho-dev/recho/issues) that we would like you to help us build together!
 
 ## Why Recho 💡
 
