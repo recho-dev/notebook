@@ -12,16 +12,16 @@
  * =                    Computer Graphics: Text-Based Shaders                 =
  * ============================================================================
  *
- * This tutorial introduces some basic concepts of computer graphics by some
- * text-based shaders in Recho.
+ * This tutorial introduces fundamental concepts of computer graphics through
+ * text-based shader implementations in Recho.
  *
  * I'm taking Prof. Ken Perlin's Computer Graphics course this semester. In the
- * second lecture, it's really amazing to see him creating some crazy effects
- * just by GPU-based fragment shaders.
+ * second lecture, it's fascinating to see him creating impressive visual effects
+ * using GPU-based fragment shaders.
  *
- * However, I find it difficult for beginners to setup WebGL and write GLSL
- * code. So I'm trying to create some text-based shaders in Recho to make it
- * easier for beginners to get started.
+ * However, I find it challenging for beginners to set up WebGL and write GLSL
+ * code. Therefore, I'm creating text-based shader implementations in Recho to
+ * make computer graphics more accessible to beginners.
  *
  * > You don't have to be familiar with Canvas, WebGL, or GLSL. Only basic
  * > JavaScript knowledge and some basic vector operations are required.
@@ -30,22 +30,22 @@
  *                                Shaders
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * Computer Graphics is about drawing pixels on the screen. We can use shaders
- * to achieve this goal. Here we only focus on fragment shaders, which are
- * programs that run once per pixels on the screen, determining the color of
- * each pixel.
+ * Computer graphics involves rendering pixels on the screen. Shaders are
+ * programs that control how pixels are rendered. Here we focus on fragment
+ * shaders, which are programs that execute once per pixel on the screen,
+ * determining the color of each pixel.
  *
- * Recho only supports text-based output. So fragment shaders in Recho are
- * functions that run once per cell in the output string, determining the
- * character of each cell.
+ * Since Recho only supports text-based output, our fragment shaders are
+ * functions that execute once per cell in the output string, determining the
+ * character displayed in each cell.
  *
- * Below is the implementation. The `shader` function takes a `callback`
+ * Below is our implementation. The `shader` function takes a `callback`
  * function and an optional `dimension` argument, returning the output string.
  * The `callback` function is evaluated for each cell in the output string,
- * being passed the cell's position as a `Vector2` object. The callback's
- * return value is the character of the cell. For each cell, the position is
- * normalized to the range of [-1, 1] from left to right, and the range of
- * [1, -1] from top to bottom.
+ * receiving the cell's position as a `Vector2` object. The callback's
+ * return value determines the character displayed in that cell. For each cell,
+ * the position is normalized to the range of [-1, 1] from left to right, and
+ * the range of [1, -1] from top to bottom.
  */
 
 function shader(callback, [width, height] = [41, 21]) {
@@ -83,7 +83,7 @@ const {Vector2, Vector3, Vector4} = await recho.require("three@0.160.0/build/thr
  * Let's draw a circle to test the shader function. The circle is defined by
  * the equation `x^2 + y^2 = 1`. For each cell, we check if the distance from
  * the cell to the center of the circle is less than or equal to 1. If it is,
- * we draw a `+` character, otherwise we draw a space character. Here is the
+ * we draw a `+` character; otherwise, we draw a space character. Here is the
  * result:
  */
 
@@ -115,13 +115,13 @@ echo(shader((vPos) => (vPos.length() <= 1 ? "+" : " ")));
  *                          Colors to Characters
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * As we mentioned above, the actual fragment shader only cares about colors.
- * So it's better for us to focus on colors and convert them to characters by
- * some simple rules in our text-based shader. A color is typically represented
+ * As mentioned above, actual fragment shaders primarily work with colors.
+ * Therefore, it's better to focus on colors and convert them to characters using
+ * simple rules in our text-based shader. A color is typically represented
  * by a `Vector4` object, containing the red, green, blue, and alpha components.
  * The alpha component is optional and is usually 1 for opaque colors.
  *
- * Let's first try the rule that converts the grayscale value of colors to a
+ * Let's first implement a rule that converts the grayscale value of colors to a
  * sequence of ASCII characters.
  */
 
@@ -135,7 +135,7 @@ function gray2ASCII(color) {
 }
 
 /**
- * Then we can use the `gray2ASCII` function like below. This example maps the
+ * Then we can use the `gray2ASCII` function as shown below. This example maps the
  * x and y components of the position to the red and green components of the
  * color respectively, resulting in a gradient.
  */
@@ -201,7 +201,7 @@ function rgb2emoji(color) {
 }
 
 /**
- * However, the result is not very good. So we'll stick to the grayscale rule
+ * However, the result is not optimal. Therefore, we'll use the grayscale rule
  * for the following examples.
  */
 
@@ -238,14 +238,14 @@ echo(
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * Now let's draw a sphere. The sphere is defined by the equation `x^2 + y^2 +
- * z^2 = 1`. Fist, for each vPos (x, y), we compute the z component by
- * `1 - x^2 - y^2`, which is equivalent to `1 - vPos.dot(vPos)`. If the z is
- * valid (z > 0), we compute the color of that cell, otherwise we set the color
+ * z^2 = 1`. First, for each vPos (x, y), we compute the z component using
+ * `1 - x^2 - y^2`, which is equivalent to `1 - vPos.dot(vPos)`. If z is
+ * valid (z > 0), we compute the color of that cell; otherwise, we set the color
  * to transparent.
  *
- * We assign the z component to the red and green components of the color. So
- * the bigger the z is (closer to the center), the brighter the color is. It
- * looks a beam of light shines perpendicularly onto the screen from outside.
+ * We assign the z component to the red and green components of the color.
+ * The larger the z value (closer to the center), the brighter the color appears.
+ * This simulates a beam of light shining perpendicularly onto the screen from outside.
  */
 
 //➜
@@ -285,14 +285,14 @@ echo(
  *                           Diffuse Reflection Model
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * Next we use the diffuse reflection model to make the sphere more realistic.
- * Given a directional light source, the intensity of the light on a surface is
+ * Next, we use the diffuse reflection model to make the sphere more realistic.
+ * Given a directional light source, the intensity of light on a surface is
  * proportional to the cosine of the angle between the light direction and the
- * surface normal. For a sphere, the surface normal is the normal vector, which
- * is `(x, y, z)`.
+ * surface normal. For a sphere, the surface normal at point (x, y, z) is the
+ * normalized vector `(x, y, z)`.
  *
  * Here we define a light direction `dir` (1, 1, 1). For each point `p`, we use
- * dot product between `p` and `dir` to compute the intensity of the light.
+ * the dot product between `p` and `dir` to compute the light intensity.
  */
 
 //➜
@@ -334,13 +334,13 @@ echo(
  *                             Ambient Light
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * In order to make the sphere more smooth, we can add an ambient light to the
- * sphere. The ambient light is a constant light that is not affected by the
+ * To make the sphere appear smoother, we can add ambient lighting to the
+ * sphere. Ambient light is constant lighting that is not affected by the
  * direction of the light source.
  *
- * Here we simply add the ambient light to the diffuse light to get the final
- * light. The sphere is brighter, and the transitions between layers are more
- * natural.
+ * Here we simply add the ambient light to the diffuse light to obtain the final
+ * lighting. The sphere appears brighter, and the transitions between layers are
+ * more natural.
  */
 
 //➜
@@ -386,11 +386,11 @@ echo(
  *                            Rotating Sphere
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * Next we make the sphere rotate around the y-axis. We can use the time variable
- * to compute the direction of the light. The key here is to change the `x` and
+ * Next, we make the sphere rotate around the y-axis. We can use the time variable
+ * to compute the direction of the light. The key is to change the `x` and
  * `z` components of the light direction.
  *
- * We define a time variable `uTime` by `recho.now()`, which is a generator that
+ * We define a time variable `uTime` using `recho.now()`, which is a generator that
  * yields the current time continuously. Every time the time variable changes,
  * the referencing block (shader) will be re-evaluated, resulting in smooth
  * animations.
@@ -445,7 +445,7 @@ echo(
  *                            Moving Sphere
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * Let's not just rotate the sphere, but also move it. The can be achieved by
+ * Let's not only rotate the sphere, but also move it. This can be achieved by
  * updating the position and radius of the sphere.
  */
 
@@ -513,10 +513,10 @@ echo(
  *                        More Spheres with more Lights
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * Our last example is more complex with more spheres and more lights. But the
- * idea is still the same as the previous examples. The only difference is that
- * for each cell, we need to compute the color for each sphere, then select the
- * one closest to the screen as the final color.
+ * Our final example is more complex, featuring multiple spheres and multiple lights.
+ * However, the concept remains the same as the previous examples. The only difference
+ * is that for each cell, we need to compute the color for each sphere, then select
+ * the one closest to the screen as the final color.
  */
 
 //➜
@@ -592,11 +592,11 @@ echo(
  *                               Summary
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * In this tutorial, we have learned how to use shaders to create some basic
+ * In this tutorial, we have learned how to use shaders to create basic
  * computer graphics effects. We have learned how to use the diffuse reflection
- * model to compute the light, how to use the ambient light to make the sphere
- * more smooth, how to use the time variable to create animations, and how to
- * use more spheres and more lights to create more complex effects.
+ * model to compute lighting, how to use ambient lighting to make the sphere
+ * appear smoother, how to use the time variable to create animations, and how to
+ * use multiple spheres and lights to create more complex effects.
  *
  * I hope you have enjoyed this tutorial. If you have any questions, please
  * feel free to comment on https://github.com/recho-dev/recho/issues/98.
