@@ -19,11 +19,15 @@ class LinkWidget extends WidgetType {
     link.title = `Open in a new tab (${isWindows ? "Ctrl" : "Cmd"} + Click)`;
 
     // Prevent default click behavior - only open on Cmd+Click
-    link.addEventListener("click", (e) => !e.metaKey && !e.ctrlKey && e.preventDefault());
+    const preventDefault = (e) => !e.metaKey && !e.ctrlKey && e.preventDefault();
+    link.addEventListener("click", preventDefault);
 
     // Change cursor to pointer when Ctrl/Cmd is held
-    link.addEventListener("mouseenter", (e) => (e.metaKey || e.ctrlKey) && link.classList.add("cmd-clickable"));
-    link.addEventListener("mouseleave", (e) => !e.metaKey && !e.ctrlKey && link.classList.remove("cmd-clickable"));
+    const add = (e) => (e.metaKey || e.ctrlKey) && link.classList.add("cmd-clickable");
+    const remove = (e) => !e.metaKey && !e.ctrlKey && link.classList.remove("cmd-clickable");
+    link.addEventListener("mouseenter", add);
+    link.addEventListener("mousemove", add);
+    link.addEventListener("mouseleave", remove);
     return link;
   }
 
@@ -52,9 +56,9 @@ export const commentLink = ViewPlugin.fromClass(
       let widgets = [];
       let tree = syntaxTree(view.state);
 
+      // Only iterate tree nodes that intersect with the viewport.
       for (const {from, to} of view.visibleRanges) {
         tree.iterate({
-          // Only iterate tree nodes that intersect with the viewport.
           from,
           to,
           enter: ({type, from, to}) => {
