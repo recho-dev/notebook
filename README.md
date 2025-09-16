@@ -26,18 +26,18 @@ Ideally, you can be creative afterwards. You may find the minimalism of ASCII/te
 Recho is still in its early stage. There are a lot of areas we want to explore and build with the community. Especially, we are interested in the following things:
 
 - **More Examples** - Examples attract users and shape tools. We would love to have examples in different areas ([text analysis](https://recho.dev/examples/word-count), [data viz](https://recho.dev/examples/phases-of-the-moon), [graphics](https://recho.dev/examples/cg-text-based-shaders), [concrete poetry](https://recho.dev/examples/fire!), [algorithms](https://recho.dev/examples/maze), etc.) and working with external libraries ([D3](https://d3js.org/), [Lodash](https://lodash.com/), [ml5](https://ml5js.org/), [Tone](https://tonejs.github.io/), etc.). They don't have to be complicated or perfect. One thing to share would be great. Follow the [instructions](/CONTRIBUTING.md#sharing-examples) to open a [pull request](https://github.com/recho-dev/recho/new/main/app/examples) to share yours today!
-- **Text Based Libraries** - Best practices deserve to be seen by more people. If you find some algorithms you are using helpful for others, don't hesitate to package them into libraries. Remember, they can be light!
-- **Diverse Programming Languages** - Recho begins with JavaScript, but isn't limited to it—coding has no boundaries. As long as a programming language can be transpiled to JavaScript, it can be incorporated with Recho. It can be mainstream ([Python](https://www.python.org/), [Rust](https://www.rust-lang.org/)), academic ([MLscript](https://github.com/hkust-taco/mlscript)), or creative ([wenyan‑lang](https://wy-lang.org/)). The best part is that it doesn't have to be production-ready or have real-life usage. Just providing a new way to code or think is cool. Want to add your favorite language to Recho or share your "toys"? [Talk to us](https://github.com/recho-dev/recho/discussions)!
-- **Interactions with LLMs** - Recho’s text-first approach is ideal for LLMs. Rather than letting the LLM write code directly, you can use code as input: fusing files, turning text into pixel outputs, and more. We want to exploring the possibilities.
+- **Text-Based Libraries** - Best practices deserve to be seen by more people. If you find some algorithms you are using helpful for others, don't hesitate to package them into libraries. Remember, they can be light!
+- **Polyglot Programming** - Recho begins with JavaScript, but isn't limited to it—coding has no boundaries. As long as a programming language can be transpiled to JavaScript, it can be incorporated with Recho. It can be mainstream ([Python](https://www.python.org/), [Rust](https://www.rust-lang.org/)), academic ([MLscript](https://github.com/hkust-taco/mlscript)), or creative ([wenyan‑lang](https://wy-lang.org/)). The best part is that it doesn't have to be production-ready or have real-life usage. Just providing a different way to code or think is cool. Want to add your favorite language to Recho or share your "toys"? [Talk to us](https://github.com/recho-dev/recho/issues/109)!
+- **Explorations with LLMs** - Recho’s text-first approach is ideal for LLMs. Rather than letting the LLM write code directly, you can use code as input: fusing files, turning text into pixel outputs, and more. We want to [exploring the possibilities](https://github.com/recho-dev/recho/issues/110).
 
 Of course, there are a lot of editor related features on the way!
 
-- **Reactive Inputs** - Reactivity right in the editor. (slider, checkbox, radio, etc.)
-- **Visual Enhancement** - More expressive and informative editor. (dark theme, ANSI escape codes, etc.)
-- **Interactivity** - Response to user inputs. (mouse, keyboard, etc.)
+- **Editing Optimization** - Improve editing experiences. ([rerunning blocks](https://github.com/recho-dev/recho/issues/42), [formatting code](https://github.com/recho-dev/recho/issues/108), etc.)
+- **Visual Enhancement** - More expressive and informative editor. ([dark theme](https://github.com/recho-dev/recho/issues/104), [ANSI escape codes](https://github.com/recho-dev/recho/issues/45), etc.)
+- **Interactivity** - Response to user inputs. ([mouse](https://github.com/recho-dev/recho/issues/34), [keyboard](https://github.com/recho-dev/recho/issues/105), etc.)
 - ...
 
-Also, we have plans to provide cloud storage services. But we don't want to overcomplicate things at this point, so any thoughts, comments, and suggestions are welcome!
+Also, we have plans to provide [cloud storage services](https://github.com/recho-dev/recho/issues/107). But we don't want to overcomplicate things at this point, so any thoughts, comments, and suggestions are welcome!
 
 ## A Quick Example 🚀
 
