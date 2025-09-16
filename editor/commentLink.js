@@ -22,17 +22,9 @@ class LinkWidget extends WidgetType {
     link.addEventListener("click", (e) => !e.metaKey && !e.ctrlKey && e.preventDefault());
 
     // Change cursor to pointer when Ctrl/Cmd is held
-    this.handleKeyDown = (e) => (e.metaKey || e.ctrlKey) && link.classList.add("cmd-clickable");
-    this.handleKeyUp = (e) => !e.metaKey && !e.ctrlKey && link.classList.remove("cmd-clickable");
-    document.addEventListener("keydown", this.handleKeyDown);
-    document.addEventListener("keyup", this.handleKeyUp);
-
+    link.addEventListener("mouseenter", (e) => (e.metaKey || e.ctrlKey) && link.classList.add("cmd-clickable"));
+    link.addEventListener("mouseleave", (e) => !e.metaKey && !e.ctrlKey && link.classList.remove("cmd-clickable"));
     return link;
-  }
-
-  destroy() {
-    document.removeEventListener("keydown", this.handleKeyDown);
-    document.removeEventListener("keyup", this.handleKeyUp);
   }
 
   ignoreEvent() {
