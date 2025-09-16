@@ -44,62 +44,53 @@ Also, we have plans to provide [cloud storage services](https://github.com/recho
 Here is a [quick example](https://recho.dev/examples/mandelbrot-set) to showcase Recho. A block of code is written to explore the algorithm behind [Mandelbrot set](https://en.wikipedia.org/wiki/Mandelbrot_set), generating a string called _output_. After calling _echo(output)_, the output appears above the code block as comments. By tweaking the values of _cols_, _rows_, and _maxIter_, the output updates reactively for further explorations. Check out more [live examples](https://recho.dev/examples) to see what you can create with Recho.
 
 ```js
-const cols = 80;
-const rows = 30;
-const maxIter = 80;
+const text = `The dog, cat, and mouse were playing in the yard. Dog barked loudly, while cat ran quickly. 
+Mouse hid under the bench, but the dog kept looking. Cat jumped over a small fence; dog followed. 
+Bird watched silently as dog, cat, and mouse moved around.`;
 
-//➜
-//➜
-//➜                                                        0
-//➜                                                      0000
-//➜                                                      0000
-//➜                                              0       000
-//➜                                              00  000000000000
-//➜                                              00000000000000000000
-//➜                                              0000000000000000000
-//➜                                            0000000000000000000000
-//➜                                          00000000000000000000000000
-//➜                                0  0       000000000000000000000000
-//➜                                00000000  00000000000000000000000000
-//➜                               0000000000 0000000000000000000000000
-//➜                              00000000000 000000000000000000000000
-//➜             000000000000000000000000000000000000000000000000000
-//➜                              00000000000 000000000000000000000000
-//➜                               0000000000 0000000000000000000000000
-//➜                                00000000  00000000000000000000000000
-//➜                                0  0       000000000000000000000000
-//➜                                          00000000000000000000000000
-//➜                                            0000000000000000000000
-//➜                                              0000000000000000000
-//➜                                              00000000000000000000
-//➜                                              00  000000000000
-//➜                                              0       000
-//➜                                                      0000
-//➜                                                      0000
-//➜                                                        0
-//➜
-{
-  let output = "";
-  for (let y = 0; y < rows; y++) {
-    for (let x = 0; x < cols; x++) {
-      const re = map(x, 0, cols, -2.5, 1);
-      const im = map(y, 0, rows, -1, 1);
-      let [a, b, i] = [0, 0, 0];
-      while (i < maxIter) {
-        [a, b] = [a * a - b * b + re, 2 * a * b + im];
-        if (a * a + b * b > 4) break;
-        i++;
-      }
-      output += i === maxIter ? "0" : " ";
-    }
-    output += y === rows - 1 ? "" : "\n";
-  }
-  echo(output);
-}
+const ignoredWords = ["the", "was", "not", "over", "and", "in", "were", "a", "while", "but", "as", "around"];
 
-function map(x, d0, d1, r0, r1) {
-  return r0 + ((r1 - r0) * (x - d0)) / (d1 - d0);
-}
+//➜ the dog cat and mouse were playing in the yard dog barked loudly while cat ran quickly
+//➜ mouse hid under the bench but the dog kept looking cat jumped over a small fence dog followed
+//➜ bird watched silently as dog cat and mouse moved around
+const clean = echo(text.toLowerCase().replace(/[.,!?;]/g, ""));
+
+//➜ [ "the", "dog", "cat", "and", "mouse", "were", "playing", "in", "the", "yard", "dog", "barked", "loudly", "while", "cat", "ran", "quickly", "mouse", "hid", "under", "the", "bench", "but", "the", "dog"…
+const words = echo(clean.split(/\s+/));
+
+//➜ [ "dog", "cat", "mouse", "playing", "yard", "dog", "barked", "loudly", "cat", "ran", "quickly", "mouse", "hid", "under", "bench", "dog", "kept", "looking", "cat", "jumped", "small", "fence", "dog", "f…
+const filtered = echo(words.filter((w) => !ignoredWords.includes(w)));
+
+//➜ { dog: 5, cat: 4, mouse: 3, playing: 1, yard: 1, barked: 1, loudly: 1, ran: 1, quickly: 1, hid: 1, under: 1, bench: 1, kept: 1, looking: 1, jumped: 1, small: 1, fence: 1, followed: 1, bird: 1, watched…
+const frequencies = echo(filtered.reduce((acc, w) => ((acc[w] = (acc[w] || 0) + 1), acc), {}));
+
+//➜ 🟩🟩🟩🟩🟩 dog
+//➜ 🟩🟩🟩🟩 cat
+//➜ 🟩🟩🟩 mouse
+//➜ 🟩 playing
+//➜ 🟩 yard
+//➜ 🟩 barked
+//➜ 🟩 loudly
+//➜ 🟩 ran
+//➜ 🟩 quickly
+//➜ 🟩 hid
+//➜ 🟩 under
+//➜ 🟩 bench
+//➜ 🟩 kept
+//➜ 🟩 looking
+//➜ 🟩 jumped
+//➜ 🟩 small
+//➜ 🟩 fence
+//➜ 🟩 followed
+//➜ 🟩 bird
+//➜ 🟩 watched
+//➜ 🟩 silently
+//➜ 🟩 moved
+echo(
+  Object.entries(frequencies)
+    .map(([word, count]) => "🟩".repeat(count) + " " + word)
+    .join("\n"),
+);
 ```
 
 ## License 📄
