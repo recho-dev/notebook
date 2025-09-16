@@ -13,3 +13,4 @@ export {randomHistogram} from "./random-histogram.js";
 export {mandelbrotSet} from "./mandelbrot-set.js";
 export {matrixRain} from "./matrix-rain.js";
 export {jsDocString} from "./js-doc-string.js";
+export {commentLink} from "./comment-link.js";

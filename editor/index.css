@@ -64,6 +64,20 @@
   }
 
   .cm-doc-tag span {
-    color: #cf222e !important;
+    color: #cf222e;
+  }
+
+  .cm-comment-link {
+    color: #6a737d;
+    text-decoration: underline;
+    cursor: text;
+  }
+
+  .cm-comment-link.cmd-clickable {
+    cursor: pointer;
+  }
+
+  .cm-comment-link.cmd-clickable:hover {
+    color: #0550ae;
   }
 }

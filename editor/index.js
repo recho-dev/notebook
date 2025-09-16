@@ -12,11 +12,11 @@ import {outputProtection} from "./protection.js";
 import {dispatch as d3Dispatch} from "d3-dispatch";
 import {rechoCompletion} from "./completion.js";
 import {docStringTag} from "./docStringTag.js";
+import {commentLink} from "./commentLink.js";
 
 export function createEditor(container, options) {
   const {code} = options;
   const dispatcher = d3Dispatch("userInput");
-
   const runtimeRef = {current: null};
 
   const state = EditorState.create({
@@ -51,17 +51,19 @@ export function createEditor(container, options) {
       // Disable this for now, because it prevents copying/pasting the code.
       // outputProtection(),
       docStringTag,
+      commentLink,
     ],
   });
 
-  const view = new EditorView({
-    state,
-    parent: container,
-  });
+  const view = new EditorView({state, parent: container});
+
+  let isStopByMetaKey = false;
 
   function initRuntime() {
     runtimeRef.current = createRuntime(view.state.doc.toString());
     runtimeRef.current.onChanges(dispatch);
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
   }
 
   function dispatch(changes) {
@@ -84,6 +86,25 @@ export function createEditor(container, options) {
     }
   }
 
+  // Stop running when press cmd key. This is useful when we want to open a link
+  // in the comment by cmd + click. If we don't stop running, the links consistently
+  // create and destroy, and there is no way to click them. This also makes sense
+  // when we want to copy/paste/select code using the shortcut with cmd key.
+  function onKeyDown(e) {
+    if (e.metaKey || e.ctrlKey) {
+      if (runtimeRef.current?.isRunning()) isStopByMetaKey = true;
+      runtimeRef.current?.setIsRunning(false);
+    }
+  }
+
+  function onKeyUp(e) {
+    const key = e.key;
+    if ((key === "Meta" || key === "Control") && isStopByMetaKey) {
+      isStopByMetaKey = false;
+      runtimeRef.current?.setIsRunning(true);
+    }
+  }
+
   return {
     run: () => {
       if (!runtimeRef.current) initRuntime();
@@ -92,10 +113,14 @@ export function createEditor(container, options) {
     stop: () => {
       runtimeRef.current?.destroy();
       runtimeRef.current = null;
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
     },
     on: (event, callback) => dispatcher.on(event, callback),
     destroy: () => {
       runtimeRef.current?.destroy();
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
       view.destroy();
     },
   };
