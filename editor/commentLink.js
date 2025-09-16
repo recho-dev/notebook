@@ -27,7 +27,11 @@ class LinkWidget extends WidgetType {
     return link;
   }
 
-  ignoreEvent() {
+  ignoreEvent(event) {
+    // Ignore click events when Cmd/Ctrl is held (for opening links)
+    if (event.type === "mousedown" || event.type === "click") {
+      return event.metaKey || event.ctrlKey;
+    }
     return false;
   }
 }
