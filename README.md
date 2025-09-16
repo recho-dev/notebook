@@ -2,7 +2,7 @@
 
 > We want to live in the editor forever. — [Luyu Cheng](https://luyu.computer/)
 
-[**Recho**](https://recho.dev/) is a free, [open-source](/LICENCE), reactive code scratchpad that echoes output inline with your code as comments—enabling beginners, developers, artists, and anyone curious to quickly code and explore through text experiments/art. Built on the reactive model of [Observable Notebook Kit](https://github.com/observablehq/notebook-kit), Recho makes coding accessible, interactive, and playful, turning every string output into a creative, in-situ experience—discover the sketches of tomorrow.
+[**Recho**](https://recho.dev/) is a free, [open-source](/LICENCE), reactive coding environment that echoes output inline with your code as comments—enabling beginners, developers, artists, and anyone curious to quickly code and explore through text experiments/art. Built on the reactive model of [Observable Notebook Kit](https://github.com/observablehq/notebook-kit), Recho makes coding accessible, interactive, and playful, turning every string output into a creative, in-situ experience—discover the sketches of tomorrow.
 
 - [Editor](https://recho.dev/) 📝 - The quickest way to get started with Recho.
 - [Documentation](https://recho.dev/docs/introduction) 📚 - Learn how to use Recho with our comprehensive guides.
@@ -12,7 +12,7 @@
 
 ## Why Recho 💡
 
-We want to make code more accessible and hopefully, more playful. Inspired by [P5.js Editor](https://editor.p5js.org/) and [Observable Notebook](https://observablehq.com/), we realize that _well-designed libraries don't necessarily make code accessible—the code environment does_! So here is Recho: **a lighter way to code**. We offer you a lighter beginning:
+We want to make code more accessible and hopefully, more playful. Inspired by [P5.js Editor](https://editor.p5js.org/) and [Observable Notebook](https://observablehq.com/), we realize that _well-designed libraries don't necessarily make code accessible—the code environment does_! So here is Recho: **a lighter way to code with creativity**. We offer you a lighter beginning:
 
 - **Lighter Input** - We use vanilla JavaScript, and you don't have to learn extra libraries or browser specific APIs to get started with. It can help you focus more on general coding concepts and algorithms themselves.
 - **Lighter Output** - We embrace text-based output—a universal and timeless interface. It's concise, intuitive, and efficient, which keeps your attention on the essence of code rather than the overhead of visuals.
@@ -41,7 +41,29 @@ Also, we have plans to provide [cloud storage services](https://github.com/recho
 
 ## A Quick Example 🚀
 
-Here is a [quick example](https://recho.dev/examples/mandelbrot-set) to showcase Recho. A block of code is written to explore the algorithm behind [Mandelbrot set](https://en.wikipedia.org/wiki/Mandelbrot_set), generating a string called _output_. After calling _echo(output)_, the output appears above the code block as comments. By tweaking the values of _cols_, _rows_, and _maxIter_, the output updates reactively for further explorations. Check out more [live examples](https://recho.dev/examples) to see what you can create with Recho.
+Here is a [word counting](https://recho.dev/examples/word-count) example to showcase Recho. Bret Victor gives programming a concise [definition](https://www.youtube.com/watch?v=ef2jpjTEB5U&t=501s):
+
+> Programming is blindly manipulating symbols.
+
+By "blindly", he means we can't see the results of our manipulations. For example, given the piece of code counting word frequencies, we aren't able to see the results of each step. Implementing this transformation process largely relies on our imagination! If we accidentally imagine wrong, the code become buggy.
+
+```js
+const text = `The dog, cat, and mouse were playing in the yard. Dog barked loudly, while cat ran quickly. 
+Mouse hid under the bench, but the dog kept looking. Cat jumped over a small fence; dog followed. 
+Bird watched silently as dog, cat, and mouse moved around.`;
+
+const ignoredWords = ["the", "was", "not", "over", "and", "in", "were", "a", "while", "but", "as", "around"];
+
+const clean = text.toLowerCase().replace(/[.,!?;]/g, "");
+
+const words = clean.split(/\s+/);
+
+const filtered = words.filter((w) => !ignoredWords.includes(w));
+
+const frequencies = filtered.reduce((acc, w) => ((acc[w] = (acc[w] || 0) + 1), acc), {});
+```
+
+However, we can see the results of each transformation in Recho. By calling `echo(results)`, the results are displayed as comments above the statement! Now we can better understand this piece of code by better "seeing" every manipulations. Notice that there is no need to switch to console to see the results, which results in a in-situ experience. And of course, we can be a little creative at last: writing one line of code to create a simple visualization!
 
 ```js
 const text = `The dog, cat, and mouse were playing in the yard. Dog barked loudly, while cat ran quickly. 
