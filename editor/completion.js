@@ -65,11 +65,11 @@ const builtinFunctions = [
     apply: toApplyCompletion("recho.toggle($)"),
   },
   {
-    label: "slider",
-    detail: "(value: number, options?: { min?: number, max?: number, step?: number })",
+    label: "number",
+    detail: "(value, min?, max?, step?)",
     type: "function",
-    info: "Display an interactive slider in the editor.",
-    apply: toApplyCompletion("recho.slider($)"),
+    info: "Display a stepper control for a number value using a given step length within a specified range.",
+    apply: toApplyCompletion("recho.number($)"),
   },
   {
     label: "mask",

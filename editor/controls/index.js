@@ -1,4 +1,3 @@
-// import {slider} from "./slider";
 import {toggle} from "./toggle";
 import {radio} from "./radio";
 import {number} from "./number";

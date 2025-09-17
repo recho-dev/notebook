@@ -84,17 +84,6 @@
     }
   }
 
-  /*.cm-number-slider {
-    display: inline-flex;
-    align-items: center;
-    padding-right: 0.125rem;
-    > input {
-      width: 2.5rem;
-    }
-  }*/
-
-  /* border: 1px solid #ccc; */
-
   .cm-content,
   .cm-lineNumbers,
   .cm-tooltip.cm-tooltip-autocomplete > ul {
