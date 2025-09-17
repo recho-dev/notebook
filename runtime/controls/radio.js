@@ -1,3 +1,3 @@
-export function radio(index, ...values) {
-  return values[index];
+export function radio(index, options) {
+  return options[index];
 }

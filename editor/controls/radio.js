@@ -122,24 +122,46 @@ class RadioPlugin {
               argNode = argNode.nextSibling;
             }
 
-            if (args.length < 2) return; // Need at least index and one value
+            if (args.length !== 2) return; // Need exactly index and options array
 
             // First argument should be the index (number)
             const indexArg = args[0];
             if (!/^\d+$/.test(indexArg.text)) return;
             const selectedIndex = parseInt(indexArg.text);
 
+            // Second argument should be an array of options
+            const optionsArg = args[1];
+
+            // Parse the array literal to extract individual options
+            let optionValues = [];
+            if (optionsArg.node.name === "ArrayExpression") {
+              let optionNode = optionsArg.node.firstChild?.nextSibling; // Skip opening bracket
+
+              while (optionNode && optionNode.name !== "]") {
+                if (optionNode.name !== ",") {
+                  optionValues.push({
+                    from: optionNode.from,
+                  });
+                }
+                optionNode = optionNode.nextSibling;
+              }
+            } else {
+              return; // Not an array literal, can't parse
+            }
+
+            if (optionValues.length === 0) return; // No options found
+
             // Create a unique group ID for this radio group
             const groupId = `radio-${node.from}-${node.to}`;
 
-            // Create radio widgets for each value argument (skip the first index argument)
-            args.slice(1).forEach((arg, valueIndex) => {
+            // Create radio widgets for each option value
+            optionValues.forEach((option, valueIndex) => {
               const isSelected = valueIndex === selectedIndex;
               widgets.push(
                 Decoration.widget({
                   widget: new RadioWidget(isSelected, valueIndex, groupId),
                   side: -1,
-                }).range(arg.from),
+                }).range(option.from),
               );
             });
           }
@@ -191,9 +213,7 @@ export function radio(runtimeRef) {
       annotations: [Transaction.remote.of("control.radio")],
     });
 
-    setTimeout(() => {
-      runtimeRef.current.run();
-    }, 0);
+    runtimeRef.current.run();
 
     return true;
   }
