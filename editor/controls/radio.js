@@ -205,7 +205,6 @@ export function radio(runtimeRef) {
         if (target.nodeName === "INPUT" && target.type === "radio" && target.closest(`.${WIDGET_CLASS_NAME}`)) {
           const newIndex = parseInt(target.dataset.index);
           const groupId = target.dataset.groupId;
-
           return updateRadioIndex(view, groupId, newIndex);
         }
       },

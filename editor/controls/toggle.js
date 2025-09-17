@@ -132,9 +132,10 @@ export function toggle(runtimeRef) {
   return ViewPlugin.fromClass(TogglePlugin, {
     decorations: (v) => v.decorations,
     eventHandlers: {
-      mousedown: ({target}, view) => {
-        if (target.nodeName == "INPUT" && target.parentElement.classList.contains(WIDGET_CLASS_NAME)) {
-          return toggleBoolean(view, view.posAtDOM(target));
+      mousedown: (event, view) => {
+        if (event.target.nodeName == "INPUT" && event.target.parentElement.classList.contains(WIDGET_CLASS_NAME)) {
+          event.stopPropagation();
+          return toggleBoolean(view, view.posAtDOM(event.target));
         }
       },
     },
