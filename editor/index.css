@@ -7,7 +7,12 @@
   --output-border-color: #19130029;
   --output-content-color: #21201c;
 
-  --button-border-color: #dad9d6;
+  --button-border-color: #bcbbb5;
+  --button-background-color: #f1f0ef;
+  --button-background-color-hover: #e9e8e6;
+  --button-background-color-active: #e2e1de;
+  --disabled-button-background-color: #bcbbb5;
+  --disabled-button-border-color: #82827c;
 
   .cm-boolean-toggle {
     display: inline-flex;
@@ -62,24 +67,24 @@
       box-sizing: content-box;
       width: 15px;
       height: 15px;
-      border: 1px solid #bcbbb5;
+      border: 1px solid var(--button-border-color);
       border-radius: 0.125rem;
-      background-color: #f1f0ef;
+      background-color: var(--button-background-color);
       cursor: pointer;
       transition: background-color 0.2s ease-in-out;
 
       &[data-disabled] {
-        background-color: #bcbbb5;
-        border-color: #82827c;
+        background-color: var(--disabled-button-background-color);
+        border-color: var(--disabled-button-border-color);
         cursor: not-allowed;
       }
 
       &:not([data-disabled]):hover {
-        background-color: #e9e8e6;
+        background-color: var(--button-background-color-hover);
       }
 
       &:not([data-disabled]):active {
-        background-color: #e2e1de;
+        background-color: var(--button-background-color-active);
       }
     }
   }
