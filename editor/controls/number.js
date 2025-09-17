@@ -47,17 +47,46 @@ function collectNumberInputs(state) {
 
         const value = parseInt(state.doc.sliceString(firstArg.from, firstArg.to), 10);
 
-        // Parse additional arguments (min, max, step)
-        const args = [];
+        // Parse second argument (options object)
+        let min = -Infinity;
+        let max = Infinity;
+        let step = 1;
+
+        // Find the options object (second argument)
+        let secondArg = null;
+        let argCount = 0;
         for (let child = argList.firstChild; child; child = child.nextSibling) {
-          if (child.name === "Number") {
-            args.push(parseInt(state.doc.sliceString(child.from, child.to), 10));
+          if (child.name === "Number" || child.name === "ObjectExpression") {
+            argCount++;
+            if (argCount === 2) {
+              secondArg = child;
+              break;
+            }
           }
         }
 
-        const min = args[1] ?? -Infinity;
-        const max = args[2] ?? Infinity;
-        const step = args[3] ?? 1;
+        if (secondArg && secondArg.name === "ObjectExpression") {
+          // Parse the options object
+          for (let prop = secondArg.firstChild; prop; prop = prop.nextSibling) {
+            if (prop.name === "Property") {
+              const key = prop.firstChild;
+              const value = prop.lastChild;
+
+              if (key && value && value.name === "Number") {
+                const keyText = state.doc.sliceString(key.from, key.to);
+                const valueNum = parseInt(state.doc.sliceString(value.from, value.to), 10);
+
+                if (keyText === "min" || keyText === '"min"' || keyText === "'min'") {
+                  min = valueNum;
+                } else if (keyText === "max" || keyText === '"max"' || keyText === "'max'") {
+                  max = valueNum;
+                } else if (keyText === "step" || keyText === '"step"' || keyText === "'step'") {
+                  step = valueNum;
+                }
+              }
+            }
+          }
+        }
 
         ranges.push({
           from: firstArg.from,
@@ -254,9 +283,7 @@ export function number(runtimeRef) {
       annotations: [Transaction.remote.of("control.number")],
     });
 
-    setTimeout(() => {
-      runtimeRef.current.run();
-    }, 0);
+    runtimeRef.current.run();
 
     return true;
   }

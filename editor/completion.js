@@ -66,7 +66,7 @@ const builtinFunctions = [
   },
   {
     label: "number",
-    detail: "(value, min?, max?, step?)",
+    detail: "(value: number, { min?, max?, step? })",
     type: "function",
     info: "Display a stepper control for a number value using a given step length within a specified range.",
     apply: toApplyCompletion("recho.number($)"),
