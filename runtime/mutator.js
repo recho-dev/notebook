@@ -5,7 +5,7 @@ import {observe} from "./observe.js";
 // generated value to be mutated. Therefore, direct mutation is only allowed
 // within the defining cell, but the cell can also export functions that allows
 // other cells to mutate the value as desired.
-export function Mutable(value) {
+function Mutable(value) {
   let change = undefined;
   const mutable = observe((_) => {
     change = _;

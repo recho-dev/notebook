@@ -1,17 +1,13 @@
-export const mutable = `const {a, getA, setA} = (() => {
-  const a = Mutable(0);
-  return {a, getA: () => a.value, setA: (value) => a.value = value};
-})();
+export const mutable = `const [a, mutator$$a] = __Mutator__(0);
 
-setA(a + 1);
+new Promise((resolve) => {
+  setTimeout(() => {
+    for (let i = 0; i < 10; i++) {
+      mutator$$a.value += 1;
+    }
+  }, 1000);
+});
 
-echo(a);`;
-
-// export const mutable = `const {a, getA, setA} = (() => {
-//   const a = Mutable(0);
-//   return {a, getA: () => a.value, setA: (value) => a.value = value};
-// })();
-
-// setA(getA() + 1);
-
-// echo(a);`;
+{
+  echo(a);
+}`;

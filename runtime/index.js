@@ -6,13 +6,13 @@ import {group} from "d3-array";
 import {dispatch as d3Dispatch} from "d3-dispatch";
 import * as stdlib from "./stdlib.js";
 import {OUTPUT_MARK} from "./constant.js";
-import {Mutable} from "./mutable.js";
+import {Mutator} from "./mutator.js";
 
 const PREFIX = `//${OUTPUT_MARK}`;
 
 const BUILTINS = {
   recho: () => stdlib,
-  Mutable: () => Mutable,
+  __Mutator__: () => Mutator,
 };
 
 function uid() {
