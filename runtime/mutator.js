@@ -1,4 +1,5 @@
-//  https://github.com/observablehq/notebook-kit/blob/main/src/runtime/stdlib/mutable.ts
+// Derived from Observable Notebook Kit's mutable and mutator.
+// https://github.com/observablehq/notebook-kit/blob/main/src/runtime/stdlib/mutable.ts
 import {observe} from "./observe.js";
 
 // Mutable returns a generator with a value getter/setting that allows the

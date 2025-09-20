@@ -1,3 +1,4 @@
+// Derived from Observable Notebook Kit's observe.
 // https://github.com/observablehq/notebook-kit/blob/main/src/runtime/stdlib/generators/observe.ts
 
 export async function* observe(initialize) {
