@@ -72,13 +72,6 @@ const builtinFunctions = [
     apply: toApplyCompletion("recho.number($)"),
   },
   {
-    label: "mask",
-    detail: "(value: string)",
-    type: "function",
-    info: "Mask a string value in the editor",
-    apply: toApplyCompletion("recho.mask($)"),
-  },
-  {
     label: "radio",
     detail: "(index: number, options: any[])",
     type: "function",
