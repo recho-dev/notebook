@@ -10,6 +10,7 @@ import {outputDecoration} from "./decoration.js";
 import {outputLines} from "./outputLines.js";
 import {outputProtection} from "./protection.js";
 import {dispatch as d3Dispatch} from "d3-dispatch";
+import {controls} from "./controls/index.js";
 import {rechoCompletion} from "./completion.js";
 import {docStringTag} from "./docStringTag.js";
 import {commentLink} from "./commentLink.js";
@@ -48,6 +49,7 @@ export function createEditor(container, options) {
       javascriptLanguage.data.of({autocomplete: rechoCompletion}),
       outputLines,
       outputDecoration,
+      controls(runtimeRef),
       // Disable this for now, because it prevents copying/pasting the code.
       // outputProtection(),
       docStringTag,
