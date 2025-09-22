@@ -3,15 +3,15 @@ import {outputLinesField} from "./outputLines";
 import {RangeSetBuilder} from "@codemirror/state";
 
 const highlight = Decoration.line({attributes: {class: "cm-output-line"}});
-const linePrefix = Decoration.mark({attributes: {class: "cm-output-line-prefix"}});
-const lineContent = Decoration.mark({attributes: {class: "cm-output-line-content"}});
+// const linePrefix = Decoration.mark({attributes: {class: "cm-output-line-prefix"}});
+// const lineContent = Decoration.mark({attributes: {class: "cm-output-line-content"}});
 
 function createWidgets(lines) {
   const builder = new RangeSetBuilder();
   for (const {from, to} of lines) {
     builder.add(from, from, highlight);
-    builder.add(from, from + 3, linePrefix);
-    builder.add(from + 4, to, lineContent);
+    // builder.add(from, from + 3, linePrefix);
+    // builder.add(from + 4, to, lineContent);
   }
   return builder.finish();
 }
