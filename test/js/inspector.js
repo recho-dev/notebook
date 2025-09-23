@@ -17,7 +17,7 @@ echo(class Foo {
 
 echo(new Map([[1, 2], [3, 4]]));
 
-echo(new Date());
+echo(new Date('2025-09-23T12:00:00Z'));
 
 echo(new Map([[1, 2], [3, 4]]), {indent: 2});
 

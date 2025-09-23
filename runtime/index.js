@@ -199,7 +199,6 @@ export function createRuntime(initialCode) {
     const nodes = split(code);
     if (!nodes) return;
 
-    // Debug logging removed for production.
     for (const node of nodes) {
       const cell = code.slice(node.start, node.end);
       const transpiled = transpile(cell, code);

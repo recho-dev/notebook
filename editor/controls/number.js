@@ -1,4 +1,4 @@
-import {EditorView, Decoration, ViewUpdate, ViewPlugin, DecorationSet, WidgetType} from "@codemirror/view";
+import {EditorView, Decoration, ViewUpdate, ViewPlugin, WidgetType} from "@codemirror/view";
 import {StateField, Transaction} from "@codemirror/state";
 import {syntaxTree} from "@codemirror/language";
 
@@ -194,7 +194,7 @@ class NumberPlugin {
 
   /**
    * @param {EditorView} view
-   * @returns {DecorationSet}
+   * @returns {import("@codemirror/view").DecorationSet}
    */
   static createNumberWidgets(view) {
     const numberInputs = view.state.field(numberInputsField);

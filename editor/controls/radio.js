@@ -1,4 +1,4 @@
-import {EditorView, Decoration, ViewUpdate, ViewPlugin, DecorationSet, WidgetType} from "@codemirror/view";
+import {EditorView, Decoration, ViewUpdate, ViewPlugin, WidgetType} from "@codemirror/view";
 import {Transaction} from "@codemirror/state";
 import {syntaxTree} from "@codemirror/language";
 

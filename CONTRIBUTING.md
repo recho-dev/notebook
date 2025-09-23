@@ -12,7 +12,7 @@ All the examples are located in `app/examples`. The quickest way to add an examp
 - Add the code below the metadata.
 - Click the "Commit changes" button.
 
-The following metadata are required:
+The following metadata is required:
 
 - **title** - the title of the sketch
 - **author** - the author of the sketch
@@ -20,7 +20,7 @@ The following metadata are required:
 - **github** - the GitHub username of the author, for displaying the avatar
 - **pull_request** - the pull request number of adding this sketch, for commenting on the pull request
 
-The following metadata are optional:
+The following metadata is optional:
 
 - **thumbnail_start** - the line number of the start of the thumbnail code
 
@@ -51,9 +51,10 @@ For example, if you add a new test file called `hello-world.js` with the followi
 export const helloWorld = `echo("Hello World");`;
 ```
 
-Then you need to register it in _test/js/index.js_ with the following content:
+Then you need to register it in `test/js/index.js` with the following content:
 
 ```js
+// test/js/index.js
 export {helloWorld} from "./hello-world.js";
 ```
 
@@ -61,7 +62,14 @@ Then run `npm run dev` to open the development server.
 
 ![test-env](/img/test-env.png)
 
-After finishing development, run `npm run test` to make sure everything works as expected.
+After finishing development, if you want to add this test case to snapshot tests, then register it in `test/js/index-tests.js`:
+
+```js
+// test/js/index.js
+export {helloWorld} from "./hello-world.js";
+```
+
+After that, run `npm run test` to generate the snapshot file for this test case, which is located at `test/output/helloWorld.js`.
 
 ## Website Development
 
