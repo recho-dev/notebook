@@ -7,7 +7,7 @@
     "app:build-cloudflare": "npx @cloudflare/next-on-pages",
     "app:start": "next start",
     "test": "npm run test:js && npm run test:lint && npm run test:format",
-    "test:js": "vitest",
+    "test:js": "TZ=America/New_York vitest",
     "test:format": "prettier --check editor runtime test app",
     "test:lint": "eslint"
   },
