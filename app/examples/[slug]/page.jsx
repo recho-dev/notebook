@@ -22,7 +22,7 @@ export default async function Page({params}) {
   const example = getAllJSExamples().find((example) => example.slug === slug);
   if (!example) notFound();
   return (
-    <div className={cn("max-w-screen-lg mx-auto my-10")}>
+    <div className={cn("max-w-screen-lg lg:mx-auto mx-4 lg:my-10 my-4")}>
       <div className={cn("mb-6")}>
         <Meta example={example} />
       </div>
