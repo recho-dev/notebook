@@ -8,7 +8,7 @@ import {indentWithTab} from "@codemirror/commands";
 import {createRuntime} from "../runtime/index.js";
 import {outputDecoration} from "./decoration.js";
 import {outputLines} from "./outputLines.js";
-import {outputProtection} from "./protection.js";
+// import {outputProtection} from "./protection.js";
 import {dispatch as d3Dispatch} from "d3-dispatch";
 import {controls} from "./controls/index.js";
 import {rechoCompletion} from "./completion.js";
@@ -41,7 +41,10 @@ export function createEditor(container, options) {
       keymap.of([
         {
           key: "Mod-s",
-          run: () => runtimeRef.current.run(),
+          run: () => {
+            runtimeRef.current?.setIsRunning(true);
+            runtimeRef.current?.run();
+          },
           preventDefault: true,
         },
         indentWithTab,
@@ -88,12 +91,14 @@ export function createEditor(container, options) {
     }
   }
 
-  // Stop running when press cmd key. This is useful when we want to open a link
+  // 1. Stop running when press cmd key. This is useful when we want to open a link
   // in the comment by cmd + click. If we don't stop running, the links consistently
   // create and destroy, and there is no way to click them. This also makes sense
   // when we want to copy/paste/select code using the shortcut with cmd key.
+  //
+  // 2. For cmd + s, we don't want to stop running.
   function onKeyDown(e) {
-    if (e.metaKey || e.ctrlKey) {
+    if ((e.metaKey || e.ctrlKey) && e.key !== "s") {
       if (runtimeRef.current?.isRunning()) isStopByMetaKey = true;
       runtimeRef.current?.setIsRunning(false);
     }

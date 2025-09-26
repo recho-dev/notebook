@@ -46,6 +46,14 @@ export function Editor({
     }
   }, [initialCode, onUserInput]);
 
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.metaKey && e.key === "s") setNeedRerun(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   function onRun() {
     onBeforeEachRun();
     setNeedRerun(false);
