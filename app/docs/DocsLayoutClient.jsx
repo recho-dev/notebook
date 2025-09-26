@@ -2,7 +2,7 @@
 import {Sidebar} from "../Sidebar.js";
 import {cn} from "../cn.js";
 import {useState, useEffect, useRef} from "react";
-import {TableOfContents, X} from "lucide-react";
+import {TableOfContents} from "lucide-react";
 
 export function DocsLayoutClient({docs, children}) {
   const [overlayOpen, setOverlayOpen] = useState(false);
@@ -14,12 +14,10 @@ export function DocsLayoutClient({docs, children}) {
         setOverlayOpen(false);
       }
     }
-
     if (overlayOpen) {
       document.addEventListener("mousedown", handleClickOutside);
       document.body.style.overflow = "hidden";
     }
-
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.body.style.overflow = "unset";

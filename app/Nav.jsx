@@ -12,7 +12,8 @@ const styles = {
   link: "hover:bg-gray-100 px-3 rounded-md text-sm h-8 font-medium inline-flex items-center",
   selectedLink: "bg-gray-100",
   tooltip: "text-sm z-999",
-  dropdown: "absolute top-full right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg py-1 min-w-[120px] z-50",
+  dropdown:
+    "absolute top-full right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg py-1 min-w-[120px] z-50",
   dropdownItem: "block px-3 py-2 text-sm hover:bg-gray-100",
   dropdownItemSelected: "bg-gray-100",
 };
@@ -82,22 +83,22 @@ export function Nav() {
           </button>
           {dropdownOpen && (
             <div className={cn(styles.dropdown)}>
-              <SafeLink 
-                href="/docs" 
+              <SafeLink
+                href="/docs"
                 className={cn(styles.dropdownItem, isSelected("/docs") && styles.dropdownItemSelected)}
                 onClick={() => setDropdownOpen(false)}
               >
                 Docs
               </SafeLink>
-              <SafeLink 
-                href="/examples" 
+              <SafeLink
+                href="/examples"
                 className={cn(styles.dropdownItem, isSelected("/examples") && styles.dropdownItemSelected)}
                 onClick={() => setDropdownOpen(false)}
               >
                 Examples
               </SafeLink>
-              <SafeLink 
-                href="/sketches" 
+              <SafeLink
+                href="/sketches"
                 className={cn(styles.dropdownItem, isSelected("/sketches") && styles.dropdownItemSelected)}
                 onClick={() => setDropdownOpen(false)}
               >

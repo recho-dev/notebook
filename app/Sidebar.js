@@ -6,13 +6,11 @@ import {cn} from "./cn.js";
 export function Sidebar({docs, onLinkClick}) {
   const pathname = usePathname();
   const isActive = (slug) => pathname.startsWith(`/docs/${slug}`);
-  
   const handleLinkClick = () => {
     if (onLinkClick) {
       onLinkClick();
     }
   };
-
   return (
     <ul className={cn("h-full", "overflow-auto px-4 w-full")}>
       {docs
