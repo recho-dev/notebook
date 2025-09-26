@@ -41,7 +41,7 @@ export default function Page() {
   }
 
   return (
-    <div className={cn("max-w-screen-lg mx-auto my-10")}>
+    <div className={cn("max-w-screen-lg lg:mx-auto mx-4 my-10")}>
       {sketches.map((sketch) => (
         <div key={sketch.id} className={cn("mt-10")}>
           <div className={cn("flex items-center justify-between mb-2")}>
