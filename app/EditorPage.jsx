@@ -137,7 +137,7 @@ export function EditorPage({id: initialId}) {
   }
 
   return (
-    <div className={cn("max-w-screen-lg mx-auto my-10 editor-page")}>
+    <div className={cn("max-w-screen-lg lg:mx-auto mx-4 lg:my-10 my-4 editor-page")}>
       <Editor
         initialCode={initialCode}
         key={sketch.id}
