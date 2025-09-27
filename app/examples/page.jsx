@@ -19,7 +19,7 @@ export default function Page() {
             <Meta example={example} />
             <div className={cn("w-full pt-[62.5%] relative  border border-gray-200 rounded-md overflow-hidden")}>
               <div className={cn("absolute inset-0 px-3")}>
-                <ThumbnailServer code={example.content} outputStartLine={example.outputStartLine} />
+                <ThumbnailServer code={example.content} outputStartLine={example.outputStartLine} snap={example.snap}/>
               </div>
             </div>
           </div>
