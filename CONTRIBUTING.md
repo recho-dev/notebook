@@ -41,6 +41,8 @@ echo("Hello World");
 
 This is a [pull request](https://github.com/recho-dev/recho/pull/82) you can refer to.
 
+If you prefer a `snapshot thumbnail`, create an image file named `[SKETCH-NAME].snap.[FORMAT]` in `app/examples`, such as [sin-wave-radios.snap.png](./app/examples/sin-wave-radios.snap.png) for [sin-wave-radios.recho.js](/app/examples/sin-wave-radios.recho.js).
+
 ## Editor & Runtime Development
 
 If you want to contribute to the editor or runtime, make sure to add test files in `test/js/` and register them in `test/js/index.js`.

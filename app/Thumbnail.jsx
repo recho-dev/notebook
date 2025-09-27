@@ -6,7 +6,7 @@ function removeEmptyLines(string) {
   return first + rest.join("\n");
 }
 
-export function Thumbnail({html, outputStartLine = null}) {
+export function Thumbnail({html, outputStartLine = null, snap = null}) {
   if (outputStartLine === null) return <div dangerouslySetInnerHTML={{__html: html}} />;
   const $ = load(html);
   const lines = $("span.line");
@@ -14,6 +14,11 @@ export function Thumbnail({html, outputStartLine = null}) {
     if (i < outputStartLine - 1) {
       $(lines[i]).remove();
     }
+  }
+  if (snap) {
+    return (
+      <div className={cn("w-full h-full bg-cover bg-center")} style={{backgroundImage: `url(/examples/${snap})`}} />
+    );
   }
   return <div dangerouslySetInnerHTML={{__html: removeEmptyLines($.html())}} className={cn("w-full h-full")} />;
 }
