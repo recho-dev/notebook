@@ -3,6 +3,9 @@ import {predicates, objects} from "friendly-words";
 
 const FILE_NAME = "obs-files";
 
+// The default runtime for new sketches.
+const DEFAULT_RUNTIME = "javascript@0.0.0-beta.1";
+
 function generateProjectName() {
   const adj = predicates[~~(Math.random() * predicates.length)];
   const obj = objects[~~(Math.random() * objects.length)];
@@ -17,6 +20,7 @@ export function createSketch() {
     updated: null,
     content: `echo("Hello, world!");`,
     autoRun: true,
+    runtime: DEFAULT_RUNTIME,
   };
 }
 
@@ -27,7 +31,9 @@ function saveSketches(sketches) {
 export function getSketches() {
   const files = localStorage.getItem(FILE_NAME);
   if (!files) return [];
-  return JSON.parse(files).sort((a, b) => new Date(b.updated) - new Date(a.updated));
+  const sketches = JSON.parse(files).sort((a, b) => new Date(b.updated) - new Date(a.updated));
+  // Remove fallback runtime when we have breaking changes.
+  return sketches.map((sketch) => ({...sketch, runtime: sketch.runtime || DEFAULT_RUNTIME}));
 }
 
 export function clearSketchesFromLocalStorage() {
