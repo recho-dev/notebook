@@ -1,9 +1,10 @@
 import {generate} from "short-uuid";
 import {predicates, objects} from "friendly-words";
 
-const FILE_NAME = "obs-files";
+const LEGACY_FILE_NAME = "obs-files";
 
-// The default runtime for new sketches.
+const FILE_NAME = "recho-files";
+
 const DEFAULT_RUNTIME = "javascript@0.0.0-beta.1";
 
 function generateProjectName() {
@@ -28,7 +29,14 @@ function saveSketches(sketches) {
   localStorage.setItem(FILE_NAME, JSON.stringify(sketches));
 }
 
+function renameLegacySketches() {
+  const legacySketches = localStorage.getItem(LEGACY_FILE_NAME);
+  if (!legacySketches) return;
+  saveSketches(JSON.parse(legacySketches));
+}
+
 export function getSketches() {
+  renameLegacySketches();
   const files = localStorage.getItem(FILE_NAME);
   if (!files) return [];
   const sketches = JSON.parse(files).sort((a, b) => new Date(b.updated) - new Date(a.updated));
