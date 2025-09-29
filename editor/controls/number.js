@@ -307,8 +307,6 @@ export function number(runtimeRef) {
 
     if (!targetInput) return false;
 
-    console.log(targetInput);
-
     const currentValue = targetInput.value;
     const step = targetInput.step;
     const min = targetInput.min;
