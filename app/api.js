@@ -33,6 +33,7 @@ function renameLegacySketches() {
   const legacySketches = localStorage.getItem(LEGACY_FILE_NAME);
   if (!legacySketches) return;
   saveSketches(JSON.parse(legacySketches));
+  localStorage.removeItem(LEGACY_FILE_NAME);
 }
 
 export function getSketches() {
