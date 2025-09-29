@@ -1,8 +1,54 @@
 import {EditorView, Decoration, ViewUpdate, ViewPlugin, WidgetType} from "@codemirror/view";
 import {StateField, Transaction} from "@codemirror/state";
 import {syntaxTree} from "@codemirror/language";
+import nstr from "nstr";
 
 const WIDGET_CLASS_NAME = "cm-number-input";
+
+function parseNumber(numberLiteral) {
+  const matchResult = numberLiteral.match(NUMBER_PATTERN);
+  let value;
+  let format;
+  let sign = matchResult[1] === "-" ? -1 : 1;
+  if (matchResult[2]) {
+    value = parseInt(matchResult[2], 16);
+    format = "hexadecimal";
+  } else if (matchResult[3]) {
+    value = parseInt(matchResult[3], 8);
+    format = "octal";
+  } else if (matchResult[4]) {
+    value = parseInt(matchResult[4], 2);
+    format = "binary";
+  } else if (matchResult[5]) {
+    value = parseInt(matchResult[5], 10);
+    format = "decimal";
+  } else {
+    value = parseFloat(numberLiteral);
+    format = "real";
+  }
+  return [sign * value, format];
+}
+
+/**
+ * Helper function to check if a `UnaryExpression` is a numeric expression (`+`
+ * or `-` with a `Number`).
+ */
+function isNumericUnaryExpression(state, node) {
+  if (node.name !== "UnaryExpression") return false;
+  const operator = node.firstChild;
+  if (!operator || operator.name !== "ArithOp") return false;
+  const operatorText = state.doc.sliceString(operator.from, operator.to);
+  if (operatorText !== "+" && operatorText !== "-") return false;
+  // Check that the operand is a Number
+  const operand = operator.nextSibling;
+  return operand && operand.name === "Number";
+}
+
+/**
+ * This pattern matches numbers in different bases and saves the literals in
+ * different capture groups.
+ */
+const NUMBER_PATTERN = /^([+-]?)(?:0x([0-9a-fA-F]+)|0o([0-7]+)|0b([01]+)|(\d+)|((?:\d+\.\d*|\.\d+)(?:[eE][+-]?\d+)?))$/;
 
 export const numberInputsField = StateField.define({
   create(state) {
@@ -37,7 +83,7 @@ function collectNumberInputs(state) {
         // Get the first argument (value)
         let firstArg = null;
         for (let child = argList.firstChild; child; child = child.nextSibling) {
-          if (child.name === "Number") {
+          if (child.name === "Number" || isNumericUnaryExpression(state, child)) {
             firstArg = child;
             break;
           }
@@ -45,7 +91,8 @@ function collectNumberInputs(state) {
 
         if (!firstArg) return;
 
-        const value = parseInt(state.doc.sliceString(firstArg.from, firstArg.to), 10);
+        const numberLiteral = state.doc.sliceString(firstArg.from, firstArg.to);
+        const [value, format] = parseNumber(numberLiteral);
 
         // Parse second argument (options object)
         let min = -Infinity;
@@ -56,7 +103,7 @@ function collectNumberInputs(state) {
         let secondArg = null;
         let argCount = 0;
         for (let child = argList.firstChild; child; child = child.nextSibling) {
-          if (child.name === "Number" || child.name === "ObjectExpression") {
+          if (child.name === "Number" || isNumericUnaryExpression(state, child) || child.name === "ObjectExpression") {
             argCount++;
             if (argCount === 2) {
               secondArg = child;
@@ -74,7 +121,7 @@ function collectNumberInputs(state) {
 
               if (key && value && value.name === "Number") {
                 const keyText = state.doc.sliceString(key.from, key.to);
-                const valueNum = parseInt(state.doc.sliceString(value.from, value.to), 10);
+                const valueNum = parseNumber(state.doc.sliceString(value.from, value.to))[0];
 
                 if (keyText === "min" || keyText === '"min"' || keyText === "'min'") {
                   min = valueNum;
@@ -92,6 +139,7 @@ function collectNumberInputs(state) {
           from: firstArg.from,
           to: firstArg.to,
           value,
+          format,
           min,
           max,
           step,
@@ -104,6 +152,7 @@ function collectNumberInputs(state) {
 
 class NumberWidget extends WidgetType {
   #value;
+  #format;
   #direction;
   #min;
   #max;
@@ -111,14 +160,16 @@ class NumberWidget extends WidgetType {
 
   /**
    * @param {number} value
+   * @param {"hexadecimal" | "octal" | "binary" | "decimal" | "real"} format
    * @param {-1 | 1} direction
    * @param {number} min
    * @param {number} max
    * @param {number} step
    */
-  constructor(value, direction, min = -Infinity, max = Infinity, step = 1) {
+  constructor(value, format, direction, min = -Infinity, max = Infinity, step = 1) {
     super();
     this.#value = value;
+    this.#format = format;
     this.#direction = direction;
     this.#min = min;
     this.#max = max;
@@ -129,6 +180,7 @@ class NumberWidget extends WidgetType {
     return (
       other instanceof NumberWidget &&
       other.#value === this.#value &&
+      other.#format === this.#format &&
       other.#direction === this.#direction &&
       other.#min === this.#min &&
       other.#max === this.#max &&
@@ -143,6 +195,7 @@ class NumberWidget extends WidgetType {
     wrap.classList.add(this.#direction > 0 ? "cm-number-inc" : "cm-number-dec");
 
     const button = wrap.appendChild(document.createElement("button"));
+    button.setAttribute("data-format", this.#format);
     if (this.#direction > 0) {
       button.className = "cm-number-btn cm-number-inc";
       // button.innerHTML = "▲";
@@ -207,7 +260,7 @@ class NumberPlugin {
           // Add widget before the value (decrement)
           widgets.push(
             Decoration.widget({
-              widget: new NumberWidget(input.value, -1, input.min, input.max, input.step),
+              widget: new NumberWidget(input.value, input.format, -1, input.min, input.max, input.step),
               side: -1,
             }).range(input.from),
           );
@@ -215,7 +268,7 @@ class NumberPlugin {
           // Add widget after the value (increment)
           widgets.push(
             Decoration.widget({
-              widget: new NumberWidget(input.value, 1, input.min, input.max, input.step),
+              widget: new NumberWidget(input.value, input.format, 1, input.min, input.max, input.step),
               side: 1,
             }).range(input.to),
           );
@@ -258,6 +311,7 @@ export function number(runtimeRef) {
     const step = targetInput.step;
     const min = targetInput.min;
     const max = targetInput.max;
+    const format = targetInput.format;
 
     // Calculate new value respecting step, min, and max constraints
     let newValue;
@@ -272,10 +326,33 @@ export function number(runtimeRef) {
     // Only update if the value actually changed
     if (newValue === currentValue) return false;
 
+    let newValueLiteral;
+
+    if (Number.isInteger(newValue)) {
+      const absoluteNewValue = Math.abs(newValue);
+      const prefix = newValue < 0 ? "-" : "";
+      switch (format) {
+        case "hexadecimal":
+          newValueLiteral = prefix + "0x" + absoluteNewValue.toString(16);
+          break;
+        case "octal":
+          newValueLiteral = prefix + "0o" + absoluteNewValue.toString(8);
+          break;
+        case "binary":
+          newValueLiteral = prefix + "0b" + absoluteNewValue.toString(2);
+          break;
+        default:
+          newValueLiteral = prefix + absoluteNewValue.toString();
+          break;
+      }
+    } else {
+      newValueLiteral = nstr(newValue);
+    }
+
     const change = {
       from: targetInput.from,
       to: targetInput.to,
-      insert: newValue.toString(),
+      insert: newValueLiteral,
     };
 
     view.dispatch({
