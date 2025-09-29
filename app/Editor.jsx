@@ -9,6 +9,10 @@ const styles = {
   iconButton: "w-4 h-4 hover:scale-110 transition-transform duration-100",
 };
 
+function metaKey() {
+  return navigator.userAgent.includes("Mac") ? "cmd" : "ctrl";
+}
+
 export function Editor({
   initialCode,
   onUserInput = () => {},
@@ -84,7 +88,7 @@ export function Editor({
           <button
             onClick={onRun}
             data-tooltip-id="action-tooltip"
-            data-tooltip-content="Run Updated Code"
+            data-tooltip-content={`Run Updated Code (${metaKey()}+s)`}
             data-tooltip-place="bottom"
           >
             <Play className={cn(styles.iconButton, needRerun && "fill-black")} />
