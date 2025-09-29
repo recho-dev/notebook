@@ -138,6 +138,68 @@ echo(counter);
  * Refer to https://recho.dev/docs/fluid-animation for more details.
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *                         Interactive Input Controls
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * Recho provides interactive input controls that allow users to modify values
+ * directly in the editor. These controls update the code as users interact
+ * with them, making it easy to explore different parameter values.
+ *
+ * The `recho.toggle` function creates a checkbox control for boolean values:
+ */
+
+const showDetails = recho.toggle(true);
+
+//➜ "Details: Enabled"
+echo(`Details: ${showDetails ? 'Enabled' : 'Disabled'}`);
+
+/**
+ * The `recho.radio` function creates a radio button group for selecting from
+ * multiple options:
+ */
+
+const theme = recho.radio(0, ["light", "dark", "auto"]);
+
+//➜ "Current theme: light"
+echo(`Current theme: ${theme}`);
+
+/**
+ * The `recho.number` function creates a number input with increment/decrement
+ * buttons. You can specify constraints like min, max, and step:
+ */
+
+const rating = recho.number(5, {min: 1, max: 10, step: 0.5});
+
+//➜ "Rating: ▓▓▓▓▓▒▒▒▒▒ (5/10)"
+{
+  const filled = "▓".repeat(Math.floor(rating));
+  const empty = "▒".repeat(Math.floor(10 - rating));
+  echo(`Speed: ${filled}${empty} (${rating}/10)`);
+}
+
+/**
+ * These controls work seamlessly with Recho's reactive system. When you change
+ * a control value, all dependent blocks are automatically re-evaluated:
+ */
+
+const size = recho.number(3, {min: 1, max: 8});
+
+//➜ ⬛⬛⬛
+//➜ ⬛⬛⬛
+//➜ ⬛⬛⬛
+{
+  let grid = "";
+  for (let i = 0; i < size; i++) {
+    grid += "⬛".repeat(size) + "\n";
+  }
+  echo(grid.trimEnd());
+}
+
+/**
+ * Interactive controls make it easy to experiment with your code and create
+ * engaging, interactive sketches.
+ *
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *                           Asynchronous Operations
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
@@ -204,68 +266,6 @@ echo(d3.range(10));
 
 /**
  * Refer to https://recho.dev/docs/errors-handling for more details.
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *                         Interactive Input Controls
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * Recho provides interactive input controls that allow users to modify values
- * directly in the editor. These controls update the code as users interact
- * with them, making it easy to explore different parameter values.
- *
- * The `recho.toggle` function creates a checkbox control for boolean values:
- */
-
-const showDetails = recho.toggle(true);
-
-//➜ "Details: Enabled"
-echo(`Details: ${showDetails ? 'Enabled' : 'Disabled'}`);
-
-/**
- * The `recho.radio` function creates a radio button group for selecting from
- * multiple options:
- */
-
-const theme = recho.radio(0, ["light", "dark", "auto"]);
-
-//➜ "Current theme: light"
-echo(`Current theme: ${theme}`);
-
-/**
- * The `recho.number` function creates a number input with increment/decrement
- * buttons. You can specify constraints like min, max, and step:
- */
-
-const rating = recho.number(5, {min: 1, max: 10, step: 0.5});
-
-//➜ "Rating: ▓▓▓▓▓▒▒▒▒▒ (5/10)"
-{
-  const filled = "▓".repeat(Math.floor(rating));
-  const empty = "▒".repeat(Math.floor(10 - rating));
-  echo(`Speed: ${filled}${empty} (${rating}/10)`);
-}
-
-/**
- * These controls work seamlessly with Recho's reactive system. When you change
- * a control value, all dependent blocks are automatically re-evaluated:
- */
-
-const size = recho.number(3, {min: 1, max: 8});
-
-//➜ ⬛⬛⬛
-//➜ ⬛⬛⬛
-//➜ ⬛⬛⬛
-{
-  let grid = "";
-  for (let i = 0; i < size; i++) {
-    grid += "⬛".repeat(size) + "\n";
-  }
-  echo(grid.trimEnd());
-}
-
-/**
- * Interactive controls make it easy to experiment with your code and create
- * engaging, interactive sketches.
  *
  *   ____                            _         _       _   _
  *  / ___|___  _ __   __ _ _ __ __ _| |_ _   _| | __ _| |_(_) ___  _ __  ___
