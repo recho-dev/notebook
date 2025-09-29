@@ -23,7 +23,7 @@
 
 //➜ "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo("━".repeat(width))
-const width = 42;
+const width = recho.number(45);
 
 // `recho.number` can set the maximum value, minimum value, and step size of
 // the value by passing a object containing the relevant properties as the
