@@ -9,31 +9,46 @@ function parseNumber(numberLiteral) {
   const matchResult = numberLiteral.match(NUMBER_PATTERN);
   let value;
   let format;
-  if (matchResult[1]) {
-    value = parseInt(matchResult[1], 16);
+  let sign = matchResult[1] === "-" ? -1 : 1;
+  if (matchResult[2]) {
+    value = parseInt(matchResult[2], 16);
     format = "hexadecimal";
-  } else if (matchResult[2]) {
-    value = parseInt(matchResult[2], 8);
-    format = "octal";
   } else if (matchResult[3]) {
-    value = parseInt(matchResult[3], 2);
-    format = "binary";
+    value = parseInt(matchResult[3], 8);
+    format = "octal";
   } else if (matchResult[4]) {
-    value = parseInt(matchResult[4], 10);
+    value = parseInt(matchResult[4], 2);
+    format = "binary";
+  } else if (matchResult[5]) {
+    value = parseInt(matchResult[5], 10);
     format = "decimal";
   } else {
     value = parseFloat(numberLiteral);
     format = "real";
   }
-  return [value, format];
+  return [sign * value, format];
+}
+
+/**
+ * Helper function to check if a `UnaryExpression` is a numeric expression (`+`
+ * or `-` with a `Number`).
+ */
+function isNumericUnaryExpression(state, node) {
+  if (node.name !== "UnaryExpression") return false;
+  const operator = node.firstChild;
+  if (!operator || operator.name !== "ArithOp") return false;
+  const operatorText = state.doc.sliceString(operator.from, operator.to);
+  if (operatorText !== "+" && operatorText !== "-") return false;
+  // Check that the operand is a Number
+  const operand = operator.nextSibling;
+  return operand && operand.name === "Number";
 }
 
 /**
  * This pattern matches numbers in different bases and saves the literals in
  * different capture groups.
  */
-const NUMBER_PATTERN =
-  /^(?:0x([0-9a-fA-F]+)|0o([0-7]+)|0b([01]+)|([+-]?\d+)|([+-]?(?:\d+\.\d*|\.\d+)(?:[eE][+-]?\d+)?))$/;
+const NUMBER_PATTERN = /^([+-]?)(?:0x([0-9a-fA-F]+)|0o([0-7]+)|0b([01]+)|(\d+)|((?:\d+\.\d*|\.\d+)(?:[eE][+-]?\d+)?))$/;
 
 export const numberInputsField = StateField.define({
   create(state) {
@@ -68,7 +83,7 @@ function collectNumberInputs(state) {
         // Get the first argument (value)
         let firstArg = null;
         for (let child = argList.firstChild; child; child = child.nextSibling) {
-          if (child.name === "Number") {
+          if (child.name === "Number" || isNumericUnaryExpression(state, child)) {
             firstArg = child;
             break;
           }
@@ -88,7 +103,7 @@ function collectNumberInputs(state) {
         let secondArg = null;
         let argCount = 0;
         for (let child = argList.firstChild; child; child = child.nextSibling) {
-          if (child.name === "Number" || child.name === "ObjectExpression") {
+          if (child.name === "Number" || isNumericUnaryExpression(state, child) || child.name === "ObjectExpression") {
             argCount++;
             if (argCount === 2) {
               secondArg = child;
@@ -316,18 +331,20 @@ export function number(runtimeRef) {
     let newValueLiteral;
 
     if (Number.isInteger(newValue)) {
+      const absoluteNewValue = Math.abs(newValue);
+      const prefix = newValue < 0 ? "-" : "";
       switch (format) {
         case "hexadecimal":
-          newValueLiteral = "0x" + newValue.toString(16);
+          newValueLiteral = prefix + "0x" + absoluteNewValue.toString(16);
           break;
         case "octal":
-          newValueLiteral = "0o" + newValue.toString(8);
+          newValueLiteral = prefix + "0o" + absoluteNewValue.toString(8);
           break;
         case "binary":
-          newValueLiteral = "0b" + newValue.toString(2);
+          newValueLiteral = prefix + "0b" + absoluteNewValue.toString(2);
           break;
         default:
-          newValueLiteral = newValue.toString();
+          newValueLiteral = prefix + absoluteNewValue.toString();
           break;
       }
     } else {
