@@ -1,5 +1,5 @@
 /**
- * @title donut.js
+ * @title Donut, Donut, and Donut!!!
  * @author Bairui Su
  * @created 2025-09-29
  * @pull_request 126
@@ -10,15 +10,21 @@
 
 /**
  * ============================================================================
- * =                           Donut                                          =
+ * =                      Donut, Donut, and Donut!!!                          =
  * ============================================================================
  *
- * This example ported directly from https://www.a1k0n.net/js/donut.js
+ * > This first donut code is ported from https://www.a1k0n.net/js/donut.js, 
+ * > the original author is Alex Naka, please refer to the original post for 
+ * > more math details: https://www.a1k0n.net/2011/07/20/donut-math.html
  *
- * - Original post: https://www.a1k0n.net/2011/07/20/donut-math.html
+ * In this example, we draw a donut by a "donut" code, and the code for
+ * formatting the "donut" code is also a "donut" code. So, there are three 
+ * donuts in this example!!!
  */
 
+// Click to change the rotation speed of the donut.
 const S = recho.number(10, {min: 5, max: 30, step: 1});
+
 const T = recho.interval(30);
 
 //➜                                                                                
@@ -71,6 +77,11 @@ const T = recho.interval(30);
 }
 
 
+/**
+ * We use a format function to format the code for drawing the 
+ * donut. The readable code is as follows:
+ */
+
 echo(format(`
 var b = [];
 var z = [];
@@ -108,12 +119,16 @@ for (var j = 0; j < 6.28; j += 0.07) {
 echo(b.join(""));
 `));
 
+/**
+ * !!! The format function is also a "donut" code !!!
+ */
+
                                 function /********/                             
                             format(code,{w=80,h=24,K=/**/                       
                           ["var"],R1=11,R2=4}={}){let n=w                       
                         *h,mi=-1,M=new Array(n).fill(null),                     
                       T=code.replace('" "',"__")/**********/                   
-                     .replace(/\s+/g,"").split("").filter((d)=>                  
+                     .replace(/\s+/g," ").split(" ").filter((d)=>                  
                     d!=="").map((d)=>d.replace("__",'" "')),tn=                 
                    T.length;for(let i=0;i <n;i++){let x=i%w,y=/**/              
                   Math.floor(i/w),d=           Math.hypot((x-w/2)               
@@ -122,15 +137,21 @@ echo(b.join(""));
                   -1;for(let i=0,                 wi=0;i<n;i++){if              
                   (M[i]!==1)/****/               continue;if(wi<                
                   tn){let s=T[wi];if            (K.some((k)=>/**/               
-                  s.includes(k)))s=s           +"";let si=0;while               
+                  s.includes(k)))s=s           +" ";let si=0;while               
                    (M[i+si]===1)si++;if(si<s.length-1)s=si-1<=0?                
-                    "":"/*"+"*".repeat(Math.max(0,si-4))+"*/";                  
+                    " ":"/*"+"*".repeat(Math.max(0,si-4))+"*/";                  
                      else wi++;for(let k=0;k<s.length;k++)M[(ni                 
                       =i+k)]=s[k];}else if(i-ni<=2)M[i]="/*"[i                  
                         -ni-1];else if(mi-i<=1)M[i]="/*"[mi-i];                     
                           else M[i]="*";}return M.join("")                       
                             ;}/**************************                         
                                 ******************/ 
+
+ /**
+ * We use format function to format itself. Note that we have to manually
+ * adjust a little bit to make sure the formatted code actually runs, 
+ * including changing "" to " ", and unwrapping `M.join("")`, etc.
+ */
 
 echo(format(`
   function format(code, {w = 80, h = 24, K = ["var"], R1 = 11, R2 = 4 } = {}) {
