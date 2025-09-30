@@ -9,10 +9,6 @@ const styles = {
   iconButton: "w-4 h-4 hover:scale-110 transition-transform duration-100",
 };
 
-function metaKey() {
-  return navigator.userAgent.includes("Mac") ? "cmd" : "ctrl";
-}
-
 export function Editor({
   initialCode,
   onUserInput = () => {},
@@ -73,6 +69,10 @@ export function Editor({
     setNeedRerun(false);
     editorRef.current.stop();
     editorRef.current.run();
+  }
+
+  function metaKey() {
+    return typeof navigator !== "undefined" || navigator.userAgent.includes("Mac") ? "cmd" : "ctrl";
   }
 
   return (

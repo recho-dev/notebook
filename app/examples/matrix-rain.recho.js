@@ -16,7 +16,7 @@
  * a way to render **shapes** in Recho.
  *
  * My implementation is basically a **particle system**. Each column of the
- * matrix is a particle. Each particle has a lifespan, a initial y position, 
+ * matrix is a particle. Each particle has a lifespan, a initial y position,
  * and a set of characters. The following rules are applied to each particle:
  *
  * - If a particle is dead (lifespan < 0), it will be reset,
@@ -93,7 +93,10 @@ const columns = d3.range(width).map(() => createColumn(height));
     for (let j = 0; j < width; ++j) output += buffer[i * width + j];
     output += i === height - 1 ? "" : "\n";
   }
-  output = output.split("\n").map((d) => "  " + d).join("\n");
+  output = output
+    .split("\n")
+    .map((d) => "  " + d)
+    .join("\n");
 
   echo(output);
 }
