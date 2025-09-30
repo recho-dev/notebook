@@ -121,29 +121,29 @@ echo(b.join(""));
  * !!! The format function is also a "donut" code !!!
  */
 
-                                function /********/                             
-                            format(code,{w=80,h=24,K=/**/                       
-                          ["var"],R1=11,R2=4}={}){let n=w                       
-                        *h,mi=-1,M=new Array(n).fill(null),                     
-                      T=code.replace('" "',"__")/**********/                   
-                     .replace(/\s+/g," ").split(" ").filter((d)=>                  
-                    d!=="").map((d)=>d.replace("__",'" "')),tn=                 
-                   T.length;for(let i=0;i <n;i++){let x=i%w,y=/**/              
-                  Math.floor(i/w),d=           Math.hypot((x-w/2)               
-                  /2,y-h/2),m=d<R1&&            d>R2;if(m)mi=i;/**/             
-                  M[i]=m?1:x===w-1               ?"\n":" ";}let ni=                
-                  -1;for(let i=0,                 wi=0;i<n;i++){if              
-                  (M[i]!==1)/****/               continue;if(wi<                
-                  tn){let s=T[wi];if            (K.some((k)=>/**/               
-                  s.includes(k)))s=s           +" ";let si=0;while               
-                   (M[i+si]===1)si++;if(si<s.length-1)s=si-1<=0?                
-                    " ":"/*"+"*".repeat(Math.max(0,si-4))+"*/";                  
-                     else wi++;for(let k=0;k<s.length;k++)M[(ni                 
-                      =i+k)]=s[k];}else if(i-ni<=2)M[i]="/*"[i                  
-                        -ni-1];else if(mi-i<=1)M[i]="/*"[mi-i];                     
-                          else M[i]="*";}return M.join("")                       
-                            ;}/**************************                         
-                                ******************/ 
+                                    function /********/                             
+                                format(code,{w=80,h=24,K=/**/                       
+                              ["var"],R1=11,R2=4}={}){let n=w                       
+                            *h,mi=-1,M=new Array(n).fill(null),                     
+                          T=code.replace('" "',"__")/**********/                   
+                        .replace(/\s+/g," ").split(" ").filter((d)=>                  
+                        d!=="").map((d)=>d.replace("__",'" "')),tn=                 
+                      T.length;for(let i=0;i <n;i++){let x=i%w,y=/**/              
+                      Math.floor(i/w),d=           Math.hypot((x-w/2)               
+                      /2,y-h/2),m=d<R1&&            d>R2;if(m)mi=i;/**/             
+                      M[i]=m?1:x===w-1               ?"\n":" ";}let ni=                
+                      -1;for(let i=0,                 wi=0;i<n;i++){if              
+                      (M[i]!==1)/****/               continue;if(wi<                
+                      tn){let s=T[wi];if            (K.some((k)=>/**/               
+                      s.includes(k)))s=s           +" ";let si=0;while               
+                      (M[i+si]===1)si++;if(si<s.length-1)s=si-1<=0?                
+                        " ":"/*"+"*".repeat(Math.max(0,si-4))+"*/";                  
+                        else wi++;for(let k=0;k<s.length;k++)M[(ni                 
+                          =i+k)]=s[k];}else if(i-ni<=2)M[i]="/*"[i                  
+                            -ni-1];else if(mi-i<=1)M[i]="/*"[mi-i];                     
+                              else M[i]="*";}return M.join("")                       
+                                ;}/**************************                         
+                                    ******************/ 
 
  /**
  * We use format function to format itself. Note that we have to manually
