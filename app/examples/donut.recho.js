@@ -4,8 +4,6 @@
  * @created 2025-09-29
  * @pull_request 126
  * @github pearmini
- * @thumbnail_start 26
- *
  */
 
 /**
