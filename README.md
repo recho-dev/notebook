@@ -14,7 +14,7 @@
 
 We want to make code more accessible and hopefully, more playful. Inspired by [p5.js web Editor](https://editor.p5js.org/) and [Observable Notebook](https://observablehq.com/), we realize that _well designed language doesn’t necessarily make coding more accessible, the environment does_! To explore this question, introducing Recho: **a lighter way to code with creativity**. By "lighter", we mean you can have a lighter start:
 
-- **Lighter Output** - We embrace text-based output—a universal and timeless interface. It's concise, intuitive, and efficient, which keeps your attention on the essence of code rather than the overhead of visuals.
+- **Lighter Output** - The first citizen of Recho is text—each piece of result can be inspected as strings. Text is a universal interface, which is concise, intuitive, and efficient. This keeps your attention on the essence of code rather than the overhead of visuals.
 - **Lighter Flow** - We stay in an online reactive editor—inputs and outputs both show up there. There is no need to switch context while coding. Instant feedback allows you to better understand your code and shape ideas.
 - **Lighter Input** - We use vanilla JavaScript, and you don't have to learn extra libraries or browser specific APIs to get started with. It can help you focus more on general coding concepts and algorithms themselves.
 - **Lighter Purpose** - We don't need to dream big in Recho. While AI makes coding less important for "world-changing" ideas, we want to secure a place where you can code just for fun. Life can be without work, right?
