@@ -16,7 +16,7 @@ We want to make code more accessible and hopefully, more playful. Inspired by [p
 
 - **Lighter Output** - The first citizen of Recho is text—each piece of result can be inspected as strings. Text is a universal interface, which is concise, intuitive, and efficient. This keeps your attention on the essence of code rather than the overhead of visuals.
 - **Lighter Flow** - We stay in an online reactive editor—inputs and outputs both show up there. There is no need to switch context while coding. Instant feedback allows you to better understand your code and shape ideas.
-- **Lighter Input** - We use vanilla JavaScript, and you don't have to learn extra libraries or browser specific APIs to get started with. It can help you focus more on general coding concepts and algorithms themselves.
+- **Lighter Input** - We use vanilla JavaScript with reactivity and minimal custom APIs. This means you don't need to learn any nonstandard JavaScript variant, and also eliminates the need to learn a bunch of third-party APIs. By doing this, we aim to minimize the gap between coding in Recho and in the real world, making it easier for the experienced to get in and for beginners to get out.
 - **Lighter Purpose** - We don't need to dream big in Recho. While AI makes coding less important for "world-changing" ideas, we want to secure a place where you can code just for fun. Life can be without work, right?
 
 By "creativity", we mean you can end up doing something fun, and find a new way to express yourself or understand the world.
