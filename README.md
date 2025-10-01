@@ -5,6 +5,7 @@
 [**Recho**](https://recho.dev/) is a free, [open-source](/LICENCE), reactive notebook-like editor that echoes output inline with your code as comments—enabling beginners, developers, artists, and anyone curious to quickly learn and explore through text experiments/art. Built on the reactive model of [Observable Notebook Kit](https://github.com/observablehq/notebook-kit), Recho aims to make coding accessible, interactive, and playful, turning every manipulation into a creative, in-situ experience—discover the sketches of tomorrow.
 
 - [Editor](https://recho.dev/) 📝 - The quickest way to get started with Recho.
+- [Announcement](https://medium.com/@subairui/a-lighter-way-to-code-with-creativity-8c0ac739aa6f) 📢 - Read our initial release story to discovery the vision behind Recho.
 - [Documentation](https://recho.dev/docs/introduction) 📚 - Learn how to use Recho with our comprehensive guides.
 - [Examples](https://recho.dev/examples) 🖼️ - See what you can create and draw some inspiration!
 - [Sharing](/CONTRIBUTING.md#sharing-examples) 🎨 - Follow the instructions to open a [pull request](https://github.com/recho-dev/recho/new/main/app/examples) to share your sketches!
@@ -12,7 +13,7 @@
 
 ## Why Recho 💡
 
-We want to make code more accessible and hopefully, more playful. Inspired by [p5.js web Editor](https://editor.p5js.org/) and [Observable Notebook](https://observablehq.com/), we realize that _well designed language doesn’t necessarily make coding more accessible, the environment does_! To explore this question, introducing Recho: **a lighter way to code with creativity**. By "lighter", we mean you can have a lighter start:
+We want to make code more accessible and hopefully, more playful. Inspired by [p5.js web Editor](https://editor.p5js.org/) and [Observable Notebook](https://observablehq.com/), we realize that _well designed language doesn’t necessarily make coding more accessible, the environment does_! To explore this question, introducing Recho: **[a lighter way to code with creativity](https://medium.com/@subairui/a-lighter-way-to-code-with-creativity-8c0ac739aa6f)**. By "lighter", we mean you can have a lighter start:
 
 - **Lighter Output** - The first citizen of Recho is text—each piece of result can be inspected as strings. Text is a universal interface, which is concise, intuitive, and efficient. This keeps your attention on the essence of code rather than the overhead of visuals.
 - **Lighter Flow** - We stay in an online reactive editor—inputs and outputs both show up there. There is no need to switch context while coding. Instant feedback allows you to better understand your code and shape ideas.
