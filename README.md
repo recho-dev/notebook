@@ -2,7 +2,7 @@
 
 > We want to live in the editor forever. — [Luyu Cheng](https://luyu.computer/)
 
-[**Recho**](https://recho.dev/) is a free, [open-source](/LICENCE), reactive coding environment that echoes output inline with your code as comments—enabling beginners, developers, artists, and anyone curious to quickly code and explore through text experiments/art. Built on the reactive model of [Observable Notebook Kit](https://github.com/observablehq/notebook-kit), Recho makes coding accessible, interactive, and playful, turning every string output into a creative, in-situ experience—discover the sketches of tomorrow.
+[**Recho**](https://recho.dev/) is a free, [open-source](/LICENCE), reactive notebook-like editor that echoes output inline with your code as comments—enabling beginners, developers, artists, and anyone curious to quickly learn and explore through text experiments/art. Built on the reactive model of [Observable Notebook Kit](https://github.com/observablehq/notebook-kit), Recho aims to make coding accessible, interactive, and playful, turning every manipulation into a creative, in-situ experience—discover the sketches of tomorrow.
 
 - [Editor](https://recho.dev/) 📝 - The quickest way to get started with Recho.
 - [Documentation](https://recho.dev/docs/introduction) 📚 - Learn how to use Recho with our comprehensive guides.
@@ -12,20 +12,22 @@
 
 ## Why Recho 💡
 
-We want to make code more accessible and hopefully, more playful. Inspired by [P5.js Editor](https://editor.p5js.org/) and [Observable Notebook](https://observablehq.com/), we realize that _well-designed libraries don't necessarily make code accessible—the code environment does_! So here is Recho: **a lighter way to code with creativity**. We offer you a lighter beginning:
+We want to make code more accessible and hopefully, more playful. Inspired by [p5.js web Editor](https://editor.p5js.org/) and [Observable Notebook](https://observablehq.com/), we realize that _well designed language doesn’t necessarily make coding more accessible, the environment does_! To explore this question, introducing Recho: **a lighter way to code with creativity**. By "lighter", we mean you can have a lighter start:
 
 - **Lighter Output** - We embrace text-based output—a universal and timeless interface. It's concise, intuitive, and efficient, which keeps your attention on the essence of code rather than the overhead of visuals.
 - **Lighter Flow** - We stay in an online reactive editor—inputs and outputs both show up there. There is no need to switch context while coding. Instant feedback allows you to better understand your code and shape ideas.
 - **Lighter Input** - We use vanilla JavaScript, and you don't have to learn extra libraries or browser specific APIs to get started with. It can help you focus more on general coding concepts and algorithms themselves.
 - **Lighter Purpose** - We don't need to dream big in Recho. While AI makes coding less important for "world-changing" ideas, we want to secure a place where you can code just for fun. Life can be without work, right?
 
-Ideally, you can be creative afterwards. You may find the minimalism of ASCII/text art both fascinating and inspiring. Coding can become a new way to express yourself and explore the world. That’s the success of Recho!
+By "creativity", we mean you can end up doing something fun, and find a new way to express yourself or understand the world.
+
+If computers are aliens, our best hope is that by learning their languages, which is code, through Recho, you'll develop a deeper understanding of computation, and of course, unleash your creativity!
 
 ## What's Next 🔥
 
-Recho is still in its early stage. There are a lot of areas we want to explore and build with the community. Especially, we are interested in the following things:
+Recho is still in its early stage. While there's still much work to do, we're excited to release the beta version and make it open source right now. If you're interested in trying it out, please visit the [website](https://recho.dev/). Since the source code is available at GitHub here, we welcome any thoughts, comments, or suggestions. If you're interested in contributing to Recho, we're especially interested in these areas:
 
-- **More Examples** - Examples attract users and shape tools. We would love to have examples in different areas ([text analysis](https://recho.dev/examples/word-count), [data viz](https://recho.dev/examples/phases-of-the-moon), [graphics](https://recho.dev/examples/cg-text-based-shaders), [concrete poetry](https://recho.dev/examples/fire!), [algorithms](https://recho.dev/examples/maze), etc.) and working with external libraries ([D3](https://d3js.org/), [Lodash](https://lodash.com/), [ml5](https://ml5js.org/), [Tone](https://tonejs.github.io/), etc.). They don't have to be complicated or perfect. One thing to share would be great. Follow the [instructions](/CONTRIBUTING.md#sharing-examples) to open a [pull request](https://github.com/recho-dev/recho/new/main/app/examples) to share yours today!
+- **More Examples** - Examples attract users and shape tools. We would love to showcase examples across diverse areas ([text analysis](https://recho.dev/examples/word-count), [data viz](https://recho.dev/examples/phases-of-the-moon), [graphics](https://recho.dev/examples/cg-text-based-shaders), [concrete poetry](https://recho.dev/examples/fire!), [algorithms](https://recho.dev/examples/maze), etc.) and demonstrations working with external libraries ([D3](https://d3js.org/), [Lodash](https://lodash.com/), [ml5](https://ml5js.org/), [Tone](https://tonejs.github.io/), etc.). They don't have to be complicated or perfect. One thing to share would be great. Follow the [instructions](/CONTRIBUTING.md#sharing-examples) to open a [pull request](https://github.com/recho-dev/recho/new/main/app/examples) to share yours today!
 - **Polyglot Programming** - Recho begins with JavaScript, but isn't limited to it—coding has no boundaries. As long as a programming language can be transpiled to JavaScript, it can be incorporated with Recho. It can be mainstream ([Python](https://www.python.org/), [Rust](https://www.rust-lang.org/)), academic ([MLscript](https://github.com/hkust-taco/mlscript)), or creative ([wenyan‑lang](https://wy-lang.org/)). The best part is that it doesn't have to be production-ready or have real-life usage. Just providing a different way to code or think is cool. Want to add your favorite language to Recho or share your "toys"? [Talk to us](https://github.com/recho-dev/recho/issues/109)!
 - **Text-Based Libraries** - Best practices deserve to be seen by more people. If you find some algorithms you are using helpful for others, don't hesitate to package them into libraries. Remember, they can be light!
 - **Explorations with LLMs** - Recho's text-first approach is ideal for LLMs. Rather than letting the LLM write code directly, you can use code as input: fusing files, turning text into pixel outputs, and more. We want to [explore the possibilities](https://github.com/recho-dev/recho/issues/110).
@@ -35,7 +37,6 @@ Of course, there are a lot of editor related features on the way!
 - **Editing Optimization** - Improve editing experiences. ([rerunning blocks](https://github.com/recho-dev/recho/issues/42), [formatting code](https://github.com/recho-dev/recho/issues/108), etc.)
 - **Visual Enhancement** - More expressive and informative editor. ([dark theme](https://github.com/recho-dev/recho/issues/104), [ANSI escape codes](https://github.com/recho-dev/recho/issues/45), etc.)
 - **Interactivity** - Response to user inputs. ([mouse](https://github.com/recho-dev/recho/issues/34), [keyboard](https://github.com/recho-dev/recho/issues/105), etc.)
-- ...
 
 Also, we have plans to provide [cloud storage services](https://github.com/recho-dev/recho/issues/107). But we don't want to overcomplicate things at this point, so any thoughts, comments, and suggestions are welcome!
 
