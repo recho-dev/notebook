@@ -21,14 +21,15 @@
  *
  * > We want to live in the editor forever. — Luyu Cheng[1]
  *
- * **Recho**[2] is a free, open-source, reactive code scratchpad that echoes
- * output inline with your code as comments — enabling beginners, developers,
- * artists, and anyone curious to quickly code and explore through text
- * experiments/art.
+ * **Recho**[2] is a free, open-source, reactive notebook-like editor that 
+ * echoes output inline with your code as comments — enabling beginners, 
+ * developers, artists, and anyone curious to quickly code and explore through
+ * text experiments/art.
  *
- * Built on the reactive model of Observable Notebook Kit[3], Recho makes
- * coding accessible, interactive, and playful, turning every string output
- * into a creative, in-situ experience - discover the sketches of tomorrow!
+ * Built on the reactive model of Observable Notebook Kit[3], Recho aims to
+ * make coding accessible, interactive, and playful, turning every string
+ * manipulation into a creative, in-situ experience - discover the sketches of
+ * tomorrow!
  *
  * Here is a quick example[4] to showcase Recho. A block of code is written to
  * explore the algorithm behind Mandelbrot set[5], generating a string called
@@ -66,7 +67,9 @@ function map(x, d0, d1, r0, r1) {
 }
 
 /**
- * Want to paint with code? Get started[6] with Recho now!
+ * Please visit the GitHub repository for more details:
+ * 
+ * > https://github.com/recho-dev/recho
  *
  * - [1] https://luyu.computer/
  * - [2] https://recho.dev/
