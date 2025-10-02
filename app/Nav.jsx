@@ -65,6 +65,9 @@ export function Nav() {
           <SafeLink href="/docs" className={cn(styles.link, isSelected("/docs") && styles.selectedLink, "ml-3")}>
             Docs
           </SafeLink>
+          <SafeLink href="/news" className={cn(styles.link, isSelected("/news") && styles.selectedLink)}>
+            News
+          </SafeLink>
           <SafeLink href="/examples" className={cn(styles.link, isSelected("/examples") && styles.selectedLink)}>
             Examples
           </SafeLink>
@@ -89,6 +92,13 @@ export function Nav() {
                 onClick={() => setDropdownOpen(false)}
               >
                 Docs
+              </SafeLink>
+              <SafeLink
+                href="/news"
+                className={cn(styles.dropdownItem, isSelected("/news") && styles.dropdownItemSelected)}
+                onClick={() => setDropdownOpen(false)}
+              >
+                News
               </SafeLink>
               <SafeLink
                 href="/examples"
