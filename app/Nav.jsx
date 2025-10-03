@@ -4,7 +4,7 @@ import {usePathname} from "next/navigation";
 import {useState, useEffect, useRef} from "react";
 import {SafeLink} from "./SafeLink.jsx";
 import {cn} from "./cn.js";
-import {Plus, Share, Github, Menu} from "lucide-react";
+import {Plus, Share, Github, Menu, FolderCode} from "lucide-react";
 import {Tooltip} from "react-tooltip";
 
 const styles = {
@@ -71,9 +71,6 @@ export function Nav() {
           <SafeLink href="/examples" className={cn(styles.link, isSelected("/examples") && styles.selectedLink)}>
             Examples
           </SafeLink>
-          <SafeLink href="/sketches" className={cn(styles.link, isSelected("/sketches") && styles.selectedLink)}>
-            Sketches
-          </SafeLink>
         </div>
         {/* Mobile navigation */}
         <div className={cn("md:hidden relative")} ref={dropdownRef}>
@@ -107,13 +104,6 @@ export function Nav() {
               >
                 Examples
               </SafeLink>
-              <SafeLink
-                href="/sketches"
-                className={cn(styles.dropdownItem, isSelected("/sketches") && styles.dropdownItemSelected)}
-                onClick={() => setDropdownOpen(false)}
-              >
-                Sketches
-              </SafeLink>
             </div>
           )}
         </div>
@@ -127,6 +117,16 @@ export function Nav() {
         >
           <Plus className={cn(styles.linkIcon)} />
         </SafeLink>
+
+        <SafeLink
+          href="/sketches"
+          className={cn(styles.link, pathname === "/sketches" && styles.selectedLink)}
+          data-tooltip-id="nav-tooltip"
+          data-tooltip-content="Open Sketches"
+        >
+          <FolderCode className={cn(styles.linkIcon)} />
+        </SafeLink>
+
         <a
           href="https://github.com/recho-dev/recho/new/main/app/examples"
           onClick={handleUpload}
