@@ -6,6 +6,6 @@ export const news = [
     link: "https://medium.com/@subairui/a-lighter-way-to-code-with-creativity-8c0ac739aa6f",
     author: "Bairui SU",
     image: "a-ligter-way-to-code-with-creativity.png",
-    slug: "hello-recho",
+    slug: "hello-world",
   },
 ];
