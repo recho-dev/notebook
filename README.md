@@ -1,5 +1,7 @@
 # Recho: Reactive Echo
 
+![preview](/public/news/a-ligter-way-to-code-with-creativity.webp)
+
 > We want to live in the editor forever. — [Luyu Cheng](https://luyu.computer/)
 
 [**Recho**](https://recho.dev/) is a free, [open-source](/LICENCE), reactive notebook-like editor that echoes output inline with your code as comments—enabling beginners, developers, artists, and anyone curious to quickly learn and explore through text experiments/art. Built on the reactive model of [Observable Notebook Kit](https://github.com/observablehq/notebook-kit), Recho aims to make coding accessible, interactive, and playful, turning every manipulation into a creative, in-situ experience—discover the sketches of tomorrow.

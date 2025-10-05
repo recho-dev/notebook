@@ -5,7 +5,7 @@ export const news = [
     summary: "Introducing Recho: a light learning and exploration environment.",
     link: "https://medium.com/@subairui/a-lighter-way-to-code-with-creativity-8c0ac739aa6f",
     author: "Bairui SU",
-    image: "a-ligter-way-to-code-with-creativity.png",
+    image: "a-ligter-way-to-code-with-creativity.webp",
     slug: "hello-world",
   },
 ];
