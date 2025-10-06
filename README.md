@@ -15,7 +15,11 @@
 
 ## Why Recho 💡
 
-We want to make code more accessible and hopefully, more playful. Inspired by [p5.js web Editor](https://editor.p5js.org/) and [Observable Notebook](https://observablehq.com/), we realize that _well designed language doesn’t necessarily make coding more accessible, the environment does_! To explore this question, introducing Recho: **[a lighter way to code with creativity](https://medium.com/@subairui/a-lighter-way-to-code-with-creativity-8c0ac739aa6f)**. By "lighter", we mean you can have a lighter start:
+On the one hand, we’ve always loved [Observable Notebooks](https://observablehq.com/). To explore a more portable notebook format, we created [Markdown Genji](https://genji-md.dev/), which extends Markdown with notebook-like features. Later, similar ideas appeared in [Observable Framework](https://observablehq.com/framework), and recently, [Observable Notebook Kit](https://observablehq.com/notebook-kit/) introduced an HTML-based file format. That made us wonder — could notebooks be even more portable, perhaps as a pure code file?
+
+On the other hand, we’ve always been interested in making code more accessible and playful. Inspired by the [p5.js web Editor](https://editor.p5js.org/) , we realized that a well-designed language doesn’t necessarily make coding more accessible — the environment does. However, the p5.js Web Editor achieves this, in part, through its focus on graphics. That made us wonder — could there be an environment that focuses more on computation rather than graphics, yet remains just as accessible and playful?
+
+To explore these questions, introducing Recho: **[a lighter way to code with creativity](https://medium.com/@subairui/a-lighter-way-to-code-with-creativity-8c0ac739aa6f)**. By "lighter", we mean you can have a lighter start:
 
 - **Lighter Output** - The first citizen of Recho is text—each piece of result can be inspected as strings. Text is a universal interface, which is concise, intuitive, and efficient. This keeps your attention on the essence of code rather than the overhead of visuals.
 - **Lighter Flow** - We stay in an online reactive editor—inputs and outputs both show up there. There is no need to switch context while coding. Instant feedback allows you to better understand your code and shape ideas.
