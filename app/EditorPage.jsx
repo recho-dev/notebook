@@ -3,14 +3,14 @@ import {useState, useEffect, useRef, useCallback, useSyncExternalStore} from "re
 import {notFound} from "next/navigation";
 import {Pencil} from "lucide-react";
 import {Editor} from "./Editor.jsx";
-import {getSketchById, createSketch, addSketch, saveSketch} from "./api.js";
+import {getNotebookById, createNotebook, addNotebook, saveNotebook} from "./api.js";
 import {isDirtyStore, countStore} from "./store.js";
 import {cn} from "./cn.js";
 
 const UNSET = Symbol("UNSET");
 
 export function EditorPage({id: initialId}) {
-  const [sketch, setSketch] = useState(UNSET);
+  const [notebook, setNotebook] = useState(UNSET);
   const [showInput, setShowInput] = useState(false);
   const [autoRun, setAutoRun] = useState(false);
   const [id, setId] = useState(initialId);
@@ -24,40 +24,40 @@ export function EditorPage({id: initialId}) {
     isDirtyStore.getServerSnapshot,
   );
   const prevCount = useRef(id ? count : null); // Last saved count.
-  const isAdded = prevCount.current === count; // Whether the sketch is added to the storage.
+  const isAdded = prevCount.current === count; // Whether the notebook is added to the storage.
   const timer = useRef(null);
 
   const onSave = useCallback(() => {
     isDirtyStore.setDirty(false);
     if (isAdded) {
-      saveSketch(sketch);
+      saveNotebook(notebook);
     } else {
-      addSketch(sketch);
+      addNotebook(notebook);
       prevCount.current = count;
-      const id = sketch.id;
+      const id = notebook.id;
       setId(id); // Force re-render.
-      window.history.pushState(null, "", `/sketches/${id}`); // Just update the url, no need to reload the page.
+      window.history.pushState(null, "", `/notebooks/${id}`); // Just update the url, no need to reload the page.
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sketch]);
+  }, [notebook]);
 
   // This effect is triggered when the count changes,
   // which happens when user clicks the "New" nav link.
   useEffect(() => {
-    const initialSketch = isAdded ? getSketchById(id) : createSketch();
-    setSketch(initialSketch);
-    setInitialCode(initialSketch.content);
-    setAutoRun(initialSketch.autoRun);
-    setTitle(initialSketch.title);
+    const initialNotebook = isAdded ? getNotebookById(id) : createNotebook();
+    setNotebook(initialNotebook);
+    setInitialCode(initialNotebook.content);
+    setAutoRun(initialNotebook.autoRun);
+    setTitle(initialNotebook.title);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [count]);
 
   useEffect(() => {
     // Use setTimeout to avoid changing to default title.
     setTimeout(() => {
-      document.title = `${isAdded ? sketch.title : "New"} | Recho`;
+      document.title = `${isAdded ? notebook.title : "New"} | Recho`;
     }, 100);
-  }, [sketch, isAdded]);
+  }, [notebook, isAdded]);
 
   useEffect(() => {
     const onBeforeUnload = (e) => {
@@ -79,34 +79,34 @@ export function EditorPage({id: initialId}) {
     if (showInput) titleRef.current.focus();
   }, [showInput]);
 
-  if (sketch === UNSET) return <div className={cn("max-w-screen-lg mx-auto my-10 editor-page")}>Loading...</div>;
+  if (notebook === UNSET) return <div className={cn("max-w-screen-lg mx-auto my-10 editor-page")}>Loading...</div>;
 
-  if (!sketch) return notFound();
+  if (!notebook) return notFound();
 
   function onUserInput(code) {
-    const newSketch = {...sketch, content: code};
+    const newNotebook = {...notebook, content: code};
     if (isAdded) {
-      saveSketch(newSketch);
-      setSketch(newSketch);
+      saveNotebook(newNotebook);
+      setNotebook(newNotebook);
     } else {
-      setSketch(newSketch);
+      setNotebook(newNotebook);
       isDirtyStore.setDirty(true);
     }
   }
 
   function onRename() {
     setShowInput(true);
-    setTitle(sketch.title);
+    setTitle(notebook.title);
   }
 
   // Only submit rename when blur with valid title.
   function onTitleBlur() {
     setShowInput(false);
     // The title can't be empty.
-    if (!title) return setTitle(sketch.title);
-    const newSketch = {...sketch, title};
-    setSketch(newSketch);
-    if (isAdded) saveSketch(newSketch);
+    if (!title) return setTitle(notebook.title);
+    const newNotebook = {...notebook, title};
+    setNotebook(newNotebook);
+    if (isAdded) saveNotebook(newNotebook);
     else isDirtyStore.setDirty(true);
   }
 
@@ -127,11 +127,11 @@ export function EditorPage({id: initialId}) {
   function onBeforeEachRun() {
     if (!isAdded) return;
     if (timer.current) clearTimeout(timer.current);
-    const newSketch = {...sketch, autoRun: false};
-    saveSketch(newSketch);
+    const newNotebook = {...notebook, autoRun: false};
+    saveNotebook(newNotebook);
     timer.current = setTimeout(() => {
-      const newSketch = {...sketch, autoRun: true};
-      saveSketch(newSketch);
+      const newNotebook = {...notebook, autoRun: true};
+      saveNotebook(newNotebook);
       timer.current = null;
     }, 100);
   }
@@ -140,7 +140,7 @@ export function EditorPage({id: initialId}) {
     <div className={cn("max-w-screen-lg lg:mx-auto mx-4 lg:my-10 my-4 editor-page")}>
       <Editor
         initialCode={initialCode}
-        key={sketch.id}
+        key={notebook.id}
         onUserInput={onUserInput}
         onBeforeEachRun={onBeforeEachRun}
         autoRun={autoRun}
@@ -170,7 +170,7 @@ export function EditorPage({id: initialId}) {
                 className={cn("border border-gray-200 rounded-md px-3 py-1 text-sm bg-white")}
               />
             ) : (
-              <span className={cn("text-sm py-1 border border-gray-100 rounded-md")}>{sketch.title}</span>
+              <span className={cn("text-sm py-1 border border-gray-100 rounded-md")}>{notebook.title}</span>
             )}
           </div>
         }

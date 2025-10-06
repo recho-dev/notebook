@@ -27,7 +27,7 @@ export function Nav() {
   function handleUpload(e) {
     e.preventDefault();
     const confirm = window.confirm(
-      `Make a Pull Request to share your sketch to Examples!\n- Input the filename\n- Copy the code\n- Click the "Commit changes" button`,
+      `Make a Pull Request to share your notebook to Examples!\n- Input the filename\n- Copy the code\n- Click the "Commit changes" button`,
     );
     if (confirm) window.open("https://github.com/recho-dev/recho/new/main/app/examples", "_blank");
   }
@@ -113,16 +113,16 @@ export function Nav() {
           href="/"
           className={cn(styles.link, pathname === "/" && styles.selectedLink)}
           data-tooltip-id="nav-tooltip"
-          data-tooltip-content="Create new sketch"
+          data-tooltip-content="Create new notebook"
         >
           <Plus className={cn(styles.linkIcon)} />
         </SafeLink>
 
         <SafeLink
-          href="/sketches"
-          className={cn(styles.link, pathname === "/sketches" && styles.selectedLink)}
+          href="/notebooks"
+          className={cn(styles.link, pathname === "/notebooks" && styles.selectedLink)}
           data-tooltip-id="nav-tooltip"
-          data-tooltip-content="Open Sketches"
+          data-tooltip-content="Open Notebooks"
         >
           <FolderCode className={cn(styles.linkIcon)} />
         </SafeLink>
