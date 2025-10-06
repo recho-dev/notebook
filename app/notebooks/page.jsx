@@ -49,7 +49,9 @@ export default function Page() {
               <Link href={`/notebooks/${notebook.id}`} className={cn("font-semibold hover:underline text-blue-500")}>
                 <span>{notebook.title}</span>
               </Link>
-              <div className={cn("text-sm text-gray-500")}>Created {new Date(notebook.created).toLocaleDateString()}</div>
+              <div className={cn("text-sm text-gray-500")}>
+                Created {new Date(notebook.created).toLocaleDateString()}
+              </div>
             </div>
             <button
               onClick={() => onDelete(notebook.id)}
@@ -59,7 +61,10 @@ export default function Page() {
             </button>
           </div>
           <div className={cn("w-full  border border-gray-200 rounded-md overflow-hidden max-h-[180px] px-3")}>
-            <ThumbnailClient code={notebook.content} outputStartLine={findFirstOutputRange(notebook.content).startLine} />
+            <ThumbnailClient
+              code={notebook.content}
+              outputStartLine={findFirstOutputRange(notebook.content).startLine}
+            />
           </div>
         </div>
       ))}
