@@ -4,7 +4,7 @@
 
 > We want to live in the editor forever. — [Luyu Cheng](https://luyu.computer/)
 
-[**Recho**](https://recho.dev/) is a free, [open-source](/LICENCE), reactive notebook-like editor that echoes output inline with your code as comments—enabling beginners, developers, artists, and anyone curious to quickly learn and explore through text experiments/art. Built on the reactive model of [Observable Notebook Kit](https://github.com/observablehq/notebook-kit), Recho aims to make coding accessible, interactive, and playful, turning every manipulation into a creative, in-situ experience—discover the sketches of tomorrow.
+[**Recho**](https://recho.dev/) is a free, [open-source](/LICENCE), light environment for learning and exploration. It combines the openness of standard code files with notebook-like interactivity, echoing output inline as comments to provide live, in-situ coding experiences with instant feedback. Built on vanilla JavaScript and the reactive model of [Observable Notebook Kit](https://observablehq.com/notebook-kit/), Recho lets developers, artists, and learners explore and create directly in code.
 
 - [Editor](https://recho.dev/) 📝 - The quickest way to get started with Recho.
 - [Announcement](https://medium.com/@subairui/a-lighter-way-to-code-with-creativity-8c0ac739aa6f) 📢 - Read our initial release story to discovery the vision behind Recho.
