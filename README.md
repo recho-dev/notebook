@@ -4,7 +4,7 @@
 
 > We want to live in the editor forever. — [Luyu Cheng](https://luyu.computer/)
 
-[**Recho**](https://recho.dev/) is a free, [open-source](/LICENCE), light environment for learning and exploration. It introduces a pure code format that combines the openness of code files with notebook-like interactivity, echoing output inline as comments to provide live, in-situ coding experiences with instant feedback. Built on vanilla JavaScript and the reactive model of [Observable Notebook Kit](https://observablehq.com/notebook-kit/), Recho lets developers, artists, and learners explore and create directly in code.
+[**Recho**](https://recho.dev/) is a free, [open-source](/LICENCE), light environment for learning and exploration. It introduces a _plain code format_ that combines the simplicity of plain text scripts with notebook-like interactivity, echoing output inline as comments to provide live, in-situ coding experiences with instant feedback. Built on vanilla JavaScript and the reactive model of [Observable Notebook Kit](https://observablehq.com/notebook-kit/), Recho lets developers, artists, and learners explore and create directly in code.
 
 - [Editor](https://recho.dev/) 📝 - The quickest way to get started with Recho.
 - [Announcement](https://medium.com/@subairui/a-lighter-way-to-code-with-creativity-8c0ac739aa6f) 📢 - Read our initial release story to discovery the vision behind Recho.
@@ -15,16 +15,18 @@
 
 ## Why Recho 💡
 
-We want to make code more accessible and hopefully, more playful. Inspired by [p5.js web Editor](https://editor.p5js.org/) and [Observable Notebook](https://observablehq.com/), we realize that _well designed language doesn’t necessarily make coding more accessible, the environment does_! To explore this question, introducing Recho: **[a lighter way to code with creativity](https://medium.com/@subairui/a-lighter-way-to-code-with-creativity-8c0ac739aa6f)**. By "lighter", we mean you can have a lighter start:
+On the one hand, we’ve always loved [Observable Notebooks](https://observablehq.com/). To explore a more portable notebook format, we created [Markdown Genji](https://genji-md.dev/), which extends Markdown with notebook-like features. Later, similar ideas appeared in [Observable Framework](https://observablehq.com/framework), and recently, [Observable Notebook Kit](https://observablehq.com/notebook-kit/) introduced an HTML-based file format. That made us wonder — could notebooks be even more portable, perhaps as a plain code file?
+
+On the other hand, we’ve always been interested in making code more accessible and playful. Inspired by the [p5.js web editor](https://editor.p5js.org/), we realized that a _well-designed language doesn’t necessarily make coding more accessible — the environment does_. However, the p5.js web editor achieves this, in part, through its focus on graphics. That made us wonder — could there be an environment that focuses more on computation rather than graphics, yet remains just as accessible and playful?
+
+To explore these questions, introducing Recho: **[a lighter way to code with creativity](https://medium.com/@subairui/a-lighter-way-to-code-with-creativity-8c0ac739aa6f)**. By "lighter", we mean you can have a lighter start:
 
 - **Lighter Output** - The first citizen of Recho is text—each piece of result can be inspected as strings. Text is a universal interface, which is concise, intuitive, and efficient. This keeps your attention on the essence of code rather than the overhead of visuals.
 - **Lighter Flow** - We stay in an online reactive editor—inputs and outputs both show up there. There is no need to switch context while coding. Instant feedback allows you to better understand your code and shape ideas.
 - **Lighter Input** - We use vanilla JavaScript with reactivity and minimal custom APIs. This means you don't need to learn any nonstandard JavaScript variant, and also eliminates the need to learn a bunch of third-party APIs. By doing this, we aim to minimize the gap between coding in Recho and in the real world, making it easier for the experienced to get in and for beginners to get out.
 - **Lighter Purpose** - We don't need to dream big in Recho. While AI makes coding less important for "world-changing" ideas, we want to secure a place where you can code just for fun. Life can be without work, right? You can experiment with math functions, play with string manipulation, or simply implement basic algorithms to experience the charm of computing.
 
-By "creativity", we mean you can end up doing something fun, and find a new way to express yourself or understand the world.
-
-If computers are aliens, our best hope is that by learning their languages, which is code, through Recho, you'll develop a deeper understanding of computation, and of course, unleash your creativity!
+By "creativity", we mean you can end up doing something fun, and find a new way to express yourself or understand the world. If computers are aliens, our best hope is that by learning their languages, which is code, through Recho, you'll develop a deeper understanding of computation while unleashing your creativity!
 
 ## What's Next 🔥
 
@@ -35,7 +37,7 @@ Recho is still in its early stage. While there's still much work to do, we're ex
 - **Text-Based Libraries** - Best practices deserve to be seen by more people. If you find some algorithms you are using helpful for others, don't hesitate to package them into libraries. Remember, they can be light!
 - **Explorations with LLMs** - Recho's text-first approach is ideal for LLMs. Rather than letting the LLM write code directly, you can use code as input: fusing files, turning text into pixel outputs, and more. We want to [explore the possibilities](https://github.com/recho-dev/recho/issues/110).
 
-Of course, there are a lot of editor related features on the way!
+In addition to these, there are a lot of editor related features on the way!
 
 - **Editing Optimization** - Improve editing experiences. ([rerunning blocks](https://github.com/recho-dev/recho/issues/42), [formatting code](https://github.com/recho-dev/recho/issues/108), etc.)
 - **Visual Enhancement** - More expressive and informative editor. ([dark theme](https://github.com/recho-dev/recho/issues/104), [ANSI escape codes](https://github.com/recho-dev/recho/issues/45), etc.)
@@ -55,10 +57,15 @@ By "blindly", he means we can't see the results of our manipulations. For exampl
 const text = `The dog, cat, and mouse were playing in the yard. Dog barked loudly, while cat ran quickly. 
 Mouse hid under the bench, but the dog kept looking. Cat jumped over a small fence; dog followed. 
 Bird watched silently as dog, cat, and mouse moved around.`;
+
 const ignoredWords = ["the", "was", "not", "over", "and", "in", "were", "a", "while", "but", "as", "around"];
+
 const clean = text.toLowerCase().replace(/[.,!?;]/g, "");
+
 const words = clean.split(/\s+/);
+
 const filtered = words.filter((w) => !ignoredWords.includes(w));
+
 const frequencies = filtered.reduce((acc, w) => ((acc[w] = (acc[w] || 0) + 1), acc), {});
 ```
 
