@@ -7,18 +7,18 @@ Recho is open source and released under the [ISC license](/LICENCE). You are wel
 All the examples are located in `app/examples`. The quickest way to add an example is through GitHub's web editor:
 
 - Go to [new file](https://github.com/recho-dev/recho/new/main/app/examples).
-- Enter the filename in the format of `[SKETCH-NAME].recho.js`.
+- Enter the filename in the format of `[NOTEBOOK-NAME].recho.js`.
 - Add the metadata as doc strings at the top of the file.
 - Add the code below the metadata.
 - Click the "Commit changes" button.
 
 The following metadata is required:
 
-- **title** - the title of the sketch
-- **author** - the author of the sketch
-- **created** - the date of the creation of the sketch
+- **title** - the title of the notebook
+- **author** - the author of the notebook
+- **created** - the date of the creation of the notebook
 - **github** - the GitHub username of the author, for displaying the avatar
-- **pull_request** - the pull request number of adding this sketch, for commenting on the pull request
+- **pull_request** - the pull request number of adding this notebook, for commenting on the pull request
 
 The following metadata is optional:
 
@@ -41,7 +41,7 @@ echo("Hello World");
 
 This is a [pull request](https://github.com/recho-dev/recho/pull/82) you can refer to.
 
-If you prefer a `snapshot thumbnail`, create an image file named `[SKETCH-NAME].snap.[FORMAT]` in `app/examples`, such as [sin-wave-radios.snap.png](./app/examples/sin-wave-radios.snap.png) for [sin-wave-radios.recho.js](/app/examples/sin-wave-radios.recho.js).
+If you prefer a `snapshot thumbnail`, create an image file named `[NOTEBOOK-NAME].snap.[FORMAT]` in `app/examples`, such as [sin-wave-radios.snap.png](./app/examples/sin-wave-radios.snap.png) for [sin-wave-radios.recho.js](/app/examples/sin-wave-radios.recho.js).
 
 ## Editor & Runtime Development
 

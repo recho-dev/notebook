@@ -13,7 +13,7 @@ function generateProjectName() {
   return `${adj}-${obj}.js`;
 }
 
-export function createSketch() {
+export function createNotebook() {
   return {
     id: generate(),
     title: generateProjectName(),
@@ -25,53 +25,53 @@ export function createSketch() {
   };
 }
 
-function saveSketches(sketches) {
-  localStorage.setItem(FILE_NAME, JSON.stringify(sketches));
+function saveNotebooks(notebooks) {
+  localStorage.setItem(FILE_NAME, JSON.stringify(notebooks));
 }
 
-function renameLegacySketches() {
-  const legacySketches = localStorage.getItem(LEGACY_FILE_NAME);
-  if (!legacySketches) return;
-  saveSketches(JSON.parse(legacySketches));
+function renameLegacyNotebooks() {
+  const legacyNotebooks = localStorage.getItem(LEGACY_FILE_NAME);
+  if (!legacyNotebooks) return;
+  saveNotebooks(JSON.parse(legacyNotebooks));
   localStorage.removeItem(LEGACY_FILE_NAME);
 }
 
-export function getSketches() {
-  renameLegacySketches();
+export function getNotebooks() {
+  renameLegacyNotebooks();
   const files = localStorage.getItem(FILE_NAME);
   if (!files) return [];
-  const sketches = JSON.parse(files).sort((a, b) => new Date(b.updated) - new Date(a.updated));
+  const notebooks = JSON.parse(files).sort((a, b) => new Date(b.updated) - new Date(a.updated));
   // Remove fallback runtime when we have breaking changes.
-  return sketches.map((sketch) => ({...sketch, runtime: sketch.runtime || DEFAULT_RUNTIME}));
+  return notebooks.map((notebook) => ({...notebook, runtime: notebook.runtime || DEFAULT_RUNTIME}));
 }
 
-export function clearSketchesFromLocalStorage() {
+export function clearNotebooksFromLocalStorage() {
   localStorage.removeItem(FILE_NAME);
 }
 
-export function getSketchById(id) {
-  const sketches = getSketches();
-  return sketches.find((f) => f.id === id);
+export function getNotebookById(id) {
+  const notebooks = getNotebooks();
+  return notebooks.find((f) => f.id === id);
 }
 
-export function deleteSketch(id) {
-  if (confirm("Are you sure you want to delete this sketch?")) {
-    const sketches = getSketches();
-    const newSketches = sketches.filter((f) => f.id !== id);
-    saveSketches(newSketches);
+export function deleteNotebook(id) {
+  if (confirm("Are you sure you want to delete this notebook?")) {
+    const notebooks = getNotebooks();
+    const newNotebooks = notebooks.filter((f) => f.id !== id);
+    saveNotebooks(newNotebooks);
   }
 }
 
-export function addSketch(sketch) {
-  const sketches = getSketches();
+export function addNotebook(notebook) {
+  const notebooks = getNotebooks();
   const time = new Date().toISOString();
-  const newSketch = {...sketch, created: time, updated: time};
-  saveSketches([...sketches, newSketch]);
+  const newNotebook = {...notebook, created: time, updated: time};
+  saveNotebooks([...notebooks, newNotebook]);
 }
 
-export function saveSketch(sketch) {
-  const sketches = getSketches();
-  const updatedSketch = {...sketch, updated: new Date().toISOString()};
-  const newSketches = sketches.map((f) => (f.id === sketch.id ? updatedSketch : f));
-  saveSketches(newSketches);
+export function saveNotebook(notebook) {
+  const notebooks = getNotebooks();
+  const updatedNotebook = {...notebook, updated: new Date().toISOString()};
+  const newNotebooks = notebooks.map((f) => (f.id === notebook.id ? updatedNotebook : f));
+  saveNotebooks(newNotebooks);
 }

@@ -4,7 +4,7 @@
 
 > We want to live in the editor forever. — [Luyu Cheng](https://luyu.computer/)
 
-[**Recho**](https://recho.dev/) is a free, [open-source](/LICENCE), light environment for learning and exploration. It introduces a _plain code format_ that combines the simplicity of plain text scripts with notebook-like interactivity, echoing output inline as comments to provide live, in-situ coding experiences with instant feedback. Built on vanilla JavaScript and the reactive model of [Observable Notebook Kit](https://observablehq.com/notebook-kit/), Recho lets developers, artists, and learners explore and create directly in code.
+[**Recho**](https://recho.dev/) is a free, [open-source](/LICENCE), light environment for learning and exploration. It introduces a _plain code format_ for notebooks — echoing output inline as comments for live, in-situ coding with instant feedback. Built on vanilla JavaScript and the reactive model of [Observable Notebook Kit](https://observablehq.com/notebook-kit/), Recho lets developers, artists, and learners explore and create directly in code.
 
 - [Editor](https://recho.dev/) 📝 - The quickest way to get started with Recho.
 - [Announcement](https://medium.com/@subairui/a-lighter-way-to-code-with-creativity-8c0ac739aa6f) 📢 - Read our initial release story to discovery the vision behind Recho.
@@ -17,7 +17,7 @@
 
 On the one hand, we’ve always loved [Observable Notebooks](https://observablehq.com/). To explore a more portable notebook format, we created [Markdown Genji](https://genji-md.dev/), which extends Markdown with notebook-like features. Later, similar ideas appeared in [Observable Framework](https://observablehq.com/framework), and recently, [Observable Notebook Kit](https://observablehq.com/notebook-kit/) introduced an HTML-based file format. That made us wonder — could notebooks be even more portable, perhaps as a plain code file?
 
-On the other hand, we’ve always been interested in making code more accessible and playful. Inspired by the [p5.js web editor](https://editor.p5js.org/), we realized that a _well-designed language doesn’t necessarily make coding more accessible — the environment does_. However, the p5.js web editor achieves this, in part, through its focus on graphics. That made us wonder — could there be an environment that focuses more on computation rather than graphics, yet remains just as accessible and playful?
+On the other hand, we’ve always been interested in making code more accessible and playful. Inspired by the [p5.js web editor](https://editor.p5js.org/), we realized that a _well-designed language doesn’t necessarily make coding more accessible — the environment does_. The p5.js web editor achieves this, in part, through its focus on graphics. That made us wonder — could there be an environment that focuses more on computation rather than graphics, yet remains just as accessible and playful?
 
 To explore these questions, introducing Recho: **[a lighter way to code with creativity](https://medium.com/@subairui/a-lighter-way-to-code-with-creativity-8c0ac739aa6f)**. By "lighter", we mean you can have a lighter start:
 

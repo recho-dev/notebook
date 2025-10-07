@@ -96,7 +96,7 @@ export function Editor({
           <button
             onClick={onRerun}
             data-tooltip-id="action-tooltip"
-            data-tooltip-content="Re-run Sketch"
+            data-tooltip-content="Re-run Notebook"
             data-tooltip-place="bottom"
           >
             <RefreshCcw className={cn(styles.iconButton)} />

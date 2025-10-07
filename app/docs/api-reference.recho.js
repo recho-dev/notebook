@@ -8,7 +8,7 @@
  * =                            API Reference                                 =
  * ============================================================================
  *
- * Recho provides a set of APIs to help you create sketches.
+ * Recho provides a set of APIs to help you create notebooks.
  */
 
 /**

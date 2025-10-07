@@ -9,7 +9,7 @@
  * ============================================================================
  *
  * This page will quickly guide you through the core concepts of Recho. After
- * reading this, you will be able to create your own sketches!
+ * reading this, you will be able to create your own notebooks!
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *                              Inline Echoing
@@ -197,7 +197,7 @@ const size = recho.number(3, {min: 1, max: 8});
 
 /**
  * Interactive controls make it easy to experiment with your code and create
- * engaging, interactive sketches.
+ * engaging, interactive notebooks.
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *                           Asynchronous Operations
@@ -254,8 +254,8 @@ echo(d3.range(10));
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * Errors are echoed as normal output. For syntax errors, they will be
- * positioned at the beginning of the sketch. For runtime errors, they will be
- * positioned above the block that caused the error.
+ * positioned at the beginning of the notebook. For runtime errors, they will
+ * be positioned above the block that caused the error.
  */
 
 //➜ { [TypeError: Assignment to constant variable.] [Symbol(next.console.error.digest)]: "NEXT_CONSOLE_ERROR" }
@@ -275,7 +275,7 @@ echo(d3.range(10));
  *                   |___/
  *
  * You've already mastered the basics of Recho! We highly recommend you to go
- * to the editor: https://recho.dev and start creating your own sketches!
+ * to the editor: https://recho.dev and start creating your own notebooks!
  *
  * If you need inspiration, you can check out the examples page:
  * https://recho.dev/examples to see what you can create with Recho.

@@ -86,7 +86,7 @@ const a = 1;
 const b = 2;
 
 /**
- * Since code (blocks) runs independent of its order in sketch, you can arrange
+ * Since code (blocks) runs independent of its order in notebook, you can arrange
  * code however you want.
  *
  * In addition to that, when a block (`const sum = echo(a + b)`) references
