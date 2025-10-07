@@ -4,7 +4,7 @@
 
 > We want to live in the editor forever. — [Luyu Cheng](https://luyu.computer/)
 
-[**Recho**](https://recho.dev/) is a free, [open-source](/LICENCE), light environment for learning and exploration. It introduces a _plain code format_ combining the simplicity of plain text scripts with notebook-like interactivity — echoing output inline as comments for live, in-situ coding with instant feedback. Built on vanilla JavaScript and the reactive model of [Observable Notebook Kit](https://observablehq.com/notebook-kit/), Recho lets developers, artists, and learners explore and create directly in code.
+[**Recho**](https://recho.dev/) is a free, [open-source](/LICENCE), light environment for learning and exploration. It introduces a _plain code format_ for notebooks — echoing output inline as comments for live, in-situ coding with instant feedback. Built on vanilla JavaScript and the reactive model of [Observable Notebook Kit](https://observablehq.com/notebook-kit/), Recho lets developers, artists, and learners explore and create directly in code.
 
 - [Editor](https://recho.dev/) 📝 - The quickest way to get started with Recho.
 - [Announcement](https://medium.com/@subairui/a-lighter-way-to-code-with-creativity-8c0ac739aa6f) 📢 - Read our initial release story to discovery the vision behind Recho.
