@@ -19,6 +19,10 @@ function uid() {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
+function isError(value) {
+  return value instanceof Error;
+}
+
 function safeEval(code, inputs) {
   const body = `const foo = ${code}; return foo(${inputs.join(",")})`;
   const fn = new Function(...inputs, body);
@@ -82,7 +86,8 @@ export function createRuntime(initialCode) {
       const start = node.start;
       const {values} = node.state;
       if (values.length) {
-        const output = values.map(({value, options}) => formatOutput(value, options)).join("\n") + "\n";
+        const f = (v) => (isError(v) ? formatError(v) : formatOutput(v));
+        const output = values.map(({value, options}) => f(value, options)).join("\n") + "\n";
         changes.push({from: start, insert: output});
       }
     }
