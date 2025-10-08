@@ -5,7 +5,7 @@ const LEGACY_FILE_NAME = "obs-files";
 
 const FILE_NAME = "recho-files";
 
-const DEFAULT_RUNTIME = "javascript@0.0.0-beta.1";
+const DEFAULT_RUNTIME = "javascript@0.1.0";
 
 function generateProjectName() {
   const adj = predicates[~~(Math.random() * predicates.length)];
@@ -42,7 +42,7 @@ export function getNotebooks() {
   if (!files) return [];
   const notebooks = JSON.parse(files).sort((a, b) => new Date(b.updated) - new Date(a.updated));
   // Remove fallback runtime when we have breaking changes.
-  return notebooks.map((notebook) => ({...notebook, runtime: notebook.runtime || DEFAULT_RUNTIME}));
+  return notebooks.map((notebook) => ({...notebook, runtime: DEFAULT_RUNTIME}));
 }
 
 export function clearNotebooksFromLocalStorage() {
