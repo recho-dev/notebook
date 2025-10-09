@@ -3,14 +3,16 @@ import {useState, useEffect, useRef, useCallback, useSyncExternalStore} from "re
 import {notFound} from "next/navigation";
 import {Pencil} from "lucide-react";
 import {Editor} from "./Editor.jsx";
-import {getNotebookById, createNotebook, addNotebook, saveNotebook} from "./api.js";
+import {getNotebookById, createNotebook, addNotebook, saveNotebook, getNotebooks} from "./api.js";
 import {isDirtyStore, countStore} from "./store.js";
 import {cn} from "./cn.js";
+import {SafeLink} from "./SafeLink.jsx";
 
 const UNSET = Symbol("UNSET");
 
 export function EditorPage({id: initialId}) {
   const [notebook, setNotebook] = useState(UNSET);
+  const [notebookList, setNotebookList] = useState([]);
   const [showInput, setShowInput] = useState(false);
   const [autoRun, setAutoRun] = useState(false);
   const [id, setId] = useState(initialId);
@@ -58,6 +60,11 @@ export function EditorPage({id: initialId}) {
       document.title = `${isAdded ? notebook.title : "New"} | Recho`;
     }, 100);
   }, [notebook, isAdded]);
+
+  useEffect(() => {
+    const notebooks = getNotebooks();
+    setNotebookList(notebooks.slice(0, 4));
+  }, [isAdded]);
 
   useEffect(() => {
     const onBeforeUnload = (e) => {
@@ -137,44 +144,98 @@ export function EditorPage({id: initialId}) {
   }
 
   return (
-    <div className={cn("max-w-screen-lg lg:mx-auto mx-4 lg:my-10 my-4 editor-page")}>
-      <Editor
-        initialCode={initialCode}
-        key={notebook.id}
-        onUserInput={onUserInput}
-        onBeforeEachRun={onBeforeEachRun}
-        autoRun={autoRun}
-        toolBarStart={
-          <div className={cn("flex items-center gap-2")}>
-            {!isAdded && (
-              <button
-                onClick={onSave}
-                className={cn("bg-green-700 text-white rounded-md px-3 py-1 text-sm hover:bg-green-800")}
-              >
-                Create
-              </button>
+    <div>
+      {!isAdded && notebookList.length > 0 && (
+        <div className={cn("flex h-[72px] bg-gray-100 p-2 w-full border-b border-gray-200")}>
+          <div
+            className={cn(
+              "flex items-center justify-between gap-2 h-full max-w-screen-lg lg:mx-auto mx-4 w-full hidden md:flex",
             )}
-            {!showInput && isAdded && (
-              <button onClick={onRename}>
-                <Pencil className="w-4 h-4" />
-              </button>
-            )}
-            {showInput || !isAdded ? (
-              <input
-                type="text"
-                value={title}
-                onChange={onTitleChange}
-                onBlur={onTitleBlur}
-                onKeyDown={onTitleKeyDown}
-                ref={titleRef}
-                className={cn("border border-gray-200 rounded-md px-3 py-1 text-sm bg-white")}
-              />
-            ) : (
-              <span className={cn("text-sm py-1 border border-gray-100 rounded-md")}>{notebook.title}</span>
-            )}
+          >
+            {notebookList.map((notebook) => (
+              <div key={notebook.id} className={cn("flex items-start flex-col gap-1")}>
+                <SafeLink
+                  href={`/notebooks/${notebook.id}`}
+                  key={notebook.id}
+                  className={cn(
+                    "font-semibold hover:underline text-blue-500 whitespace-nowrap line-clamp-1 max-w-[150px] text-ellipsis",
+                  )}
+                >
+                  {notebook.title}
+                </SafeLink>
+                <span
+                  className={cn("text-xs text-gray-500 line-clamp-1 whitespace-nowrap max-w-[150px] text-ellipsis")}
+                >
+                  Created {new Date(notebook.created).toLocaleDateString()}
+                </span>
+              </div>
+            ))}
+            <SafeLink href="/notebooks" className={cn("font-semibold text-blue-500 hover:underline")}>
+              View your notebooks
+            </SafeLink>
           </div>
-        }
-      />
+          <div
+            className={cn(
+              "flex items-center justify-between gap-2 h-full max-w-screen-lg lg:mx-auto mx-4 w-full md:hidden",
+            )}
+          >
+            <SafeLink
+              href="/notebooks"
+              className={cn(
+                "font-medium w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-center hover:bg-gray-200",
+              )}
+            >
+              View your notebooks
+            </SafeLink>
+          </div>
+        </div>
+      )}
+      {!isAdded && notebookList.length === 0 && (
+        <div className={cn("flex items-center justify-center h-[72px] mt-6 mb-10 lg:mb-0")}>
+          <p className={cn("text-3xl text-gray-800 font-light text-center mx-10")}>
+            Explore code and art with instant feedback.
+          </p>
+        </div>
+      )}
+      <div className={cn("max-w-screen-lg lg:mx-auto mx-4 lg:my-10 my-4 editor-page")}>
+        <Editor
+          initialCode={initialCode}
+          key={notebook.id}
+          onUserInput={onUserInput}
+          onBeforeEachRun={onBeforeEachRun}
+          autoRun={autoRun}
+          toolBarStart={
+            <div className={cn("flex items-center gap-2")}>
+              {!isAdded && (
+                <button
+                  onClick={onSave}
+                  className={cn("bg-green-700 text-white rounded-md px-3 py-1 text-sm hover:bg-green-800")}
+                >
+                  Create
+                </button>
+              )}
+              {!showInput && isAdded && (
+                <button onClick={onRename}>
+                  <Pencil className="w-4 h-4" />
+                </button>
+              )}
+              {showInput || !isAdded ? (
+                <input
+                  type="text"
+                  value={title}
+                  onChange={onTitleChange}
+                  onBlur={onTitleBlur}
+                  onKeyDown={onTitleKeyDown}
+                  ref={titleRef}
+                  className={cn("border border-gray-200 rounded-md px-3 py-1 text-sm bg-white")}
+                />
+              ) : (
+                <span className={cn("text-sm py-1 border border-gray-100 rounded-md")}>{notebook.title}</span>
+              )}
+            </div>
+          }
+        />
+      </div>
     </div>
   );
 }
