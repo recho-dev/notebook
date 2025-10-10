@@ -156,7 +156,6 @@ export function EditorPage({id: initialId}) {
               <div key={notebook.id} className={cn("flex items-start flex-col gap-1")}>
                 <SafeLink
                   href={`/notebooks/${notebook.id}`}
-                  key={notebook.id}
                   className={cn(
                     "font-semibold hover:underline text-blue-500 whitespace-nowrap line-clamp-1 max-w-[150px] text-ellipsis",
                   )}
