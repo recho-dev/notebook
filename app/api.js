@@ -42,7 +42,12 @@ export function getNotebooks() {
   if (!files) return [];
   const notebooks = JSON.parse(files).sort((a, b) => new Date(b.updated) - new Date(a.updated));
   // Remove fallback runtime when we have breaking changes.
-  return notebooks.map((notebook) => ({...notebook, runtime: DEFAULT_RUNTIME}));
+  return notebooks.map((notebook) => {
+    const newNotebook = {...notebook, runtime: DEFAULT_RUNTIME};
+    // Add fallback created timestamp.
+    if (!newNotebook.created) newNotebook.created = new Date().toISOString();
+    return newNotebook;
+  });
 }
 
 export function clearNotebooksFromLocalStorage() {
@@ -72,6 +77,10 @@ export function addNotebook(notebook) {
 export function saveNotebook(notebook) {
   const notebooks = getNotebooks();
   const updatedNotebook = {...notebook, updated: new Date().toISOString()};
+  // Prevent creating a new notebook if the created timestamp is not set.
+  if (!updatedNotebook.created) {
+    updatedNotebook.created = new Date().toISOString();
+  }
   const newNotebooks = notebooks.map((f) => (f.id === notebook.id ? updatedNotebook : f));
   saveNotebooks(newNotebooks);
 }
