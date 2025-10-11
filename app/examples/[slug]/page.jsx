@@ -1,8 +1,8 @@
 import {notFound} from "next/navigation";
 import {getAllJSExamples, removeJSMeta} from "../../utils.js";
-import {Editor} from "../../Editor.jsx";
 import {cn} from "../../cn.js";
 import {Meta} from "../../Meta.js";
+import {ExampleEditor} from "../ExampleEditor.jsx";
 
 export async function generateStaticParams() {
   return getAllJSExamples().map((example) => ({slug: example.slug}));
@@ -21,27 +21,13 @@ export default async function Page({params}) {
   const {slug} = await params;
   const example = getAllJSExamples().find((example) => example.slug === slug);
   if (!example) notFound();
+  const initialCode = removeJSMeta(example.content);
   return (
     <div className={cn("max-w-screen-lg lg:mx-auto mx-4 lg:my-10 my-4")}>
       <div className={cn("mb-6")}>
         <Meta example={example} />
       </div>
-      <Editor
-        initialCode={removeJSMeta(example.content)}
-        key={example.title}
-        toolBarStart={
-          <div className={cn("flex items-center")} key={example.slug}>
-            <a
-              href={`https://github.com/recho-dev/recho/pull/${example.pull_request}`}
-              target="_blank"
-              rel="noreferrer"
-              className={cn("bg-green-700 text-white rounded-md px-3 py-1 text-sm hover:bg-green-800")}
-            >
-              Comment
-            </a>
-          </div>
-        }
-      />
+      <ExampleEditor example={example} initialCode={initialCode} />
     </div>
   );
 }

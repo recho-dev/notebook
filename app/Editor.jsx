@@ -1,6 +1,6 @@
 "use client";
 import {useEffect, useRef, useState} from "react";
-import {Play, Square, RefreshCcw} from "lucide-react";
+import {Play, Square, RefreshCcw, Copy} from "lucide-react";
 import {Tooltip} from "react-tooltip";
 import {createEditor} from "../editor/index.js";
 import {cn} from "./cn.js";
@@ -16,6 +16,7 @@ export function Editor({
   autoRun = true,
   toolBarStart = null,
   pinToolbar = true,
+  onDuplicate = null,
 }) {
   const containerRef = useRef(null);
   const editorRef = useRef(null);
@@ -109,6 +110,16 @@ export function Editor({
           >
             <Square className={cn(styles.iconButton)} />
           </button>
+          {onDuplicate && (
+            <button
+              onClick={onDuplicate}
+              data-tooltip-id="action-tooltip"
+              data-tooltip-content="Duplicate Notebook"
+              data-tooltip-place="bottom"
+            >
+              <Copy className={cn(styles.iconButton)} />
+            </button>
+          )}
         </div>
       </div>
       <div ref={containerRef}>

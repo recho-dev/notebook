@@ -1,9 +1,9 @@
 "use client";
 import {useState, useEffect, useRef, useCallback, useSyncExternalStore} from "react";
-import {notFound} from "next/navigation";
+import {notFound, useRouter} from "next/navigation";
 import {Pencil} from "lucide-react";
 import {Editor} from "./Editor.jsx";
-import {getNotebookById, createNotebook, addNotebook, saveNotebook, getNotebooks} from "./api.js";
+import {getNotebookById, createNotebook, addNotebook, saveNotebook, getNotebooks, duplicateNotebook} from "./api.js";
 import {isDirtyStore, countStore} from "./store.js";
 import {cn} from "./cn.js";
 import {SafeLink} from "./SafeLink.jsx";
@@ -11,6 +11,7 @@ import {SafeLink} from "./SafeLink.jsx";
 const UNSET = Symbol("UNSET");
 
 export function EditorPage({id: initialId}) {
+  const router = useRouter();
   const [notebook, setNotebook] = useState(UNSET);
   const [notebookList, setNotebookList] = useState([]);
   const [showInput, setShowInput] = useState(false);
@@ -143,6 +144,12 @@ export function EditorPage({id: initialId}) {
     }, 100);
   }
 
+  function onDuplicate() {
+    const duplicated = duplicateNotebook(notebook);
+    addNotebook(duplicated);
+    router.push(`/notebooks/${duplicated.id}`);
+  }
+
   return (
     <div>
       {!isAdded && notebookList.length > 0 && (
@@ -203,6 +210,7 @@ export function EditorPage({id: initialId}) {
           onUserInput={onUserInput}
           onBeforeEachRun={onBeforeEachRun}
           autoRun={autoRun}
+          onDuplicate={isAdded ? onDuplicate : null}
           toolBarStart={
             <div className={cn("flex items-center gap-2")}>
               {!isAdded && (
