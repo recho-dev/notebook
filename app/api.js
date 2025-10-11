@@ -84,3 +84,26 @@ export function saveNotebook(notebook) {
   const newNotebooks = notebooks.map((f) => (f.id === notebook.id ? updatedNotebook : f));
   saveNotebooks(newNotebooks);
 }
+
+export function generateDuplicateName(originalName) {
+  // Handle names with extension like "xxx.js" -> "xxx copy.js"
+  const lastDotIndex = originalName.lastIndexOf(".");
+  if (lastDotIndex > 0) {
+    const name = originalName.substring(0, lastDotIndex);
+    const extension = originalName.substring(lastDotIndex);
+    return `${name} copy${extension}`;
+  }
+  // Handle names without extension like "xxx" -> "xxx copy"
+  return `${originalName} copy`;
+}
+
+export function duplicateNotebook(sourceNotebook) {
+  const newNotebook = createNotebook();
+  const duplicatedTitle = generateDuplicateName(sourceNotebook.title);
+  return {
+    ...newNotebook,
+    title: duplicatedTitle,
+    content: sourceNotebook.content,
+    autoRun: sourceNotebook.autoRun,
+  };
+}
