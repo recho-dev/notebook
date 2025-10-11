@@ -86,14 +86,14 @@ export function saveNotebook(notebook) {
 }
 
 export function generateDuplicateName(originalName) {
-  // Handle names with extension like "xxx.js" -> "xxx copy.js"
+  // Handle names with extension like "[NAME].js" -> "[NAME] copy.js"
   const lastDotIndex = originalName.lastIndexOf(".");
   if (lastDotIndex > 0) {
     const name = originalName.substring(0, lastDotIndex);
     const extension = originalName.substring(lastDotIndex);
     return `${name} copy${extension}`;
   }
-  // Handle names without extension like "xxx" -> "xxx copy"
+  // Handle names without extension like "NAME" -> "NAME copy"
   return `${originalName} copy`;
 }
 

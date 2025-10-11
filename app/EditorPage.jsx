@@ -3,14 +3,7 @@ import {useState, useEffect, useRef, useCallback, useSyncExternalStore} from "re
 import {notFound, useRouter} from "next/navigation";
 import {Pencil} from "lucide-react";
 import {Editor} from "./Editor.jsx";
-import {
-  getNotebookById,
-  createNotebook,
-  addNotebook,
-  saveNotebook,
-  getNotebooks,
-  duplicateNotebook,
-} from "./api.js";
+import {getNotebookById, createNotebook, addNotebook, saveNotebook, getNotebooks, duplicateNotebook} from "./api.js";
 import {isDirtyStore, countStore} from "./store.js";
 import {cn} from "./cn.js";
 import {SafeLink} from "./SafeLink.jsx";
