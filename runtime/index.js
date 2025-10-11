@@ -86,7 +86,7 @@ export function createRuntime(initialCode) {
       const start = node.start;
       const {values} = node.state;
       if (values.length) {
-        const f = (v) => (isError(v) ? formatError(v) : formatOutput(v));
+        const f = (v, o) => (isError(v) ? formatError(v, o) : formatOutput(v, o));
         const output = values.map(({value, options}) => f(value, options)).join("\n") + "\n";
         changes.push({from: start, insert: output});
       }
