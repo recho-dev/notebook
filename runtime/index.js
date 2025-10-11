@@ -5,9 +5,11 @@ import {parse} from "acorn";
 import {group} from "d3-array";
 import {dispatch as d3Dispatch} from "d3-dispatch";
 import * as stdlib from "./stdlib.js";
-import {OUTPUT_MARK} from "./constant.js";
+import {OUTPUT_MARK, ERROR_MARK} from "./constant.js";
 
-const PREFIX = `//${OUTPUT_MARK}`;
+const OUTPUT_PREFIX = `//${OUTPUT_MARK}`;
+
+const ERROR_PREFIX = `//${ERROR_MARK}`;
 
 const BUILTINS = {
   recho: () => stdlib,
@@ -15,6 +17,10 @@ const BUILTINS = {
 
 function uid() {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+}
+
+function isError(value) {
+  return value instanceof Error;
 }
 
 function safeEval(code, inputs) {
@@ -46,10 +52,18 @@ function inspect(value, {limit = 200, quote = "double", indent = null} = {}) {
   return string;
 }
 
-function format(value, options) {
+function format(value, options, prefix) {
   const string = inspect(value, options);
   const lines = string.split("\n");
-  return lines.map((line) => `${PREFIX} ${line}`).join("\n");
+  return lines.map((line) => `${prefix} ${line}`).join("\n");
+}
+
+function formatOutput(value, options) {
+  return format(value, options, OUTPUT_PREFIX);
+}
+
+function formatError(value, options) {
+  return format(value, options, ERROR_PREFIX);
 }
 
 export function createRuntime(initialCode) {
@@ -72,7 +86,8 @@ export function createRuntime(initialCode) {
       const start = node.start;
       const {values} = node.state;
       if (values.length) {
-        const output = values.map(({value, options}) => format(value, options)).join("\n") + "\n";
+        const f = (v, o) => (isError(v) ? formatError(v, o) : formatOutput(v, o));
+        const output = values.map(({value, options}) => f(value, options)).join("\n") + "\n";
         changes.push({from: start, insert: output});
       }
     }
@@ -127,7 +142,7 @@ export function createRuntime(initialCode) {
     } catch (error) {
       console.error(error);
       const changes = removeChanges(code);
-      const errorMsg = format(error) + "\n";
+      const errorMsg = formatError(error) + "\n";
       changes.push({from: 0, insert: errorMsg});
       dispatch(changes);
       return null;
@@ -140,7 +155,7 @@ export function createRuntime(initialCode) {
     } catch (error) {
       console.error(error);
       const changes = removeChanges(code);
-      const errorMsg = format(error) + "\n";
+      const errorMsg = formatError(error) + "\n";
       changes.push({from: 0, insert: errorMsg});
       dispatch(changes);
       return null;
@@ -153,7 +168,7 @@ export function createRuntime(initialCode) {
     const oldOutputs = code
       .split("\n")
       .map((l, i) => [l, i])
-      .filter(([l]) => l.startsWith(PREFIX))
+      .filter(([l]) => l.startsWith(OUTPUT_PREFIX) || l.startsWith(ERROR_PREFIX))
       .map(([_, i]) => i);
 
     const lineOf = (i) => {
