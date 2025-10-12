@@ -149,7 +149,7 @@ export function createRuntime(initialCode) {
     }
   }
 
-  function transpile(cell, code) {
+  function transpile(cell) {
     try {
       return transpileJavaScript(cell);
     } catch (error) {
@@ -207,7 +207,7 @@ export function createRuntime(initialCode) {
 
     for (const node of nodes) {
       const cell = code.slice(node.start, node.end);
-      const transpiled = transpile(cell, code);
+      const transpiled = transpile(cell);
       node.transpiled = transpiled;
     }
 
