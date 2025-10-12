@@ -70,7 +70,6 @@ export function createRuntime(initialCode) {
   let code = initialCode;
   let prevCode = null;
   let isRunning = false;
-  let noSyntaxError = false;
 
   const runtime = new Runtime(BUILTINS);
   const main = runtime.module();
@@ -129,9 +128,10 @@ export function createRuntime(initialCode) {
         if (isRunning) rerun(code);
       },
       rejected(error) {
-        console.error(error);
+        const e = state.syntaxError || error;
+        console.error(e);
         clear(state);
-        echo(state, error);
+        echo(state, e);
       },
     };
   }
@@ -149,16 +149,11 @@ export function createRuntime(initialCode) {
     }
   }
 
-  function transpile(cell, code) {
+  function transpile(cell) {
     try {
       return transpileJavaScript(cell);
     } catch (error) {
-      console.error(error);
-      const changes = removeChanges(code);
-      const errorMsg = formatError(error) + "\n";
-      changes.push({from: 0, insert: errorMsg});
-      dispatch(changes);
-      return null;
+      return {body: cell, inputs: [], outputs: [], error};
     }
   }
 
@@ -202,25 +197,19 @@ export function createRuntime(initialCode) {
   }
 
   function rerun(code) {
-    // If the code is the same as the pervious one, and the previous code has no syntax error,
-    // there is no need to to update the position of blocks. So skip the diffing and just
-    // refresh the outputs.
-    if (code === prevCode && noSyntaxError) return refresh(code);
+    if (code === prevCode) return refresh(code);
 
     prevCode = code;
     isRunning = true;
-    noSyntaxError = false;
 
     const nodes = split(code);
     if (!nodes) return;
 
     for (const node of nodes) {
       const cell = code.slice(node.start, node.end);
-      const transpiled = transpile(cell, code);
+      const transpiled = transpile(cell);
       node.transpiled = transpiled;
     }
-    if (nodes.some((n) => !n.transpiled)) return;
-    noSyntaxError = true;
 
     const groups = group(nodes, (n) => code.slice(n.start, n.end));
     const enter = [];
@@ -265,9 +254,9 @@ export function createRuntime(initialCode) {
     // @ref https://github.com/observablehq/notebook-kit/blob/02914e034fd21a50ebcdca08df57ef5773864125/src/runtime/define.ts#L33
     for (const node of enter) {
       const vid = uid();
-      const state = {values: [], variables: [], error: null, doc: false};
+      const {inputs, body, outputs, error = null} = node.transpiled;
+      const state = {values: [], variables: [], error: null, syntaxError: error, doc: false};
       node.state = state;
-      const {inputs, body, outputs} = node.transpiled;
       const v = main.variable(observer(state), {shadow: {}});
       if (inputs.includes("echo")) {
         state.doc = true;
