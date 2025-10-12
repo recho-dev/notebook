@@ -25,8 +25,8 @@ function computeLineNumbers(state) {
     enter: (node) => {
       // Find top-level single-line comments.
       if (node.name === "LineComment" && node.node.parent.name === "Script") {
-        // Check if the line comment covers the entire line.
         const line = state.doc.lineAt(node.from);
+        // Check if the line comment covers the entire line.
         if (line.from !== node.from || line.to !== node.to) return;
         if (line.text.codePointAt(2) === OUTPUT_MARK_CODE_POINT) {
           lineNumbers.push({
@@ -36,6 +36,12 @@ function computeLineNumbers(state) {
             type: "output",
           });
         }
+      }
+
+      // For error messages, it's Ok if the line is not top-level.
+      if (node.name === "LineComment") {
+        const line = state.doc.lineAt(node.from);
+        if (line.from !== node.from || line.to !== node.to) return;
         if (line.text.codePointAt(2) === ERROR_MARK_CODE_POINT) {
           lineNumbers.push({
             number: line.number,

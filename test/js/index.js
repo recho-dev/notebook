@@ -15,3 +15,4 @@ export {matrixRain} from "./matrix-rain.js";
 export {jsDocString} from "./js-doc-string.js";
 export {commentLink} from "./comment-link.js";
 export {syntaxError3} from "./syntax-error3.js";
+export {syntaxError4} from "./syntax-error4.js";
