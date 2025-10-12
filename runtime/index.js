@@ -141,9 +141,14 @@ export function createRuntime(initialCode) {
       return parse(code, {ecmaVersion: "latest", sourceType: "module"}).body;
     } catch (error) {
       console.error(error);
+      // Display the error at the start of the line where the error occurred.
+      const loc = error.loc;
+      const prevLine = code.split("\n").slice(0, loc.line - 1);
+      const offset = loc.line === 1 ? 0 : 1;
+      const from = prevLine.join("\n").length + offset;
       const changes = removeChanges(code);
       const errorMsg = formatError(error) + "\n";
-      changes.push({from: 0, insert: errorMsg});
+      changes.push({from, insert: errorMsg});
       dispatch(changes);
       return null;
     }

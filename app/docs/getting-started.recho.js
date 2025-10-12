@@ -151,7 +151,7 @@ echo(counter);
 const showDetails = recho.toggle(true);
 
 //➜ "Details: Enabled"
-echo(`Details: ${showDetails ? 'Enabled' : 'Disabled'}`);
+echo(`Details: ${showDetails ? "Enabled" : "Disabled"}`);
 
 /**
  * The `recho.radio` function creates a radio button group for selecting from
@@ -253,9 +253,9 @@ echo(d3.range(10));
  *                           Errors Handling
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * Errors are echoed as normal output. For syntax errors, they will be
- * positioned at the beginning of the notebook. For runtime errors, they will
- * be positioned above the block that caused the error.
+ * Errors are echoed as normal output. For syntax errors, they will be positioned
+ * at the start of the line where the error occurred. For runtime errors, they
+ * will be positioned above the block that caused the error.
  */
 
 //➜ { [TypeError: Assignment to constant variable.] [Symbol(next.console.error.digest)]: "NEXT_CONSOLE_ERROR" }
