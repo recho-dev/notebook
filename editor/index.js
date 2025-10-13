@@ -1,10 +1,13 @@
 import {EditorView, basicSetup} from "codemirror";
 import {EditorState, Transaction} from "@codemirror/state";
 import {keymap} from "@codemirror/view";
-import {javascript, javascriptLanguage} from "@codemirror/lang-javascript";
+import {javascript, javascriptLanguage, esLint} from "@codemirror/lang-javascript";
+import {linter} from "@codemirror/lint";
 import {githubLightInit} from "@uiw/codemirror-theme-github";
 import {tags as t} from "@lezer/highlight";
 import {indentWithTab} from "@codemirror/commands";
+import {browser} from "globals";
+import * as eslint from "eslint-linter-browserify";
 import {createRuntime} from "../runtime/index.js";
 import {outputDecoration} from "./decoration.js";
 import {outputLines} from "./outputLines.js";
@@ -14,6 +17,20 @@ import {controls} from "./controls/index.js";
 import {rechoCompletion} from "./completion.js";
 import {docStringTag} from "./docStringTag.js";
 import {commentLink} from "./commentLink.js";
+
+// @see https://github.com/UziTech/eslint-linter-browserify/blob/master/example/script.js
+// @see https://codemirror.net/examples/lint/
+const eslintConfig = {
+  languageOptions: {
+    globals: {
+      ...browser,
+    },
+    parserOptions: {
+      ecmaVersion: 2022,
+      sourceType: "module",
+    },
+  },
+};
 
 export function createEditor(container, options) {
   const {code} = options;
@@ -57,6 +74,7 @@ export function createEditor(container, options) {
       // outputProtection(),
       docStringTag,
       commentLink,
+      linter(esLint(new eslint.Linter(), eslintConfig)),
     ],
   });
 
