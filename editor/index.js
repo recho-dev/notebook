@@ -1,10 +1,13 @@
 import {EditorView, basicSetup} from "codemirror";
 import {EditorState, Transaction} from "@codemirror/state";
 import {keymap} from "@codemirror/view";
-import {javascript, javascriptLanguage} from "@codemirror/lang-javascript";
+import {javascript, javascriptLanguage, esLint} from "@codemirror/lang-javascript";
+import {linter} from "@codemirror/lint";
 import {githubLightInit} from "@uiw/codemirror-theme-github";
 import {tags as t} from "@lezer/highlight";
 import {indentWithTab} from "@codemirror/commands";
+import globals from "globals";
+import * as eslint from "eslint-linter-browserify";
 import {createRuntime} from "../runtime/index.js";
 import {outputDecoration} from "./decoration.js";
 import {outputLines} from "./outputLines.js";
@@ -57,6 +60,20 @@ export function createEditor(container, options) {
       // outputProtection(),
       docStringTag,
       commentLink,
+      // @see https://github.com/UziTech/eslint-linter-browserify/blob/master/example/script.js
+      linter(
+        esLint(new eslint.Linter(), {
+          languageOptions: {
+            globals: {
+              ...globals.browser,
+            },
+            parserOptions: {
+              ecmaVersion: 2022,
+              sourceType: "module",
+            },
+          },
+        }),
+      ),
     ],
   });
 
