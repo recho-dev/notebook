@@ -55,10 +55,10 @@ const search = null;
 //➜
 //➜
 {
-  echo(`⚡ Type: ${pokemon.types[0].type.name.toUpperCase()}`, {quote: false});
-  echo(`⚖️ Weight: ${pokemon.weight}`, {quote: false});
-  echo(`📏 Height: ${pokemon.height}`, {quote: false});
-  echo("", {quote: false});
+  echo(recho.inspect(`⚡ Type: ${pokemon.types[0].type.name.toUpperCase()}`, {quote: false}));
+  echo(recho.inspect(`⚖️ Weight: ${pokemon.weight}`, {quote: false}));
+  echo(recho.inspect(`📏 Height: ${pokemon.height}`, {quote: false}));
+  echo(recho.inspect("", {quote: false}));
   img2ASCIIString(pokemon.sprites.front_default).then(echo);
 }
 

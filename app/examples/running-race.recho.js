@@ -30,9 +30,9 @@ const rocket = recho.interval(2);
 //➜           🚀💨
 {
   const x = (count) => 40 - (count % 40);
-  echo("🐌💨".padStart(x(snail)), {quote: false});
-  echo("🐢💨".padStart(x(turtle)), {quote: false});
-  echo("🚶‍♂️💨".padStart(x(human)), {quote: false});
-  echo("🚗💨".padStart(x(car)), {quote: false});
-  echo("🚀💨".padStart(x(rocket)), {quote: false});
+  echo("🐌💨".padStart(x(snail)));
+  echo("🐢💨".padStart(x(turtle)));
+  echo("🚶‍♂️💨".padStart(x(human)));
+  echo("🚗💨".padStart(x(car)));
+  echo("🚀💨".padStart(x(rocket)));
 }

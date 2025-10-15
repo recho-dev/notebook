@@ -1,11 +1,11 @@
 import {transpileJavaScript} from "@observablehq/notebook-kit";
 import {Runtime} from "@observablehq/runtime";
-import inspector from "object-inspect";
 import {parse} from "acorn";
-import {group} from "d3-array";
+import {group, max} from "d3-array";
 import {dispatch as d3Dispatch} from "d3-dispatch";
 import * as stdlib from "./stdlib.js";
 import {OUTPUT_MARK, ERROR_MARK} from "./constant.js";
+import {Inspector} from "./inspect.js";
 
 const OUTPUT_PREFIX = `//${OUTPUT_MARK}`;
 
@@ -37,33 +37,39 @@ function debounce(fn, delay = 0) {
   };
 }
 
-function isMultiline(value) {
-  const isString = typeof value === "string";
-  if (!isString) return false;
-  const lines = value.split("\n");
-  return lines.length > 1;
+function padStringWidth(string) {
+  const lines = string.split("\n");
+  const maxLength = max(lines, (line) => line.length);
+  return lines.map((line) => line.padEnd(maxLength)).join("\n");
 }
 
-function inspect(value, {limit = 200, quote = "double", indent = null} = {}) {
-  if (isMultiline(value)) return value;
-  if (typeof value === "string" && !quote) return value;
-  const string = inspector(value, {indent, quoteStyle: quote});
-  if (string.length > limit) return string.slice(0, limit) + "…";
-  return string;
+function padStringHeight(string, height) {
+  const lines = string.split("\n");
+  const diff = height - lines.length;
+  return lines.join("\n") + "\n".repeat(diff);
 }
 
-function format(value, options, prefix) {
-  const string = inspect(value, options);
+function merge(...strings) {
+  const maxHeight = max(strings, (string) => string.split("\n").length);
+  const aligned = strings
+    .map((string) => padStringHeight(string, maxHeight))
+    .map((string) => padStringWidth(string))
+    .map((string) => string.split("\n"));
+  let output = "";
+  for (let i = 0; i < maxHeight; i++) {
+    for (let j = 0; j < aligned.length; j++) {
+      const line = aligned[j][i];
+      output += line;
+      output += j < aligned.length - 1 ? " " : "";
+    }
+    output += i < maxHeight - 1 ? "\n" : "";
+  }
+  return output;
+}
+
+function addPrefix(string, prefix) {
   const lines = string.split("\n");
   return lines.map((line) => `${prefix} ${line}`).join("\n");
-}
-
-function formatOutput(value, options) {
-  return format(value, options, OUTPUT_PREFIX);
-}
-
-function formatError(value, options) {
-  return format(value, options, ERROR_PREFIX);
 }
 
 export function createRuntime(initialCode) {
@@ -85,9 +91,26 @@ export function createRuntime(initialCode) {
       const start = node.start;
       const {values} = node.state;
       if (values.length) {
-        const f = (v, o) => (isError(v) ? formatError(v, o) : formatOutput(v, o));
-        const output = values.map(({value, options}) => f(value, options)).join("\n") + "\n";
-        changes.push({from: start, insert: output});
+        let output = "";
+        let error = false;
+        for (let i = 0; i < values.length; i++) {
+          const line = values[i];
+          const n = line.length;
+          const formatted = line.map((v) => {
+            if (isError(v)) error = true;
+            // If there are multiple values, we don't want to quote the string values.
+            // such as echo("a =", 1) results in "a = 1" instead of "a = "1"".
+            const options = n === 1 ? {} : {quote: false};
+            const inspector = v instanceof Inspector ? v : new Inspector(v, options);
+            return inspector.format();
+          });
+          const merged = merge(...formatted);
+          output += merged;
+          output += i < values.length - 1 ? "\n" : "";
+        }
+        const prefix = error ? ERROR_PREFIX : OUTPUT_PREFIX;
+        const prefixed = addPrefix(output, prefix);
+        changes.push({from: start, insert: prefixed + "\n"});
       }
     }
 
@@ -147,7 +170,7 @@ export function createRuntime(initialCode) {
       const offset = loc.line === 1 ? 0 : 1;
       const from = prevLine.join("\n").length + offset;
       const changes = removeChanges(code);
-      const errorMsg = formatError(error) + "\n";
+      const errorMsg = addPrefix(new Inspector(error).format(), ERROR_PREFIX) + "\n";
       changes.push({from, insert: errorMsg});
       dispatch(changes);
       return null;
@@ -189,9 +212,9 @@ export function createRuntime(initialCode) {
     return changes;
   }
 
-  function echo(state, value, options) {
+  function echo(state, ...values) {
     if (!isRunning) return;
-    state.values.push({value, options});
+    state.values.push(values);
     rerun(code);
   }
 
@@ -270,13 +293,13 @@ export function createRuntime(initialCode) {
           inputs.filter((i) => i !== "echo" && i !== "clear"),
           () => {
             const version = v._version; // Capture version on input change.
-            return (value, options) => {
+            return (value, ...args) => {
               if (version < docVersion) throw new Error("stale echo");
               else if (state.variables[0] !== v) throw new Error("stale echo");
               else if (version > docVersion) clear(state);
               docVersion = version;
-              echo(state, value, options);
-              return value;
+              echo(state, value, ...args);
+              return args.length ? [value, ...args] : value;
             };
           },
         );
