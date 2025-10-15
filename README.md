@@ -1,6 +1,6 @@
 # Recho Notebook
 
-![preview](/public/news/a-ligter-way-to-code-with-creativity.webp)
+![preview](./img/preview.png)
 
 > We want to live in the editor forever. — [Luyu Cheng](https://luyu.computer/)
 
