@@ -117,8 +117,8 @@ export function createRuntime(initialCode) {
   function observer(state) {
     return {
       pending() {
-        clear(state);
-        if (state.doc) echo(state, "Pending…", {quote: false});
+        // clear(state);
+        // if (state.doc) echo(state, "Pending…", {quote: false});
       },
       fulfilled() {
         // Before blocks are fulfilled, their position might be changed or
@@ -264,7 +264,6 @@ export function createRuntime(initialCode) {
       node.state = state;
       const v = main.variable(observer(state), {shadow: {}});
       if (inputs.includes("echo")) {
-        state.doc = true;
         let docVersion = -1;
         const vd = new v.constructor(2, v._module);
         vd.define(

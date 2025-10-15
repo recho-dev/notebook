@@ -7,3 +7,4 @@ export {runtimeError} from "./runtime-error.js";
 export {syntaxError2} from "./syntax-error2.js";
 export {syntaxError3} from "./syntax-error3.js";
 export {syntaxError4} from "./syntax-error4.js";
+export {nonCallEcho} from "./non-call-echo.js";
