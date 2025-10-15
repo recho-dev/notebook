@@ -95,7 +95,7 @@ export function createRuntime(initialCode) {
         let error = false;
         for (let i = 0; i < values.length; i++) {
           const line = values[i];
-          const n = values[i].length;
+          const n = line.length;
           const formatted = line.map((v) => {
             if (isError(v)) error = true;
             // If there are multiple values, we don't want to quote the string values.
