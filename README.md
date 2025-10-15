@@ -1,4 +1,4 @@
-# Recho: Reactive Echo
+# Recho Notebook
 
 ![preview](/public/news/a-ligter-way-to-code-with-creativity.webp)
 

@@ -18,7 +18,7 @@ export async function generateMetadata({params}) {
   const blog = news.find((news) => slugof(news) === slug);
   if (!blog) notFound();
   return {
-    title: `${blog.title} | Recho`,
+    title: `${blog.title} | Recho Notebook`,
   };
 }
 

@@ -1,5 +1,5 @@
 /**
- * @title Recho's Number Input Control
+ * @title Recho Notebook's Number Input Control
  * @author Luyu Cheng
  * @created 2025-09-29
  * @pull_request 134
@@ -9,7 +9,7 @@
 
 /**
  * ============================================================================
- * =               Recho's Interactive Number Input Control                   =
+ * =            Recho Notebook's Interactive Number Input Control            =
  * ============================================================================
  */
 

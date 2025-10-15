@@ -1,6 +1,6 @@
-# Recho - Contributing
+# Recho Notebook - Contributing
 
-Recho is open source and released under the [ISC license](/LICENCE). You are welcome to contribute in different ways: open a [pull request](https://github.com/recho-dev/recho/pulls), participate in [issues](https://github.com/recho-dev/recho/issues) and [discussions](https://github.com/recho-dev/recho/discussions) or star this project!
+Recho Notebook is open source and released under the [ISC license](/LICENCE). You are welcome to contribute in different ways: open a [pull request](https://github.com/recho-dev/recho/pulls), participate in [issues](https://github.com/recho-dev/recho/issues) and [discussions](https://github.com/recho-dev/recho/discussions) or star this project!
 
 ## Sharing Examples
 

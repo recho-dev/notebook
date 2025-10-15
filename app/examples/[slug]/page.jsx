@@ -13,7 +13,7 @@ export async function generateMetadata({params}) {
   const example = getAllJSExamples().find((example) => example.slug === slug);
   if (!example) notFound();
   return {
-    title: `${example.title} | Recho`,
+    title: `${example.title} | Recho Notebook`,
   };
 }
 

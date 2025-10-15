@@ -58,7 +58,9 @@ export function Nav() {
     <header className={cn("flex justify-between items-center p-4 border-b border-gray-200")}>
       <div className={cn("flex md:gap-2 items-center")}>
         <SafeLink href="/">
-          <h1 className={cn("text-2xl font-bold")}>Recho</h1>
+          <h1 className={cn("text-xl font-bold")}>
+            Recho<span className={cn("hidden md:inline")}> Notebook</span>
+          </h1>
         </SafeLink>
         {/* Desktop navigation */}
         <div className={cn("hidden md:flex gap-2 items-center")}>

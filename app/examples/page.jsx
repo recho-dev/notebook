@@ -4,8 +4,8 @@ import {Meta} from "../Meta.js";
 import {ThumbnailServer} from "../ThumbnailServer.js";
 
 export const metadata = {
-  title: "Examples | Recho",
-  description: "Examples | Recho",
+  title: "Examples | Recho Notebook",
+  description: "Examples | Recho Notebook",
 };
 
 export default function Page() {
