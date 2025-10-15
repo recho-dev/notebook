@@ -121,8 +121,8 @@ export function Nav() {
         </SafeLink>
 
         <SafeLink
-          href="/notebooks"
-          className={cn(styles.link, pathname === "/notebooks" && styles.selectedLink)}
+          href="/works"
+          className={cn(styles.link, pathname === "/works" && styles.selectedLink)}
           data-tooltip-id="nav-tooltip"
           data-tooltip-content="Open Notebooks"
         >
