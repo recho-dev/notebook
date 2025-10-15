@@ -13,36 +13,51 @@
 
 /**
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *                         echo(value[, options])
+ *                         echo(...values)
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * Echos a value inline with your code as comments.
+ * Echos one or more values inline with your code as comments. If only one
+ * value is provided, return the value itself. If multiple values are provided,
+ * return all the values as an array.
  *
- * @param {any} value - The value to echo.
- * @param {Object} [options] - The options to format the output.
- * @param {string} [options.quote="double"] - The quote style of the output.
- * @param {number} [options.indent=null] - The indentation of the output.
- * @param {number} [options.limit=200] - The limit of the output.
- * @returns {any} The value.
+ * @param {...any} values - The values to echo.
+ * @returns {any} The values if multiple values are provided, or the single value.
  */
 
 //➜ "Hello, World!"
 echo("Hello, World!");
 
-//➜ 'Hello, World!'
-echo("Hello, World!", {quote: "single"});
+//➜ 1 2 3
+echo(1, 2, 3);
 
-//➜ Hello, World!
-echo("Hello, World!", {quote: false});
+//➜ Peter:  Age = 20
+//➜         Height = 180
+echo("Peter: ", "Age = 20\nHeight = 180");
 
-//➜ {
-//➜   a: 1,
-//➜   b: 2
-//➜ }
-echo({a: 1, b: 2}, {indent: 2});
+const a = echo(1 + 2);
 
-//➜ [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
-echo(new Array(100).fill(0), {limit: 80});
+//➜ 3
+echo(a);
+
+const numbers = echo(1, 2, 3);
+
+//➜ [ 1, 2, 3 ]
+echo(numbers);
+
+/**
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *                      recho.inspect(value[, options])
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * Formats a value for inspection with customizable options.
+ *
+ * @param {any} value - The value to inspect.
+ * @param {Object} [options] - The options to format the output.
+ * @param {string} [options.quote="double"] - The quote style of the output ("single", "double", or false).
+ * @param {number} [options.indent=null] - The indentation of the output (null, "\t", or a positive integer).
+ * @param {number} [options.limit=200] - The character limit of the output.
+ * @returns {string} The formatted string representation of the value.
+ */
 
 /**
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -138,7 +153,7 @@ const Noise = recho.require("perlin-noise-3d");
   for (let i = 0; i < 100; i++) {
     values.push(noise.get(i / 100, i / 100, i / 100));
   }
-  echo(values, {limit: 80});
+  echo(recho.inspect(values, {limit: 80}));
 }
 
 const d3 = recho.require("d3-array", "d3-random");
@@ -166,8 +181,8 @@ const isVisible = recho.toggle(false);
 //➜ "The button is enabled."
 //➜ "The button is hidden."
 {
-  echo(`The button is ${isEnabled ? 'enabled' : 'disabled'}.`);
-  echo(`The button is ${isVisible ? 'visible' : 'hidden'}.`);
+  echo(`The button is ${isEnabled ? "enabled" : "disabled"}.`);
+  echo(`The button is ${isVisible ? "visible" : "hidden"}.`);
 }
 
 /**
@@ -246,6 +261,6 @@ const temperature = recho.number(24, {min: -10, max: 40, step: 0.5});
 
 //➜ "The room temperature is 24 °C (75.2 °F)."
 {
-  const fahrenheit = (temperature * 9 / 5) + 32;
+  const fahrenheit = (temperature * 9) / 5 + 32;
   echo(`The room temperature is ${temperature} °C (${fahrenheit} °F).`);
 }

@@ -8,8 +8,8 @@
  * =                         Animations Authoring                             =
  * ============================================================================
  *
- * Animations are very powerful tools making your notebooks more interactive 
- * and engaging. In Recho, there are at least two ways to author animations. 
+ * Animations are very powerful tools making your notebooks more interactive
+ * and engaging. In Recho, there are at least two ways to author animations.
  * You can choose either one which suits you best.
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -69,11 +69,11 @@ const rocket = recho.interval(2);
 //➜                                    🚀💨
 {
   const x = (count) => 40 - (count % 40);
-  echo("🐌💨".padStart(x(snail)), {quote: false});
-  echo("🐢💨".padStart(x(turtle)), {quote: false});
-  echo("🚶‍♂️💨".padStart(x(human)), {quote: false});
-  echo("🚗💨".padStart(x(car)), {quote: false});
-  echo("🚀💨".padStart(x(rocket)), {quote: false});
+  echo("🐌💨".padStart(x(snail)));
+  echo("🐢💨".padStart(x(turtle)));
+  echo("🚶‍♂️💨".padStart(x(human)));
+  echo("🚗💨".padStart(x(car)));
+  echo("🚀💨".padStart(x(rocket)));
 }
 
 /**
@@ -94,7 +94,7 @@ echo(now);
 const x = echo(Math.abs(~~(Math.sin(now / 1000) * 22)));
 
 //➜ ~(๑•̀ㅂ•́)و✧
-echo("~".repeat(x) + "(๑•̀ㅂ•́)و✧", {quote: false});
+echo("~".repeat(x) + "(๑•̀ㅂ•́)و✧");
 
 /**
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
