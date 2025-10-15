@@ -21,16 +21,16 @@
  *
  * > We want to live in the editor forever. — Luyu Cheng[1]
  *
- * Recho[2] is a free, open-source, light environment for learning and
- * exploration. It introduces a plain code format for notebooks — echoing 
- * output inline as comments for live, in-situ coding with instant feedback. 
- * Built on vanilla JavaScript and the reactive model of Observable Notebook 
- * Kit[3], Recho lets developers, artists, and learners explore and create 
- * directly in code.
+ * Recho Notebook[2] is a free, open-source, reactive editor for algorithms
+ * and ASCII art. It introduces a plain code format for notebooks — echoing
+ * output inline as comments for live, in-situ coding with instant feedback.
+ * Built on vanilla JavaScript and the reactive model of Observable Notebook
+ * Kit[3], Recho Notebook lets developers, artists, and learners explore and
+ * create directly in code.
  *
- * Here is a word counting example to show the core feature of Recho: echoing
- * output inline as comments. By calling `echo(results)`, the results are
- * displayed as comments above the statement! Now we can better understand
+ * Here is a word counting example to show the core feature of Recho Notebook:
+ * echoing output inline as comments. By calling `echo(results)`, the results
+ * are displayed as comments above the statement! Now we can better understand
  * this piece of code by better "seeing" every manipulation. Notice that there
  * is no need to switch to console to see the results, which results in an
  * in-situ experience. And of course, we can be a little creative at last:

@@ -8,7 +8,7 @@
  * =                            Inline Echoing                                =
  * ============================================================================
  *
- * The core feature of Recho is to echo output inline with your code as
+ * The core feature of Recho Notebook is to echo output inline with your code as
  * comments. Each line of the output is prefixed with `//➜`. You can call the
  * built-in function `echo` to echo output.
  */
