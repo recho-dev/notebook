@@ -1,7 +1,7 @@
 import {transpileJavaScript} from "@observablehq/notebook-kit";
 import {Runtime} from "@observablehq/runtime";
 import {parse} from "acorn";
-import {group} from "d3-array";
+import {group, max} from "d3-array";
 import {dispatch as d3Dispatch} from "d3-dispatch";
 import * as stdlib from "./stdlib.js";
 import {OUTPUT_MARK, ERROR_MARK} from "./constant.js";
@@ -37,8 +37,34 @@ function debounce(fn, delay = 0) {
   };
 }
 
+function padStringWidth(string) {
+  const lines = string.split("\n");
+  const maxLength = max(lines, (line) => line.length);
+  return lines.map((line) => line.padEnd(maxLength)).join("\n");
+}
+
+function padStringHeight(string, height) {
+  const lines = string.split("\n");
+  const diff = height - lines.length;
+  return lines.join("\n") + "\n".repeat(diff);
+}
+
 function merge(...strings) {
-  return strings.join("\n");
+  const maxHeight = max(strings, (string) => string.split("\n").length);
+  const aligned = strings
+    .map((string) => padStringHeight(string, maxHeight))
+    .map((string) => padStringWidth(string))
+    .map((string) => string.split("\n"));
+  let output = "";
+  for (let i = 0; i < maxHeight; i++) {
+    for (let j = 0; j < aligned.length; j++) {
+      const line = aligned[j][i];
+      output += line;
+      output += j < aligned.length - 1 ? " " : "";
+    }
+    output += i < maxHeight - 1 ? "\n" : "";
+  }
+  return output;
 }
 
 function addPrefix(string, prefix) {
@@ -69,9 +95,13 @@ export function createRuntime(initialCode) {
         let error = false;
         for (let i = 0; i < values.length; i++) {
           const line = values[i];
+          const n = values[i].length;
           const formatted = line.map((v) => {
             if (isError(v)) error = true;
-            const inspector = v instanceof Inspector ? v : new Inspector(v);
+            // If there are multiple values, we don't want to quote the string values.
+            // such as echo("a =", 1) results in "a = 1" instead of "a = "1"".
+            const options = n === 1 ? {} : {quote: false};
+            const inspector = v instanceof Inspector ? v : new Inspector(v, options);
             return inspector.format();
           });
           const merged = merge(...formatted);

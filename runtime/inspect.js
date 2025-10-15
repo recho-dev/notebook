@@ -10,6 +10,7 @@ function isMultiline(value) {
 function inspector(value, {limit = 200, quote = "double", indent = null} = {}) {
   if (isMultiline(value)) return value;
   if (typeof value === "string" && !quote) return value;
+  if (!quote) quote = "double";
   const string = objectInspector(value, {indent, quoteStyle: quote});
   if (string.length > limit) return string.slice(0, limit) + "…";
   return string;

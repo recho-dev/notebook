@@ -17,3 +17,4 @@ export {commentLink} from "./comment-link.js";
 export {syntaxError3} from "./syntax-error3.js";
 export {syntaxError4} from "./syntax-error4.js";
 export {nonCallEcho} from "./non-call-echo.js";
+export {echoMultipleValues} from "./echo-multiple-values.js";
