@@ -9,7 +9,7 @@
     "test:js": "TZ=America/New_York vitest",
     "test:format": "prettier --check editor runtime test app",
     "test:lint": "eslint",
-    "app:build-cloudflare": "opennextjs-cloudflare build",
+    "cloudflare:build": "opennextjs-cloudflare build",
     "cloudflare:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "cloudflare:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "cloudflare:upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
