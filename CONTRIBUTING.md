@@ -75,4 +75,4 @@ After that, run `npm run test` to generate the snapshot file for this test case,
 
 ## Website Development
 
-If you want to contribute to the [website](https://recho.dev/), run `npm run app:dev` to open the development server. After finishing development, run `npm run test` to make sure everything works as expected.
+If you want to contribute to the [website](https://recho.dev/notebook), run `npm run app:dev` to open the development server. After finishing development, run `npm run test` to make sure everything works as expected.

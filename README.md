@@ -4,12 +4,12 @@
 
 > We want to live in the editor forever. — [Luyu Cheng](https://luyu.computer/)
 
-[**Recho Notebook**](https://recho.dev/) is a free, [open-source](/LICENCE), reactive editor for algorithms and ASCII art. It introduces a _plain code format_ for notebooks — echoing output inline as comments for live, in-situ coding with instant feedback. Built on vanilla JavaScript and the reactive model of [Observable Notebook Kit](https://observablehq.com/notebook-kit/), Recho Notebook lets developers, artists, and learners explore and create directly in code.
+[**Recho Notebook**](https://recho.dev/notebook) is a free, [open-source](/LICENCE), reactive editor for algorithms and ASCII art. It introduces a _plain code format_ for notebooks — echoing output inline as comments for live, in-situ coding with instant feedback. Built on vanilla JavaScript and the reactive model of [Observable Notebook Kit](https://observablehq.com/notebook-kit/), Recho Notebook lets developers, artists, and learners explore and create directly in code.
 
-- [Editor](https://recho.dev/) 📝 - The quickest way to get started with Recho Notebook.
+- [Editor](https://recho.dev/notebook) 📝 - The quickest way to get started with Recho Notebook.
 - [Announcement](https://medium.com/@subairui/a-lighter-way-to-code-with-creativity-8c0ac739aa6f) 📢 - Read our initial release story to discovery the vision behind Recho Notebook.
-- [Documentation](https://recho.dev/docs/introduction) 📚 - Learn how to use Recho Notebook with our comprehensive guides.
-- [Examples](https://recho.dev/examples) 🖼️ - See what you can create and draw some inspiration!
+- [Documentation](https://recho.dev/notebook/docs/introduction) 📚 - Learn how to use Recho Notebook with our comprehensive guides.
+- [Examples](https://recho.dev/notebook/examples) 🖼️ - See what you can create and draw some inspiration!
 - [Sharing](/CONTRIBUTING.md#sharing-examples) 🎨 - Follow the instructions to open a [pull request](https://github.com/recho-dev/recho/new/main/app/examples) to share your sketches!
 - [Contributing](/CONTRIBUTING.md) 🙏 - We have [a bunch of things](https://github.com/recho-dev/recho/issues) that we would like you to help us build together!
 
@@ -30,9 +30,9 @@ By "creativity", we mean you can end up doing something fun, and find a new way 
 
 ## What's Next 🔥
 
-Recho Notebook is still in its early stage. While there's still much work to do, we're excited to release the beta version and make it open source right now. If you're interested in trying it out, please visit the [website](https://recho.dev/). Since the source code is available at GitHub here, we welcome any thoughts, comments, or suggestions. If you're interested in contributing to Recho Notebook, we're especially interested in these areas:
+Recho Notebook is still in its early stage. While there's still much work to do, we're excited to release the beta version and make it open source right now. If you're interested in trying it out, please visit the [website](https://recho.dev/notebook). Since the source code is available at GitHub here, we welcome any thoughts, comments, or suggestions. If you're interested in contributing to Recho Notebook, we're especially interested in these areas:
 
-- **More Examples** - Examples attract users and shape tools. We would love to showcase examples across diverse areas ([text analysis](https://recho.dev/examples/word-count), [data viz](https://recho.dev/examples/phases-of-the-moon), [graphics](https://recho.dev/examples/cg-text-based-shaders), [concrete poetry](https://recho.dev/examples/fire!), [algorithms](https://recho.dev/examples/maze), etc.) and demonstrations working with external libraries ([D3](https://d3js.org/), [Lodash](https://lodash.com/), [ml5](https://ml5js.org/), [Tone](https://tonejs.github.io/), etc.). They don't have to be complicated or perfect. One thing to share would be great. Follow the [instructions](/CONTRIBUTING.md#sharing-examples) to open a [pull request](https://github.com/recho-dev/recho/new/main/app/examples) to share yours today!
+- **More Examples** - Examples attract users and shape tools. We would love to showcase examples across diverse areas ([text analysis](https://recho.dev/notebook/examples/word-count), [data viz](https://recho.dev/notebook/examples/phases-of-the-moon), [graphics](https://recho.dev/notebook/examples/cg-text-based-shaders), [concrete poetry](https://recho.dev/notebook/examples/fire!), [algorithms](https://recho.dev/notebook/examples/maze), etc.) and demonstrations working with external libraries ([D3](https://d3js.org/), [Lodash](https://lodash.com/), [ml5](https://ml5js.org/), [Tone](https://tonejs.github.io/), etc.). They don't have to be complicated or perfect. One thing to share would be great. Follow the [instructions](/CONTRIBUTING.md#sharing-examples) to open a [pull request](https://github.com/recho-dev/recho/new/main/app/examples) to share yours today!
 - **Polyglot Programming** - Recho Notebook begins with JavaScript, but isn't limited to it—coding has no boundaries. As long as a programming language can be transpiled to JavaScript, it can be incorporated with Recho Notebook. It can be mainstream ([Python](https://www.python.org/), [Rust](https://www.rust-lang.org/)), academic ([MLscript](https://github.com/hkust-taco/mlscript)), or creative ([wenyan‑lang](https://wy-lang.org/)). The best part is that it doesn't have to be production-ready or have real-life usage. Just providing a different way to code or think is cool. Want to add your favorite language to Recho Notebook or share your "toys"? [Talk to us](https://github.com/recho-dev/recho/issues/109)!
 - **Text-Based Libraries** - Best practices deserve to be seen by more people. If you find some algorithms you are using helpful for others, don't hesitate to package them into libraries. Remember, they can be light!
 - **Explorations with LLMs** - Recho Notebook's text-first approach is ideal for LLMs. Rather than letting the LLM write code directly, you can use code as input: fusing files, turning text into pixel outputs, and more. We want to [explore the possibilities](https://github.com/recho-dev/recho/issues/110).
@@ -47,7 +47,7 @@ Also, we have plans to provide [cloud storage services](https://github.com/recho
 
 ## A Quick Example 🚀
 
-Here is a [word counting](https://recho.dev/examples/word-count) example to showcase Recho Notebook. Bret Victor gives programming a concise [definition](https://www.youtube.com/watch?v=ef2jpjTEB5U&t=501s):
+Here is a [word counting](https://recho.dev/notebook/examples/word-count) example to showcase Recho Notebook. Bret Victor gives programming a concise [definition](https://www.youtube.com/watch?v=ef2jpjTEB5U&t=501s):
 
 > Programming is blindly manipulating symbols.
 

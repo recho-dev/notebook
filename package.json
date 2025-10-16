@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "scripts": {
     "vercel-build": "next build",
     "dev": "vite",

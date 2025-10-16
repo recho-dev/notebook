@@ -1,5 +1,6 @@
 import {cn} from "../cn.js";
 import {news} from "./data.js";
+import {BASE_PATH} from "../shared.js";
 
 export default function News() {
   return (
@@ -12,7 +13,7 @@ export default function News() {
               <span>{news.author}</span> • <span>{news.publishedAt}</span>
             </p>
             <p className={cn("lg:text-lg text-base text-gray-600 mb-2")}>{news.summary}</p>
-            <img src={`/news/${news.image}`} alt={news.title} className={cn("w-full h-auto")} />
+            <img src={`${BASE_PATH}/news/${news.image}`} alt={news.title} className={cn("w-full h-auto")} />
           </div>
         </a>
       ))}
