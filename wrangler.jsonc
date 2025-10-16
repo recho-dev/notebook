@@ -26,7 +26,7 @@
     // Create a R2 binding with the binding name "NEXT_INC_CACHE_R2_BUCKET"
     // {
     //   "binding": "NEXT_INC_CACHE_R2_BUCKET",
-    //   "bucket_name": "<BUCKET_NAME>",
-    // },
-  ],
+    //   "bucket_name": "<BUCKET_NAME>"
+    // }
+  ]
 }
