@@ -59,6 +59,28 @@ echo(numbers);
  * @returns {string} The formatted string representation of the value.
  */
 
+//➜ "Hello, World!"
+const defaultQuotedString = echo("Hello, World!");
+
+//➜ 'Hello, World!'
+const singleQuotedString = echo(recho.inspect("Hello, World!", {quote: "single"}));
+
+//➜ "Hello, World!"
+const doubleQuotedString = echo(recho.inspect("Hello, World!", {quote: "double"}));
+
+//➜ Hello, World!
+const unquotedString = echo(recho.inspect("Hello, World!", {quote: false}));
+
+//➜ {
+//➜   a: 1,
+//➜   b: 2,
+//➜   c: 3
+//➜ }
+const indentedObject = echo(recho.inspect({a: 1, b: 2, c: 3}, {indent: 2}));
+
+//➜ [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+const array1000 = echo(recho.inspect(new Array(1000).fill(0), {limit: Infinity}));
+
 /**
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *                                clear()
