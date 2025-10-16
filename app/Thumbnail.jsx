@@ -18,7 +18,10 @@ export function Thumbnail({html, outputStartLine = null, snap = null}) {
   }
   if (snap) {
     return (
-      <div className={cn("w-full h-full bg-cover bg-center")} style={{backgroundImage: `url(${BASE_PATH}/examples/${snap})`}} />
+      <div
+        className={cn("w-full h-full bg-cover bg-center")}
+        style={{backgroundImage: `url(${BASE_PATH}/examples/${snap})`}}
+      />
     );
   }
   return <div dangerouslySetInnerHTML={{__html: removeEmptyLines($.html())}} className={cn("w-full h-full")} />;
