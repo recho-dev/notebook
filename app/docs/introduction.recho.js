@@ -149,7 +149,7 @@ function map(x, d0, d1, r0, r1) {
 /**
  * Please visit the GitHub repository for more details:
  *
- * > https://github.com/recho-dev/recho
+ * > https://github.com/recho-dev/notebook
  *
  * - [1] https://luyu.computer/
  * - [2] https://recho.dev/

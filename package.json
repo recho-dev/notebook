@@ -1,4 +1,29 @@
 {
+  "name": "recho-notebook",
+  "version": "0.1.0",
+  "description": "A free, open-source, reactive editor for algorithms and ASCII art. It introduces a plain code format for notebooks — echoing output inline as comments for live, in-situ coding with instant feedback.",
+  "author": "Recho",
+  "license": "ISC",
+  "homepage": "https://recho.dev/notebook",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/recho-dev/notebook.git"
+  },
+  "bugs": {
+    "url": "https://github.com/recho-dev/notebook/issues"
+  },
+  "keywords": [
+    "notebook",
+    "reactive",
+    "editor",
+    "javascript",
+    "observable",
+    "ascii-art",
+    "algorithms",
+    "live-coding",
+    "creative-coding",
+    "computational-art"
+  ],
   "type": "module",
   "scripts": {
     "dev": "vite",

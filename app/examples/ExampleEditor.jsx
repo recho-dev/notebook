@@ -26,7 +26,7 @@ export function ExampleEditor({example, initialCode}) {
       toolBarStart={
         <div className={cn("flex items-center")} key={example.slug}>
           <a
-            href={`https://github.com/recho-dev/recho/pull/${example.pull_request}`}
+            href={`https://github.com/recho-dev/notebook/pull/${example.pull_request}`}
             target="_blank"
             rel="noreferrer"
             className={cn("bg-green-700 text-white rounded-md px-3 py-1 text-sm hover:bg-green-800")}
