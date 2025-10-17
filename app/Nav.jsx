@@ -29,7 +29,7 @@ export function Nav() {
     const confirm = window.confirm(
       `Make a Pull Request to share your notebook to Examples!\n- Input the filename\n- Copy the code\n- Click the "Commit changes" button`,
     );
-    if (confirm) window.open("https://github.com/recho-dev/recho/new/main/app/examples", "_blank");
+    if (confirm) window.open("https://github.com/recho-dev/notebook/new/main/app/examples", "_blank");
   }
 
   function isSelected(path) {
@@ -131,7 +131,7 @@ export function Nav() {
         </SafeLink>
 
         <a
-          href="https://github.com/recho-dev/recho/new/main/app/examples"
+          href="https://github.com/recho-dev/notebook/new/main/app/examples"
           onClick={handleUpload}
           target="_blank"
           rel="noreferrer"
@@ -144,7 +144,7 @@ export function Nav() {
           <Share className={cn(styles.linkIcon)} />
         </a>
         <a
-          href="https://github.com/recho-dev/recho"
+          href="https://github.com/recho-dev/notebook"
           target="_blank"
           rel="noreferrer"
           className={cn(styles.link)}

@@ -648,5 +648,5 @@ echo(
  * to use multiple spheres and lights to create more complex effects.
  *
  * I hope you have enjoyed this tutorial. If you have any questions, please
- * feel free to comment on https://github.com/recho-dev/recho/issues/98.
+ * feel free to comment on https://github.com/recho-dev/notebook/issues/98.
  */
