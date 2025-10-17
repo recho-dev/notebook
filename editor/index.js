@@ -33,7 +33,7 @@ const eslintConfig = {
 };
 
 export function createEditor(container, options) {
-  const {code} = options;
+  const {code, onError} = options;
   const dispatcher = d3Dispatch("userInput");
   const runtimeRef = {current: null};
 
@@ -132,8 +132,13 @@ export function createEditor(container, options) {
 
   return {
     run: () => {
-      if (!runtimeRef.current) initRuntime();
-      runtimeRef.current.run();
+      try {
+        if (!runtimeRef.current) initRuntime();
+        runtimeRef.current.run();
+      } catch (error) {
+        console.error(error);
+        onError?.(error);
+      }
     },
     stop: () => {
       runtimeRef.current?.destroy();

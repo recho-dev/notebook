@@ -24,9 +24,20 @@ function isError(value) {
 }
 
 function safeEval(code, inputs) {
-  const body = `const foo = ${code}; return foo(${inputs.join(",")})`;
-  const fn = new Function(...inputs, body);
-  return fn;
+  const create = (code) => {
+    const body = `const foo = ${code}; return foo(${inputs.join(",")})`;
+    const fn = new Function(...inputs, body);
+    return fn;
+  };
+  try {
+    return create(code);
+  } catch (error) {
+    // For non-function statements, such as for statement, we need to wrap the code in a function.
+    // For example, `for (let i = 0; i < 10; i++) { echo(i); }` will be wrapped in
+    // `() => { for (let i = 0; i < 10; i++) { echo(i); } }` then return the function.
+    const wrapped = `() => {${code}}`;
+    return create(wrapped);
+  }
 }
 
 function debounce(fn, delay = 0) {
