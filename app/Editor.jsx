@@ -9,6 +9,20 @@ const styles = {
   iconButton: "w-4 h-4 hover:scale-110 transition-transform duration-100",
 };
 
+function debounce(fn, delay = 0) {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn(...args), delay);
+  };
+}
+
+const onDefaultError = debounce(() => {
+  setTimeout(() => {
+    alert("Something unexpected happened. Please check the console for details.");
+  }, 100);
+}, 0);
+
 export function Editor({
   initialCode,
   onUserInput = () => {},
@@ -17,6 +31,7 @@ export function Editor({
   toolBarStart = null,
   pinToolbar = true,
   onDuplicate = null,
+  onError = onDefaultError,
 }) {
   const containerRef = useRef(null);
   const editorRef = useRef(null);
@@ -25,7 +40,7 @@ export function Editor({
   useEffect(() => {
     if (containerRef.current) {
       containerRef.current.innerHTML = "";
-      editorRef.current = createEditor(containerRef.current, {code: initialCode});
+      editorRef.current = createEditor(containerRef.current, {code: initialCode, onError});
       if (autoRun) onRun();
     }
     return () => {
