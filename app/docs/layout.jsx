@@ -2,8 +2,8 @@ import {getAllJSDocs} from "../utils.js";
 import {DocsLayoutClient} from "./DocsLayoutClient.jsx";
 
 export const metadata = {
-  title: "Docs | Recho",
-  description: "Docs | Recho",
+  title: "Docs | Recho Notebook",
+  description: "Docs | Recho Notebook",
 };
 
 export default function Layout({children}) {

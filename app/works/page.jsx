@@ -17,7 +17,7 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
-    document.title = "Notebooks | Recho";
+    document.title = "Notebooks | Recho Notebook";
   }, []);
 
   function onDelete(id) {
@@ -46,7 +46,7 @@ export default function Page() {
         <div key={notebook.id} className={cn("mt-10")}>
           <div className={cn("flex items-center justify-between mb-2")}>
             <div>
-              <Link href={`/notebooks/${notebook.id}`} className={cn("font-semibold hover:underline text-blue-500")}>
+              <Link href={`/works/${notebook.id}`} className={cn("font-semibold hover:underline text-blue-500")}>
                 <span>{notebook.title}</span>
               </Link>
               <div className={cn("text-sm text-gray-500")}>

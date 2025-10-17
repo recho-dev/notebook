@@ -9,8 +9,8 @@
  * ============================================================================
  *
  * Animations are very powerful tools making your notebooks more interactive
- * and engaging. In Recho, there are at least two ways to author animations.
- * You can choose either one which suits you best.
+ * and engaging. In Recho Notebook, there are at least two ways to author 
+ * animations. You can choose either one which suits you best.
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *                          Block-level Animations

@@ -56,9 +56,12 @@ export function Nav() {
 
   return (
     <header className={cn("flex justify-between items-center p-4 border-b border-gray-200")}>
-      <div className={cn("flex md:gap-2 items-center")}>
+      <div className={cn("flex md:gap-2 items-center ")}>
+        <SafeLink href="https://recho.dev">
+          <h1 className={cn("text-xl font-extrabold")}>Recho</h1>
+        </SafeLink>
         <SafeLink href="/">
-          <h1 className={cn("text-2xl font-bold")}>Recho</h1>
+          <h1 className={cn("text-xl hidden md:inline font-medium")}>Notebook</h1>
         </SafeLink>
         {/* Desktop navigation */}
         <div className={cn("hidden md:flex gap-2 items-center")}>
@@ -119,8 +122,8 @@ export function Nav() {
         </SafeLink>
 
         <SafeLink
-          href="/notebooks"
-          className={cn(styles.link, pathname === "/notebooks" && styles.selectedLink)}
+          href="/works"
+          className={cn(styles.link, pathname === "/works" && styles.selectedLink)}
           data-tooltip-id="nav-tooltip"
           data-tooltip-content="Open Notebooks"
         >

@@ -15,7 +15,7 @@ export function ExampleEditor({example, initialCode}) {
     };
     const duplicated = duplicateNotebook(sourceNotebook);
     addNotebook(duplicated);
-    router.push(`/notebooks/${duplicated.id}`);
+    router.push(`/works/${duplicated.id}`);
   }
 
   return (

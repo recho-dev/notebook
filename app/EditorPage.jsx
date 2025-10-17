@@ -39,7 +39,7 @@ export function EditorPage({id: initialId}) {
       prevCount.current = count;
       const id = notebook.id;
       setId(id); // Force re-render.
-      window.history.pushState(null, "", `/notebooks/${id}`); // Just update the url, no need to reload the page.
+      window.history.pushState(null, "", `/works/${id}`); // Just update the url, no need to reload the page.
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notebook]);
@@ -58,7 +58,7 @@ export function EditorPage({id: initialId}) {
   useEffect(() => {
     // Use setTimeout to avoid changing to default title.
     setTimeout(() => {
-      document.title = `${isAdded ? notebook.title : "New"} | Recho`;
+      document.title = `${isAdded ? notebook.title : "New"} | Recho Notebook`;
     }, 100);
   }, [notebook, isAdded]);
 
@@ -147,7 +147,7 @@ export function EditorPage({id: initialId}) {
   function onDuplicate() {
     const duplicated = duplicateNotebook(notebook);
     addNotebook(duplicated);
-    router.push(`/notebooks/${duplicated.id}`);
+    router.push(`/works/${duplicated.id}`);
   }
 
   return (
@@ -162,7 +162,7 @@ export function EditorPage({id: initialId}) {
             {notebookList.map((notebook) => (
               <div key={notebook.id} className={cn("flex items-start flex-col gap-1")}>
                 <SafeLink
-                  href={`/notebooks/${notebook.id}`}
+                  href={`/works/${notebook.id}`}
                   className={cn(
                     "font-semibold hover:underline text-blue-500 whitespace-nowrap line-clamp-1 max-w-[150px] text-ellipsis",
                   )}
@@ -176,7 +176,7 @@ export function EditorPage({id: initialId}) {
                 </span>
               </div>
             ))}
-            <SafeLink href="/notebooks" className={cn("font-semibold text-blue-500 hover:underline")}>
+            <SafeLink href="/works" className={cn("font-semibold text-blue-500 hover:underline")}>
               View your notebooks
             </SafeLink>
           </div>
@@ -186,7 +186,7 @@ export function EditorPage({id: initialId}) {
             )}
           >
             <SafeLink
-              href="/notebooks"
+              href="/works"
               className={cn(
                 "font-medium w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-center hover:bg-gray-200",
               )}

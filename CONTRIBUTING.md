@@ -1,6 +1,6 @@
-# Recho - Contributing
+# Recho Notebook - Contributing
 
-Recho is open source and released under the [ISC license](/LICENCE). You are welcome to contribute in different ways: open a [pull request](https://github.com/recho-dev/recho/pulls), participate in [issues](https://github.com/recho-dev/recho/issues) and [discussions](https://github.com/recho-dev/recho/discussions) or star this project!
+Recho Notebook is open source and released under the [ISC license](/LICENCE). You are welcome to contribute in different ways: open a [pull request](https://github.com/recho-dev/recho/pulls), participate in [issues](https://github.com/recho-dev/recho/issues) and [discussions](https://github.com/recho-dev/recho/discussions) or star this project!
 
 ## Sharing Examples
 
@@ -75,4 +75,4 @@ After that, run `npm run test` to generate the snapshot file for this test case,
 
 ## Website Development
 
-If you want to contribute to the [website](https://recho.dev/), run `npm run app:dev` to open the development server. After finishing development, run `npm run test` to make sure everything works as expected.
+If you want to contribute to the [website](https://recho.dev/notebook), run `npm run app:dev` to open the development server. After finishing development, run `npm run test` to make sure everything works as expected.
