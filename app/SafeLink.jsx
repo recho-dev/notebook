@@ -14,7 +14,6 @@ export function SafeLink({href, children, className, onClick, ...props}) {
   const handleClick = (e) => {
     e.preventDefault();
     if (isDirty) {
-      e.preventDefault();
       const confirmLeave = window.confirm("Your changes will be lost.");
       if (!confirmLeave) return;
     }
