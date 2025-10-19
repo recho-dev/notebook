@@ -68,6 +68,9 @@ export function Nav() {
           <SafeLink href="/docs" className={cn(styles.link, isSelected("/docs") && styles.selectedLink, "ml-3")}>
             Docs
           </SafeLink>
+          <SafeLink href="/examples" className={cn(styles.link, isSelected("/examples") && styles.selectedLink)}>
+            Examples
+          </SafeLink>
           <a
             href="https://recho.dev/news"
             target="_blank"
@@ -76,9 +79,6 @@ export function Nav() {
           >
             News
           </a>
-          <SafeLink href="/examples" className={cn(styles.link, isSelected("/examples") && styles.selectedLink)}>
-            Examples
-          </SafeLink>
         </div>
         {/* Mobile navigation */}
         <div className={cn("md:hidden relative")} ref={dropdownRef}>
@@ -98,6 +98,13 @@ export function Nav() {
               >
                 Docs
               </SafeLink>
+              <SafeLink
+                href="/examples"
+                className={cn(styles.dropdownItem, isSelected("/examples") && styles.dropdownItemSelected)}
+                onClick={() => setDropdownOpen(false)}
+              >
+                Examples
+              </SafeLink>
               <a
                 href="https://recho.dev/news"
                 className={cn(styles.dropdownItem, isSelected("/news") && styles.dropdownItemSelected)}
@@ -107,13 +114,6 @@ export function Nav() {
               >
                 News
               </a>
-              <SafeLink
-                href="/examples"
-                className={cn(styles.dropdownItem, isSelected("/examples") && styles.dropdownItemSelected)}
-                onClick={() => setDropdownOpen(false)}
-              >
-                Examples
-              </SafeLink>
             </div>
           )}
         </div>
