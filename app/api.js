@@ -13,13 +13,46 @@ function generateProjectName() {
   return `${adj}-${obj}.js`;
 }
 
+const DEFAULT_CONTENT = `
+// Welcome to **Recho Notebook**!
+// A reactive editor for algorithms and ASCII art.
+// 1. You can call echo(value) to echo output inline as comments, which allows
+// you to better understand the code by "seeing" every manipulation in-situ.
+
+const text = echo("dog");
+
+const words = echo(text.split(""));
+
+echo(words.reverse().join(""));
+
+// 2. You can also call recho.interval(ms) to create data-driven animations,
+// which can help you find the minimalism of ASCII art is still fascinating!
+
+const x = recho.interval(100);
+
+echo("🚗💨".padStart(40 - (x % 40)));
+
+// 3. Inputs are also supported, which can help you create interactive
+// notebooks. Click the buttons to see what happens!
+
+const x1 = recho.number(10, {min: 0, max: 40, step: 1});
+
+//➜ "(๑•̀ㅂ•́)و✧"
+echo("~".repeat(x1) + "(๑•̀ㅂ•́)و✧");
+
+// Follow the links (cmd/ctrl + click) to learn more about the Recho Notebook
+// - Docs: https://recho.dev/notebook/docs/
+// - Examples: https://recho.dev/notebook/examples/
+// - Github: https://github.com/recho-dev/notebook
+`;
+
 export function createNotebook() {
   return {
     id: generate(),
     title: generateProjectName(),
     created: null,
     updated: null,
-    content: `echo("Hello, world!");`,
+    content: DEFAULT_CONTENT.trimStart(),
     autoRun: true,
     runtime: DEFAULT_RUNTIME,
   };

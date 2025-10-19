@@ -2,6 +2,7 @@
 import {useSyncExternalStore} from "react";
 import {useRouter} from "next/navigation";
 import {isDirtyStore, countStore} from "./store.js";
+import Link from "next/link";
 
 export function SafeLink({href, children, className, onClick, ...props}) {
   const router = useRouter();
@@ -24,8 +25,8 @@ export function SafeLink({href, children, className, onClick, ...props}) {
   };
 
   return (
-    <a href={href} onClick={handleClick} className={className} {...props}>
+    <Link href={href} onClick={handleClick} className={className} {...props}>
       {children}
-    </a>
+    </Link>
   );
 }
