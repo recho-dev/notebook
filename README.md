@@ -15,7 +15,7 @@
 
 ## Core Idea 🧠
 
-Unlike typical notebooks (like Jupyter or Observable), Recho Notebook treats **code and its output as a single, continuous document**. When you write code, **the output appears inline — as a comment right below or beside your code**.
+Unlike typical notebooks (like Jupyter or Observable), Recho Notebook treats **code and its output as a single, continuous document**. When you write code, **the output appears inline — as a comment right above your code**.
 
 ```js
 //➜ "dog"
@@ -40,7 +40,7 @@ It’s light, artistic, and reactive — blending ideas from creative coding, li
 
 ## Example Use Cases 🖼️
 
-- Teaching/learning basic algorithms with immediate visual/text feedback.
+- Teaching/learning basic algorithms with immediate text/visual feedback.
 - Creating text-based animations to experience the simplicity and clarity in ASCII art.
 - Exploring code minimalism — finding beauty in code and its textual output.
 
@@ -51,6 +51,22 @@ We’ve always loved [Observable Notebooks](https://observablehq.com/). To make 
 At the same time, we wanted to make coding more accessible and playful. Inspired by the [p5.js web editor](https://editor.p5js.org/), we realized **well-designed language doesn’t necessarily make coding more accessible — the environment does**. So we asked — what if we focused on algorithms instead of graphics, using ASCII art when visuals are needed?
 
 That’s how Recho Notebook began — **[a lighter way to code with creativity](https://medium.com/@subairui/a-lighter-way-to-code-with-creativity-8c0ac739aa6f)**.
+
+## What's Next 🔥
+
+Recho Notebook is in beta — and open source! 🎉 Try it out on our [website](https://recho.dev/notebook) or explore the code on [GitHub](https://github.com/recho-dev/notebook). We’d love your thoughts, comments, or suggestions. Want to contribute? Here’s where you can help:
+
+- **Sharing Examples** – [text analysis](https://recho.dev/notebook/examples/word-count), [ASCII art](https://recho.dev/notebook/examples/moon-sundial), [data viz](https://recho.dev/notebook/examples/phases-of-the-moon), [graphics](https://recho.dev/notebook/examples/cg-text-based-shaders), [concrete poetry](https://recho.dev/notebook/examples/fire!), or demos with [D3](https://d3js.org/),, [Tone](https://tonejs.github.io/), [ml5](https://ml5js.org/)… anything! One example is enough.
+- **Polyglot Programming** – Recho Notebook is JS-first but open to any language that compiles to JS — [Python](https://www.python.org/), [Rust](https://www.rust-lang.org/), [MLscript](https://github.com/hkust-taco/mlscript), [wenyan‑lang](https://wy-lang.org/)… your playground.
+- **LLM Experiments** – What if LLMs can both see the input and output?
+
+We’re also improving:
+
+- **Editing & Workflow** – Reruns, formatting, smoother editing.
+- **Visuals** – Dark theme, ANSI codes, more expressive output.
+- **Interactivity** – Mouse, keyboard, and more input support.
+
+Cloud storage is coming, but for now, keep it simple — and keep the ideas coming! 🚀
 
 ## License 📄
 
