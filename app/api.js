@@ -29,9 +29,9 @@ const DEFAULT_CONTENT = `
 
 const text = echo("dog");
 
-const words = echo(text.split(""));
+const chars = echo(text.split(""));
 
-echo(words.reverse().join(""));
+echo(chars.slice().reverse().join(""));
 
 // 2. You can also call recho.interval(ms) to create data-driven animations,
 // which can help you find the minimalism of ASCII art is fascinating!

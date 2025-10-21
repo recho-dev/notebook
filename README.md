@@ -17,16 +17,7 @@
 
 Unlike typical notebooks (like Jupyter or Observable), Recho Notebook treats **code and its output as a single, continuous document**. When you write code, **the output appears inline — as a comment right above your code**.
 
-```js
-//➜ "dog"
-const text = echo("dog");
-
-//➜ [ "g", "o", "d" ]
-const words = echo(text.split(""));
-
-//➜ "god"
-echo(words.reverse().join(""));
-```
+![A Quick Example](./img/dog.gif)
 
 If you modify the code, the echoed output updates immediately. So instead of switching between “code cells” and “output cells,” your entire notebook feels like a living text file that responds to you.
 
