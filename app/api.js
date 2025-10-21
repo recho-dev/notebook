@@ -14,10 +14,15 @@ function generateProjectName() {
 }
 
 const DEFAULT_CONTENT = `
-/**
- * Welcome to Recho Notebook!
- * A reactive editor for algorithms and ASCII art. 
- */
+/* 
+** Welcome to                                                                         
+**  ___        _          _  _     _       _              _   
+** | _ \\___ __| |_  ___  | \\| |___| |_ ___| |__  ___  ___| |__
+** |   / -_) _| ' \\/ _ \\ | .\` / _ \\  _/ -_) '_ \\/ _ \\/ _ \\ / /
+** |_|_\\___\\__|_||_\\___/ |_|\\_\\___/\\__\\___|_.__/\\___/\\___/_\\_\\
+**
+** A reactive editor for algorithms and ASCII art. 
+*/
 
 // 1. You can call echo(value) to echo output inline as comments, which allows
 // you to better understand the code by "seeing" every manipulation in-situ.
