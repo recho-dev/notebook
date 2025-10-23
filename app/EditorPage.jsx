@@ -7,6 +7,7 @@ import {getNotebookById, createNotebook, addNotebook, saveNotebook, getNotebooks
 import {isDirtyStore, countStore} from "./store.js";
 import {cn} from "./cn.js";
 import {SafeLink} from "./SafeLink.jsx";
+import {BASE_PATH} from "./shared.js";
 
 const UNSET = Symbol("UNSET");
 
@@ -39,7 +40,7 @@ export function EditorPage({id: initialId}) {
       prevCount.current = count;
       const id = notebook.id;
       setId(id); // Force re-render.
-      window.history.pushState(null, "", `/works/${id}`); // Just update the url, no need to reload the page.
+      window.history.pushState(null, "", `${BASE_PATH}/works/${id}`); // Just update the url, no need to reload the page.
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notebook]);
