@@ -125,7 +125,16 @@ export function createRuntime(initialCode) {
       }
     }
 
-    dispatch(changes);
+    // Collect block attributes - we need to map positions through the changes
+    const blockAttributes = nodes
+      .filter((node) => Object.keys(node.state.attributes).length > 0)
+      .map((node) => ({
+        from: node.start,
+        to: node.end,
+        attributes: node.state.attributes,
+      }));
+
+    dispatch(changes, blockAttributes);
   }, 0);
 
   function setCode(newCode) {
@@ -136,8 +145,8 @@ export function createRuntime(initialCode) {
     isRunning = value;
   }
 
-  function dispatch(changes) {
-    dispatcher.call("changes", null, changes);
+  function dispatch(changes, blockAttributes = []) {
+    dispatcher.call("changes", null, {changes, blockAttributes});
   }
 
   function onChanges(callback) {
@@ -294,7 +303,14 @@ export function createRuntime(initialCode) {
     for (const node of enter) {
       const vid = uid();
       const {inputs, body, outputs, error = null} = node.transpiled;
-      const state = {values: [], variables: [], error: null, syntaxError: error, doc: false};
+      const state = {
+        values: [],
+        variables: [],
+        error: null,
+        syntaxError: error,
+        doc: false,
+        attributes: Object.create(null),
+      };
       node.state = state;
       const v = main.variable(observer(state), {shadow: {}});
       if (inputs.includes("echo")) {
@@ -304,14 +320,21 @@ export function createRuntime(initialCode) {
           inputs.filter((i) => i !== "echo" && i !== "clear"),
           () => {
             const version = v._version; // Capture version on input change.
-            return (value, ...args) => {
-              if (version < docVersion) throw new Error("stale echo");
-              else if (state.variables[0] !== v) throw new Error("stale echo");
-              else if (version > docVersion) clear(state);
-              docVersion = version;
-              echo(state, value, ...args);
-              return args.length ? [value, ...args] : value;
-            };
+            return Object.assign(
+              function (value, ...args) {
+                if (version < docVersion) throw new Error("stale echo");
+                else if (state.variables[0] !== v) throw new Error("stale echo");
+                else if (version > docVersion) clear(state);
+                docVersion = version;
+                echo(state, value, ...args);
+                return args.length ? [value, ...args] : value;
+              },
+              {
+                set: function (key, value) {
+                  state.attributes[key] = value;
+                },
+              },
+            );
           },
         );
         v._shadow.set("echo", vd);
