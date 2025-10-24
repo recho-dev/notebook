@@ -147,6 +147,18 @@
     line-height: 1;
   }
 
+  .cm-debug-mark {
+    &.red {
+      background-color: #e4002440;
+    }
+    &.green {
+      background-color: #009a5753;
+    }
+    &.blue {
+      background-color: #0088f653;
+    }
+  }
+
   /* We can't see background color, which is conflict with selection background color.
    * So we use svg pattern to simulate the background color.
    */

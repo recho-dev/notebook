@@ -11,7 +11,7 @@ import * as eslint from "eslint-linter-browserify";
 import {createRuntime} from "../runtime/index.js";
 import {outputDecoration} from "./decoration.js";
 import {outputLines} from "./outputLines.js";
-import {blockAttributes, setBlockAttributesEffect} from "./blockAttributes.js";
+import {blockMetadata, blockMetadataEffect} from "./blockMetadata.ts";
 // import {outputProtection} from "./protection.js";
 import {dispatch as d3Dispatch} from "d3-dispatch";
 import {controls} from "./controls/index.js";
@@ -69,7 +69,7 @@ export function createEditor(container, options) {
       ]),
       javascriptLanguage.data.of({autocomplete: rechoCompletion}),
       outputLines,
-      blockAttributes,
+      blockMetadata,
       outputDecoration,
       controls(runtimeRef),
       // Disable this for now, because it prevents copying/pasting the code.
@@ -91,41 +91,12 @@ export function createEditor(container, options) {
     window.addEventListener("keyup", onKeyUp);
   }
 
-  function dispatch({changes, blockAttributes: blockAttrs}) {
-    // Map block attributes through the changes to get correct final positions
-    const effects = [];
-
-    if (blockAttrs && blockAttrs.length > 0) {
-      // We need to map the block positions through the changes
-      // Create a simplified change set mapper
-      const sortedChanges = [...changes].sort((a, b) => a.from - b.from);
-
-      const mapPos = (pos) => {
-        let mapped = pos;
-        for (const change of sortedChanges) {
-          if (change.from <= pos) {
-            const inserted = change.insert ? change.insert.length : 0;
-            const deleted = change.to ? change.to - change.from : 0;
-            mapped += inserted - deleted;
-          }
-        }
-        return mapped;
-      };
-
-      const mappedBlockAttrs = blockAttrs.map(({from, to, attributes}) => ({
-        from: mapPos(from),
-        to: mapPos(to),
-        attributes,
-      }));
-
-      effects.push(setBlockAttributesEffect.of(mappedBlockAttrs));
-    }
-
+  function dispatch({changes, effects}) {
     // Mark this transaction as from runtime so that it will not be filtered out.
     view.dispatch({
       changes,
       effects,
-      annotations: [Transaction.remote.of("runtime")],
+      annotations: [Transaction.remote.of(true)],
     });
   }
 

@@ -6,6 +6,8 @@ import {dispatch as d3Dispatch} from "d3-dispatch";
 import * as stdlib from "./stdlib.js";
 import {OUTPUT_MARK, ERROR_MARK} from "./constant.js";
 import {Inspector} from "./inspect.js";
+import {blockMetadataEffect} from "../editor/blockMetadata.ts";
+import {IntervalTree} from "../lib/IntervalTree.ts";
 
 const OUTPUT_PREFIX = `//${OUTPUT_MARK}`;
 
@@ -95,9 +97,13 @@ export function createRuntime(initialCode) {
 
   const refresh = debounce((code) => {
     const changes = removeChanges(code);
+    const removedIntervals = IntervalTree.from(changes, ({from, to}, index) =>
+      from === to ? null : {interval: {low: from, high: to - 1}, data: index},
+    );
 
     // Insert new outputs
     const nodes = Array.from(nodesByKey.values()).flat(Infinity);
+    const blocks = [];
     for (const node of nodes) {
       const start = node.start;
       const {values} = node.state;
@@ -121,20 +127,28 @@ export function createRuntime(initialCode) {
         }
         const prefix = error ? ERROR_PREFIX : OUTPUT_PREFIX;
         const prefixed = addPrefix(output, prefix);
-        changes.push({from: start, insert: prefixed + "\n"});
+        // Search for existing changes and update the inserted text if found.
+        const entry = removedIntervals.contains(start - 1);
+        let outputRange = null;
+        if (entry === null) {
+          changes.push({from: start, insert: prefixed + "\n"});
+        } else {
+          const change = changes[entry.data];
+          change.insert = prefixed + "\n";
+          outputRange = {from: change.from, to: change.to};
+        }
+        blocks.push({
+          source: {from: node.start, to: node.end},
+          output: outputRange,
+          attributes: node.state.attributes,
+        });
       }
     }
 
-    // Collect block attributes - we need to map positions through the changes
-    const blockAttributes = nodes
-      .filter((node) => Object.keys(node.state.attributes).length > 0)
-      .map((node) => ({
-        from: node.start,
-        to: node.end,
-        attributes: node.state.attributes,
-      }));
+    // Attach block positions and attributes as effects to the transaction.
+    const effects = [blockMetadataEffect.of(blocks)];
 
-    dispatch(changes, blockAttributes);
+    dispatch(changes, effects);
   }, 0);
 
   function setCode(newCode) {
@@ -145,8 +159,8 @@ export function createRuntime(initialCode) {
     isRunning = value;
   }
 
-  function dispatch(changes, blockAttributes = []) {
-    dispatcher.call("changes", null, {changes, blockAttributes});
+  function dispatch(changes, effects = []) {
+    dispatcher.call("changes", null, {changes, effects});
   }
 
   function onChanges(callback) {
@@ -205,29 +219,44 @@ export function createRuntime(initialCode) {
     }
   }
 
+  /**
+   * Get the changes that remove the output lines from the code.
+   * @param {string} code The code to remove changes from.
+   * @returns {{from: number, to: number, insert: ""}[]} An array of changes.
+   */
   function removeChanges(code) {
-    const changes = [];
-
-    const oldOutputs = code
-      .split("\n")
-      .map((l, i) => [l, i])
-      .filter(([l]) => l.startsWith(OUTPUT_PREFIX) || l.startsWith(ERROR_PREFIX))
-      .map(([_, i]) => i);
-
-    const lineOf = (i) => {
-      const lines = code.split("\n");
-      const line = lines[i];
-      const from = lines.slice(0, i).join("\n").length;
-      const to = from + line.length;
-      return {from, to};
-    };
-
-    for (const i of oldOutputs) {
-      const line = lineOf(i);
-      const from = line.from;
-      const to = line.to + 1 > code.length ? line.to : line.to + 1;
-      changes.push({from, to, insert: ""});
+    function matchAt(index) {
+      return code.startsWith(OUTPUT_PREFIX, index) || code.startsWith(ERROR_PREFIX, index);
     }
+
+    /** Line number ranges (left-closed and right-open) of lines that contain output or error. */
+    const lineNumbers = matchAt(0) ? [{begin: 0, end: 1}] : [];
+    /**
+     * The index of the first character of each line.
+     * If the code ends with a newline, the last index is the length of the code.
+     */
+    const lineStartIndices = [0];
+    let nextNewlineIndex = code.indexOf("\n", 0);
+    while (0 <= nextNewlineIndex && nextNewlineIndex < code.length) {
+      lineStartIndices.push(nextNewlineIndex + 1);
+      if (matchAt(nextNewlineIndex + 1)) {
+        const lineNumber = lineStartIndices.length - 1;
+        if (lineNumbers.length > 0 && lineNumber === lineNumbers[lineNumbers.length - 1].end) {
+          // Extend the last line number range.
+          lineNumbers[lineNumbers.length - 1].end += 1;
+        } else {
+          // Append a new line number range.
+          lineNumbers.push({begin: lineNumber, end: lineNumber + 1});
+        }
+      }
+      nextNewlineIndex = code.indexOf("\n", nextNewlineIndex + 1);
+    }
+
+    const changes = lineNumbers.map(({begin, end}) => ({
+      from: lineStartIndices[begin],
+      to: lineStartIndices[end],
+      insert: "",
+    }));
 
     return changes;
   }
@@ -332,6 +361,7 @@ export function createRuntime(initialCode) {
               {
                 set: function (key, value) {
                   state.attributes[key] = value;
+                  return this;
                 },
               },
             );
