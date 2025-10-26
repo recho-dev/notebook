@@ -1,3 +1,6 @@
+// Derived from Observable Notebook Kit's sourcemap.ts.
+// https://github.com/observablehq/notebook-kit/blob/02914e034fd21a50ebcdca08df57ef5773864125/src/javascript/sourcemap.ts
+
 import {lineBreakG} from "acorn";
 
 export class Sourcemap {

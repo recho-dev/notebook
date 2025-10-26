@@ -307,7 +307,8 @@ export function createRuntime(initialCode) {
       for (const variable of variables) variable.delete();
     }
 
-    // @ref https://github.com/observablehq/notebook-kit/blob/02914e034fd21a50ebcdca08df57ef5773864125/src/runtime/define.ts#L33
+    // Derived from Observable Notebook Kit's define.
+    // https://github.com/observablehq/notebook-kit/blob/02914e034fd21a50ebcdca08df57ef5773864125/src/runtime/define.ts#L33
     for (const node of enter) {
       const vid = uid();
       const {inputs, body, outputs, error = null} = node.transpiled;
