@@ -28,18 +28,18 @@ function rewriteEchoInFunction(input, output, body) {
   const echoNodes = [];
   const topLevelEchoNodes = [];
   const state = {depth: 0};
+  if (!input.includes("echo")) return;
+
+  // Fallback to global echo function if no echo function is available,
+  // For example, `setTimeout(() => echo(1), 0)`
+  output.insertLeft(body.start, "let __cellEcho__ = __getEcho__();");
+
   recursive(body, state, {
     Function(node, state, c) {
       if (state.depth === 0) topLevelEchoNodes.push(node);
       else echoNodes.push(node);
       state.depth++;
       c(node.body, state);
-      state.depth--;
-    },
-    // Skip transpilation of block statements while maintaining depth tracking.
-    BlockStatement(node, state, c) {
-      state.depth++;
-      for (const statement of node.body) c(statement, state);
       state.depth--;
     },
   });
@@ -49,13 +49,13 @@ function rewriteEchoInFunction(input, output, body) {
       // Transform arrow function expression to block statement with echo context.
       // Input: (x, y) => echo(x, y)
       // Output: (x, y) => {const echo = __getEcho__(); return echo(x, y);}
-      output.insertLeft(node.body.start, "{const echo = __getEcho__(); return ");
+      output.insertLeft(node.body.start, "{const echo = __getEcho__() || __cellEcho__; return ");
       output.insertLeft(node.body.end, "}");
     } else {
       // Inject echo context into existing block statement.
       // Input: (x, y) => {return echo(x, y);}
       // Output: (x, y) => {const echo = __getEcho__(); return echo(x, y);}
-      output.insertLeft(node.body.start + 1, "const echo = __getEcho__();");
+      output.insertLeft(node.body.start + 1, "const echo = __getEcho__() || __cellEcho__;");
     }
   }
 
