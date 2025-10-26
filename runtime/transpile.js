@@ -30,7 +30,7 @@ function rewriteEchoInFunction(input, output, body) {
   const state = {depth: 0};
   if (!input.includes("echo")) return;
 
-  // Fallback to global echo function if no echo function is available,
+  // Fallback to cell-level echo function if no echo function is available.
   // For example, `setTimeout(() => echo(1), 0)`
   output.insertLeft(body.start, "let __cellEcho__ = __getEcho__();");
 
