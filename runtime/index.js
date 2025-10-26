@@ -3,9 +3,9 @@ import {Runtime} from "@observablehq/runtime";
 import {parse} from "acorn";
 import {group, max} from "d3-array";
 import {dispatch as d3Dispatch} from "d3-dispatch";
-import * as stdlib from "./stdlib.js";
+import * as stdlib from "./stdlib/index.js";
+import {Inspector} from "./stdlib/inspect.js";
 import {OUTPUT_MARK, ERROR_MARK} from "./constant.js";
-import {Inspector} from "./inspect.js";
 import {transpileRechoJavaScript} from "./transpile.js";
 
 const OUTPUT_PREFIX = `//${OUTPUT_MARK}`;
@@ -35,7 +35,7 @@ function safeEval(code, inputs, __setEcho__) {
     return create(code);
   } catch (error) {
     // Wrap non-function statements in an arrow function for proper evaluation.
-    // Example: 
+    // Example:
     // Input: `for (let i = 0; i < 10; i++) { echo(i); }`
     // Output: `() => { for (let i = 0; i < 10; i++) { echo(i); } }`
     const wrapped = `() => {${code}}`;
@@ -169,8 +169,7 @@ export function createRuntime(initialCode) {
 
   function observer(state) {
     return {
-      pending() {
-      },
+      pending() {},
       fulfilled() {
         // Re-execute code to synchronize block positions after state changes.
         // Note: A more robust solution would involve applying changes from both

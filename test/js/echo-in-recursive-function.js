@@ -7,4 +7,4 @@ export const echoInRecursiveFunction = `function recursiveAdd(v, depth) {
 recursiveAdd(1, 3);
 
 recursiveAdd(2, 4);
-`
+`;
