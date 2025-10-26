@@ -48,13 +48,13 @@ function rewriteEchoInFunction(input, output, body) {
     if (node.body.type !== "BlockStatement") {
       // Transform arrow function expression to block statement with echo context.
       // Input: (x, y) => echo(x, y)
-      // Output: (x, y) => {const echo = __getEcho__(); return echo(x, y);}
+      // Output: (x, y) => {const echo = __getEcho__() || __cellEcho__; return echo(x, y);}
       output.insertLeft(node.body.start, "{const echo = __getEcho__() || __cellEcho__; return ");
       output.insertLeft(node.body.end, "}");
     } else {
       // Inject echo context into existing block statement.
       // Input: (x, y) => {return echo(x, y);}
-      // Output: (x, y) => {const echo = __getEcho__(); return echo(x, y);}
+      // Output: (x, y) => {const echo = __getEcho__() || __cellEcho__; return echo(x, y);}
       output.insertLeft(node.body.start + 1, "const echo = __getEcho__() || __cellEcho__;");
     }
   }
