@@ -83,7 +83,7 @@ const array1000 = echo(recho.inspect(new Array(1000).fill(0), {limit: Infinity})
 
 /**
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *                                clear()
+ *                              echo.clear()
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * Clear the output of the current block.
@@ -93,7 +93,7 @@ const array1000 = echo(recho.inspect(new Array(1000).fill(0), {limit: Infinity})
 
 {
   echo("Hello, World!");
-  setTimeout(() => clear(), 1000);
+  setTimeout(() => echo.clear(), 1000);
 }
 
 /**

@@ -27,7 +27,7 @@ const builtinFunctions = [
     type: "function",
     detail: "()",
     info: "Clears the output of the current block.",
-    apply: toApplyCompletion("clear()"),
+    apply: toApplyCompletion("echo.clear()"),
   },
   {
     label: "invalidation",
