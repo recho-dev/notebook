@@ -29,3 +29,4 @@ export {echoInExpression} from "./echo-in-expression.js";
 export {echoInBlock} from "./echo-in-block.js";
 export {echoInAsyncCallback} from "./echo-in-async-callback.js";
 export {echoInBracket} from "./echo-in-bracket.js";
+export {echoAsParams} from "./echo-as-params.js";

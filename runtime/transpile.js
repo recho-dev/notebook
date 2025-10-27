@@ -39,6 +39,7 @@ function rewriteEchoInFunction(input) {
 
   recursive(body, state, {
     Function(node, state, c) {
+      if (node.params.map((p) => p.name).includes("echo")) return;
       if (state.depth === 0) topLevelEchoNodes.push(node);
       else echoNodes.push(node);
       state.depth++;
