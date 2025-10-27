@@ -1,5 +1,5 @@
 import {Parser} from "acorn";
-import {recursive} from "acorn-walk";
+import {recursive, simple} from "acorn-walk";
 import {Sourcemap} from "./sourcemap.js";
 
 /**
@@ -24,11 +24,14 @@ import {Sourcemap} from "./sourcemap.js";
  * add(1, 2); // Preserves original echo function context
  * ```
  */
-function rewriteEchoInFunction(input, output, body) {
+function rewriteEchoInFunction(input) {
+  if (!input.includes("echo")) return input;
+
+  const body = Parser.parse(input, {ecmaVersion: "latest", sourceType: "module"});
+  const output = new Sourcemap(input);
   const echoNodes = [];
   const topLevelEchoNodes = [];
   const state = {depth: 0};
-  if (!input.includes("echo")) return;
 
   // Fallback to cell-level echo function if no echo function is available.
   // For example, `setTimeout(() => echo(1), 0)`
@@ -45,41 +48,47 @@ function rewriteEchoInFunction(input, output, body) {
   });
 
   for (const node of topLevelEchoNodes) {
-    if (node.body.type !== "BlockStatement") {
-      // Transform arrow function expression to block statement with echo context.
-      // Input: (x, y) => echo(x, y)
-      // Output: (x, y) => {const echo = __getEcho__() || __cellEcho__; return echo(x, y);}
-      output.insertLeft(node.body.start, "{const echo = __getEcho__() || __cellEcho__; return ");
-      output.insertLeft(node.body.end, "}");
-    } else {
-      // Inject echo context into existing block statement.
-      // Input: (x, y) => {return echo(x, y);}
-      // Output: (x, y) => {const echo = __getEcho__() || __cellEcho__; return echo(x, y);}
+    if (node.body.type === "BlockStatement") {
       output.insertLeft(node.body.start + 1, "const echo = __getEcho__() || __cellEcho__;");
     }
   }
 
   for (const node of echoNodes) {
-    if (node.body.type !== "BlockStatement") {
-      // Transform nested arrow function with conditional echo resolution.
-      // Input: () => echo(x, y);
-      // Output: () => {if(__getEcho__()) {const echo = __getEcho__(); return echo(x, y);} return echo(x, y);}
-      const source = input.slice(node.body.start, node.body.end);
-      output.insertLeft(node.body.start, `{if(__getEcho__()) {const echo = __getEcho__(); return ${source};} return `);
-      output.insertLeft(node.body.end, "}");
-    } else {
-      // Transform nested block statement with conditional echo resolution.
-      // Input: () => {echo(x, y);}
-      // Output: () => {if(__getEcho__()) {const echo = __getEcho__(); echo(x, y); return;} echo(x, y);}
+    if (node.body.type === "BlockStatement") {
       const source = input.slice(node.body.start + 1, node.body.end - 1);
       output.insertLeft(node.body.start + 1, `if(__getEcho__()) {const echo = __getEcho__(); ${source}; return;}`);
     }
   }
+
+  return String(output);
+}
+
+function rewriteArrowFunction(input) {
+  const body = Parser.parse(input, {ecmaVersion: "latest", sourceType: "module"});
+  const output = new Sourcemap(input);
+  const objectExpressions = [];
+  const arrowExpressions = [];
+  simple(body, {
+    ArrowFunctionExpression(node) {
+      if (!node.expression) return;
+      if (node.body.type === "ObjectExpression") objectExpressions.push(node);
+      else arrowExpressions.push(node);
+    },
+  });
+  for (const node of objectExpressions) {
+    output.insertLeft(node.body.start - 1, "{return ");
+    output.insertLeft(node.body.end + 1, ";}");
+  }
+  for (const node of arrowExpressions) {
+    output.insertLeft(node.body.start, "{return ");
+    output.insertLeft(node.body.end, ";}");
+  }
+  return String(output);
 }
 
 export function transpileRechoJavaScript(input) {
-  const cell = Parser.parse(input, {ecmaVersion: "latest", sourceType: "module"});
-  const output = new Sourcemap(input);
-  rewriteEchoInFunction(input, output, cell);
-  return String(output);
+  let output = input;
+  output = rewriteArrowFunction(output);
+  output = rewriteEchoInFunction(output);
+  return output;
 }
