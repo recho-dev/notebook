@@ -113,7 +113,7 @@ const array1000 = echo(recho.inspect(new Array(1000).fill(0), {limit: Infinity})
   const timer = setInterval(() => {
     if (count-- <= 0) clearInterval(timer);
     else {
-      clear();
+      echo.clear();
       echo(count);
     }
   }, 1000);
