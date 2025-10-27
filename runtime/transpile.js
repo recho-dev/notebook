@@ -2,6 +2,10 @@ import {Parser} from "acorn";
 import {recursive, simple} from "acorn-walk";
 import {Sourcemap} from "./sourcemap.js";
 
+function parseParams(params) {
+  return params.map((p) => (p.type === "AssignmentPattern" ? p.left.name : p.name));
+}
+
 /**
  * Transforms echo function calls within JavaScript functions to ensure proper
  * echo context handling. For top-level function nodes, defines a local echo
@@ -39,7 +43,7 @@ function rewriteEchoInFunction(input) {
 
   recursive(body, state, {
     Function(node, state, c) {
-      if (node.params.map((p) => p.name).includes("echo")) return;
+      if (parseParams(node.params).includes("echo")) return;
       if (state.depth === 0) topLevelEchoNodes.push(node);
       else echoNodes.push(node);
       state.depth++;
