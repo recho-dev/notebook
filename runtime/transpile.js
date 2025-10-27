@@ -66,22 +66,17 @@ function rewriteEchoInFunction(input) {
 function rewriteArrowFunction(input) {
   const body = Parser.parse(input, {ecmaVersion: "latest", sourceType: "module"});
   const output = new Sourcemap(input);
-  const objectExpressions = [];
   const arrowExpressions = [];
   simple(body, {
     ArrowFunctionExpression(node) {
       if (!node.expression) return;
-      if (node.body.type === "ObjectExpression") objectExpressions.push(node);
       else arrowExpressions.push(node);
     },
   });
-  for (const node of objectExpressions) {
-    output.insertLeft(node.body.start - 1, "{return ");
-    output.insertLeft(node.body.end + 1, ";}");
-  }
   for (const node of arrowExpressions) {
-    output.insertLeft(node.body.start, "{return ");
-    output.insertLeft(node.body.end, ";}");
+    const arrayIndex = input.slice(node.start, node.end).indexOf("=>");
+    output.insertLeft(node.start + arrayIndex + 2, "{return ");
+    output.insertLeft(node.end, ";}");
   }
   return String(output);
 }
