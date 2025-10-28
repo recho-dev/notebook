@@ -56,6 +56,9 @@ importers:
       acorn:
         specifier: ^8.15.0
         version: 8.15.0
+      acorn-walk:
+        specifier: ^8.3.4
+        version: 8.3.4
       cheerio:
         specifier: ^1.1.2
         version: 1.1.2

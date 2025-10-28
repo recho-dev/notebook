@@ -69,6 +69,7 @@
     "@observablehq/runtime": "^6.0.0",
     "@uiw/codemirror-theme-github": "^4.25.2",
     "acorn": "^8.15.0",
+    "acorn-walk": "^8.3.4",
     "cheerio": "^1.1.2",
     "codemirror": "^6.0.2",
     "d3-array": "^3.2.4",
