@@ -84,7 +84,7 @@ handPose.detectStart(video, (hands) => {
     for (let j = 0; j < width; ++j) output += buffer[i * width + j];
     output += i === height - 1 ? "" : "\n";
   }
-  clear();
+  echo.clear();
   echo(output);
 });
 

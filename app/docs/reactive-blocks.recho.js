@@ -123,7 +123,7 @@ const random = echo(Math.random());
   const timer = setInterval(() => {
     if (count-- <= 0) clearInterval(timer);
     else {
-      clear();
+      echo.clear();
       echo(count);
     }
   }, 1000);

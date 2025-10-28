@@ -120,7 +120,7 @@ echo("~".repeat(x) + "(๑•̀ㅂ•́)و✧");
   const loop = () => {
     const x = 40 - (i++ % 40);
     const turtle = "🐢".padStart(x);
-    clear(); // Clear the output of the current block.
+    echo.clear(); // Clear the output of the current block.
     echo(turtle);
   };
 
