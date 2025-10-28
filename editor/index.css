@@ -159,6 +159,45 @@
     }
   }
 
+  .cm-blockIndicators {
+    padding-left: 0.25rem;
+
+    --gap-between-blocks: 2px;
+  }
+
+  .cm-gutterElement .cm-block-indicator {
+    width: 0.25rem;
+    height: 100%;
+
+    &.output {
+      background: #72aa006e;
+    }
+
+    &.source {
+      background: #1f180021;
+    }
+
+    &.error {
+      background: #df2600d1;
+    }
+
+    &.head {
+      height: calc(100% - var(--gap-between-blocks));
+      /*border-top-left-radius: 0.25rem;
+      border-top-right-radius: 0.25rem;*/
+
+      &:not(.tail) {
+        transform: translate(0, var(--gap-between-blocks));
+      }
+    }
+
+    &.tail {
+      height: calc(100% - var(--gap-between-blocks));
+      /*border-bottom-left-radius: 0.25rem;
+      border-bottom-right-radius: 0.25rem;*/
+    }
+  }
+
   /* We can't see background color, which is conflict with selection background color.
    * So we use svg pattern to simulate the background color.
    */

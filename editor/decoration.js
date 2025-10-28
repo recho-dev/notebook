@@ -25,17 +25,15 @@ function createWidgets(lines, blockMetadata, state) {
   const set1 = builder1.finish();
 
   // Build the range set for block attributes.
+  console.groupCollapsed("Decorations for block attributes");
   const builder2 = new RangeSetBuilder();
   // Add block attribute decorations
   for (const {output, attributes} of blockMetadata) {
+    if (output === null) continue;
     // Apply decorations to each line in the block range
     const startLine = state.doc.lineAt(output.from);
     const endLine = state.doc.lineAt(output.to);
-    console.log("from:", output.from);
-    console.log("to:", output.to);
-    console.log("startLine:", startLine);
-    console.log("endLine:", endLine);
-
+    console.log(`Make lines from ${startLine.number} to ${endLine.number} compact`);
     if (attributes.compact === true) {
       for (let lineNum = startLine.number; lineNum <= endLine.number; lineNum++) {
         const line = state.doc.line(lineNum);
@@ -44,6 +42,7 @@ function createWidgets(lines, blockMetadata, state) {
     }
   }
   const set2 = builder2.finish();
+  console.groupEnd();
 
   const builder3 = new RangeSetBuilder();
   for (const {output} of blockMetadata) {

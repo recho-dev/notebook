@@ -6,7 +6,7 @@ import {dispatch as d3Dispatch} from "d3-dispatch";
 import * as stdlib from "./stdlib.js";
 import {OUTPUT_MARK, ERROR_MARK} from "./constant.js";
 import {Inspector} from "./inspect.js";
-import {blockMetadataEffect} from "../editor/blockMetadata.ts";
+import {BlockMetadata, blockMetadataEffect} from "../editor/blockMetadata.ts";
 import {IntervalTree} from "../lib/IntervalTree.ts";
 
 const OUTPUT_PREFIX = `//${OUTPUT_MARK}`;
@@ -107,9 +107,10 @@ export function createRuntime(initialCode) {
     for (const node of nodes) {
       const start = node.start;
       const {values} = node.state;
+      let outputRange = null;
+      let error = false;
       if (values.length) {
         let output = "";
-        let error = false;
         for (let i = 0; i < values.length; i++) {
           const line = values[i];
           const n = line.length;
@@ -129,7 +130,6 @@ export function createRuntime(initialCode) {
         const prefixed = addPrefix(output, prefix);
         // Search for existing changes and update the inserted text if found.
         const entry = removedIntervals.contains(start - 1);
-        let outputRange = null;
         if (entry === null) {
           changes.push({from: start, insert: prefixed + "\n"});
         } else {
@@ -137,13 +137,16 @@ export function createRuntime(initialCode) {
           change.insert = prefixed + "\n";
           outputRange = {from: change.from, to: change.to};
         }
-        blocks.push({
-          source: {from: node.start, to: node.end},
-          output: outputRange,
-          attributes: node.state.attributes,
-        });
       }
+      // Add this block to the block metadata array.
+      const block = BlockMetadata(outputRange, {from: node.start, to: node.end}, node.state.attributes);
+      block.error = error;
+      blocks.push(block);
     }
+
+    blocks.sort((a, b) => a.from - b.from);
+
+    console.log(blocks);
 
     // Attach block positions and attributes as effects to the transaction.
     const effects = [blockMetadataEffect.of(blocks)];
@@ -195,6 +198,9 @@ export function createRuntime(initialCode) {
 
   function split(code) {
     try {
+      // The `parse` call here is actually unnecessary. Parsing the entire code
+      // is quite expensive. If we can perform the splitting operation through
+      // the editor's syntax tree, we can save the parsing here.
       return parse(code, {ecmaVersion: "latest", sourceType: "module"}).body;
     } catch (error) {
       console.error(error);
@@ -281,6 +287,12 @@ export function createRuntime(initialCode) {
 
     const nodes = split(code);
     if (!nodes) return;
+
+    console.group("rerun");
+    for (const node of nodes) {
+      console.log(`Node ${node.type} (${node.start}-${node.end})`);
+    }
+    console.groupEnd();
 
     for (const node of nodes) {
       const cell = code.slice(node.start, node.end);

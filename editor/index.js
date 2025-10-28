@@ -11,13 +11,15 @@ import * as eslint from "eslint-linter-browserify";
 import {createRuntime} from "../runtime/index.js";
 import {outputDecoration} from "./decoration.js";
 import {outputLines} from "./outputLines.js";
-import {blockMetadata, blockMetadataEffect} from "./blockMetadata.ts";
+import {blockMetadataExtension, blockMetadataEffect} from "./blockMetadata.ts";
 // import {outputProtection} from "./protection.js";
 import {dispatch as d3Dispatch} from "d3-dispatch";
 import {controls} from "./controls/index.js";
 import {rechoCompletion} from "./completion.js";
 import {docStringTag} from "./docStringTag.js";
 import {commentLink} from "./commentLink.js";
+import {blockIndicator} from "./blockIndicator.ts";
+import {lineNumbers} from "@codemirror/view";
 
 // @see https://github.com/UziTech/eslint-linter-browserify/blob/master/example/script.js
 // @see https://codemirror.net/examples/lint/
@@ -38,10 +40,13 @@ export function createEditor(container, options) {
   const dispatcher = d3Dispatch("userInput");
   const runtimeRef = {current: null};
 
+  const myBasicSetup = Array.from(basicSetup);
+  myBasicSetup.splice(2, 0, blockIndicator);
+
   const state = EditorState.create({
     doc: code,
     extensions: [
-      basicSetup,
+      myBasicSetup,
       javascript(),
       githubLightInit({
         styles: [
@@ -69,7 +74,7 @@ export function createEditor(container, options) {
       ]),
       javascriptLanguage.data.of({autocomplete: rechoCompletion}),
       outputLines,
-      blockMetadata,
+      blockMetadataExtension,
       outputDecoration,
       controls(runtimeRef),
       // Disable this for now, because it prevents copying/pasting the code.
