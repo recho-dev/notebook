@@ -1,5 +1,5 @@
-export const commentLink = `// https://recho.dev
-// http://recho.dev
+export const commentLink = `// https://recho.dev!
+// http://recho.dev,
 
 /**
  * [Recho](https://recho.dev)

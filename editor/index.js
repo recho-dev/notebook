@@ -16,7 +16,7 @@ import {dispatch as d3Dispatch} from "d3-dispatch";
 import {controls} from "./controls/index.js";
 import {rechoCompletion} from "./completion.js";
 import {docStringTag} from "./docStringTag.js";
-import {commentLink} from "./commentLink.js";
+import {commentLink, commentLinkClickHandler} from "./commentLink.js";
 
 // @see https://github.com/UziTech/eslint-linter-browserify/blob/master/example/script.js
 // @see https://codemirror.net/examples/lint/
@@ -74,6 +74,7 @@ export function createEditor(container, options) {
       // outputProtection(),
       docStringTag,
       commentLink,
+      commentLinkClickHandler,
       linter(esLint(new eslint.Linter(), eslintConfig)),
     ],
   });
