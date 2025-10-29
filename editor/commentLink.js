@@ -38,13 +38,18 @@ export const commentLink = ViewPlugin.fromClass(
           enter: ({type, from, to}) => {
             if (type.name === "BlockComment" || type.name === "LineComment") {
               const text = view.state.doc.sliceString(from, to);
-              let httpRegex = /https?:\/\/[^\s\)]+/g;
+              // Match URLs, allowing common URL characters, then trim trailing punctuation.
+              let httpRegex = /https?:\/\/[^\s\)\]\}]+/g;
               let m;
               while ((m = httpRegex.exec(text))) {
+                let url = m[0];
+                // Trim trailing punctuation that shouldn't be part of URL.
+                // These are common sentence/clause-ending punctuation.
+                url = url.replace(/[.,;:!?)\]}>]+$/, '');
+                if (!url || url.length < 11) continue; // Minimum valid URL length.
                 const tagStart = from + m.index;
-                const tagEnd = tagStart + m[0].length;
+                const tagEnd = tagStart + url.length;
                 if (tagEnd >= from && tagStart <= to) {
-                  const url = m[0];
                   decorations.push(createLinkDecoration(url).range(tagStart, tagEnd));
                 }
               }

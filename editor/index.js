@@ -75,7 +75,6 @@ export function createEditor(container, options) {
       docStringTag,
       commentLink,
       commentLinkClickHandler,
-      // commentLinkKeyHandler,
       linter(esLint(new eslint.Linter(), eslintConfig)),
     ],
   });
