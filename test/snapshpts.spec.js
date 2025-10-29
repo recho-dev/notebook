@@ -12,7 +12,7 @@ describe("snapshots", () => {
       console.error = () => {};
       try {
         const runtime = createRuntime(state.doc.toString());
-        runtime.onChanges((changes) => (state = state.update({changes}).state));
+        runtime.onChanges((specs) => (state = state.update(specs).state));
         runtime.run();
         await new Promise((resolve) => setTimeout(resolve, 100));
       } catch (error) {}
