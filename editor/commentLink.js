@@ -1,43 +1,17 @@
 import {syntaxTree} from "@codemirror/language";
-import {Decoration, ViewPlugin, WidgetType} from "@codemirror/view";
+import {Decoration, ViewPlugin, EditorView} from "@codemirror/view";
 
 const isWindows = navigator.userAgent.includes("Windows");
 
-class LinkWidget extends WidgetType {
-  constructor(url) {
-    super();
-    this.url = url;
-  }
-
-  toDOM() {
-    const link = document.createElement("a");
-    link.href = this.url;
-    link.textContent = this.url;
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    link.className = "cm-comment-link";
-    link.title = `Open in a new tab (${isWindows ? "Ctrl" : "Cmd"} + Click)`;
-
-    // Prevent default click behavior - only open on Cmd+Click
-    const preventDefault = (e) => !e.metaKey && !e.ctrlKey && e.preventDefault();
-    link.addEventListener("click", preventDefault);
-
-    // Change cursor to pointer when Ctrl/Cmd is held
-    const add = (e) => (e.metaKey || e.ctrlKey) && link.classList.add("cmd-clickable");
-    const remove = (e) => !e.metaKey && !e.ctrlKey && link.classList.remove("cmd-clickable");
-    link.addEventListener("mouseenter", add);
-    link.addEventListener("mousemove", add);
-    link.addEventListener("mouseleave", remove);
-    return link;
-  }
-
-  ignoreEvent(event) {
-    // Ignore click events when Cmd/Ctrl is held (for opening links)
-    if (event.type === "mousedown" || event.type === "click") {
-      return event.metaKey || event.ctrlKey;
-    }
-    return false;
-  }
+// Create a decoration that marks links but keeps text selectable.
+function createLinkDecoration(url) {
+  return Decoration.mark({
+    class: "cm-comment-link",
+    attributes: {
+      "data-url": url,
+      title: `Open in a new tab (${isWindows ? "Ctrl" : "Cmd"} + Click)`,
+    },
+  });
 }
 
 export const commentLink = ViewPlugin.fromClass(
@@ -53,7 +27,7 @@ export const commentLink = ViewPlugin.fromClass(
     }
 
     buildDeco(view) {
-      let widgets = [];
+      let decorations = [];
       let tree = syntaxTree(view.state);
 
       // Only iterate tree nodes that intersect with the viewport.
@@ -71,13 +45,7 @@ export const commentLink = ViewPlugin.fromClass(
                 const tagEnd = tagStart + m[0].length;
                 if (tagEnd >= from && tagStart <= to) {
                   const url = m[0];
-                  const widget = new LinkWidget(url);
-                  widgets.push(
-                    Decoration.replace({
-                      widget,
-                      inclusive: true,
-                    }).range(tagStart, tagEnd),
-                  );
+                  decorations.push(createLinkDecoration(url).range(tagStart, tagEnd));
                 }
               }
             }
@@ -85,10 +53,35 @@ export const commentLink = ViewPlugin.fromClass(
         });
       }
 
-      return Decoration.set(widgets, true);
+      return Decoration.set(decorations, true);
     }
   },
   {
     decorations: (v) => v.decorations,
   },
 );
+
+// Handle clicks and cursor updates on comment links.
+export const commentLinkClickHandler = EditorView.domEventHandlers({
+  mousedown(event) {
+    const target = event.target.closest?.(".cm-comment-link");
+    if (!target) return false;
+    const url = target.getAttribute("data-url");
+    if (!url) return false;
+    if (event.metaKey || event.ctrlKey) {
+      event.preventDefault();
+      window.open(url, "_blank", "noopener,noreferrer");
+      return true;
+    }
+    return false;
+  },
+  mousemove(event) {
+    const element = event.target;
+    const isCmdHeld = event.metaKey || event.ctrlKey;
+    const target = element?.closest?.(".cm-comment-link");
+    if (!target) return false;
+    if (isCmdHeld) target.classList.add("cmd-clickable");
+    else target.classList.remove("cmd-clickable");
+    return false;
+  },
+});
