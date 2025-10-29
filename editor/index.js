@@ -36,7 +36,7 @@ const eslintConfig = {
 };
 
 export function createEditor(container, options) {
-  const {code, onError} = options;
+  const {code, onError, extensions = []} = options;
   const dispatcher = d3Dispatch("userInput");
   const runtimeRef = {current: null};
 
@@ -82,6 +82,7 @@ export function createEditor(container, options) {
       docStringTag,
       commentLink,
       linter(esLint(new eslint.Linter(), eslintConfig)),
+      ...extensions,
     ],
   });
 
