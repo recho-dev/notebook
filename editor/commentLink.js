@@ -45,7 +45,7 @@ export const commentLink = ViewPlugin.fromClass(
                 let url = m[0];
                 // Trim trailing punctuation that shouldn't be part of URL.
                 // These are common sentence/clause-ending punctuation.
-                url = url.replace(/[.,;:!?)\]}>]+$/, '');
+                url = url.replace(/[.,;:!?)\]}>]+$/, "");
                 if (!url || url.length < 11) continue; // Minimum valid URL length.
                 const tagStart = from + m.index;
                 const tagEnd = tagStart + url.length;
