@@ -1,6 +1,5 @@
 /**
  * @title recho.radio(index, options)
- * @order 18
  */
 
 /**

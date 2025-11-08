@@ -1,6 +1,5 @@
 /**
  * @title recho.number(value[, options])
- * @order 19
  */
 
 /**

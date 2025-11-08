@@ -1,6 +1,5 @@
 /**
  * @title recho.inspect(value[, options])
- * @order 12
  */
 
 /**

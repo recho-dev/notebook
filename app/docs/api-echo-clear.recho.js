@@ -1,6 +1,5 @@
 /**
  * @title echo.clear()
- * @order 11
  */
 
 /**

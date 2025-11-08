@@ -1,6 +1,5 @@
 /**
  * @title recho.interval(milliseconds)
- * @order 15
  */
 
 /**
