@@ -1,6 +1,6 @@
 "use client";
 import {useEffect, useRef, useState} from "react";
-import {Play, Square, RefreshCcw} from "lucide-react";
+import {Play, Square, RefreshCcw, Copy} from "lucide-react";
 import {Tooltip} from "react-tooltip";
 import {createEditor} from "../editor/index.js";
 import {cn} from "./cn.js";
@@ -9,6 +9,20 @@ const styles = {
   iconButton: "w-4 h-4 hover:scale-110 transition-transform duration-100",
 };
 
+function debounce(fn, delay = 0) {
+  let timeout;
+  return (...args) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn(...args), delay);
+  };
+}
+
+const onDefaultError = debounce(() => {
+  setTimeout(() => {
+    alert("Something unexpected happened. Please check the console for details.");
+  }, 100);
+}, 0);
+
 export function Editor({
   initialCode,
   onUserInput = () => {},
@@ -16,6 +30,8 @@ export function Editor({
   autoRun = true,
   toolBarStart = null,
   pinToolbar = true,
+  onDuplicate = null,
+  onError = onDefaultError,
 }) {
   const containerRef = useRef(null);
   const editorRef = useRef(null);
@@ -24,7 +40,7 @@ export function Editor({
   useEffect(() => {
     if (containerRef.current) {
       containerRef.current.innerHTML = "";
-      editorRef.current = createEditor(containerRef.current, {code: initialCode});
+      editorRef.current = createEditor(containerRef.current, {code: initialCode, onError});
       if (autoRun) onRun();
     }
     return () => {
@@ -46,6 +62,14 @@ export function Editor({
     }
   }, [initialCode, onUserInput]);
 
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.metaKey && e.key === "s") setNeedRerun(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   function onRun() {
     onBeforeEachRun();
     setNeedRerun(false);
@@ -63,6 +87,10 @@ export function Editor({
     editorRef.current.run();
   }
 
+  function metaKey() {
+    return typeof navigator !== "undefined" || navigator.userAgent.includes("Mac") ? "cmd" : "ctrl";
+  }
+
   return (
     <div className={cn("w-full border border-gray-200 rounded-md")}>
       <div
@@ -76,7 +104,7 @@ export function Editor({
           <button
             onClick={onRun}
             data-tooltip-id="action-tooltip"
-            data-tooltip-content="Run Updated Code"
+            data-tooltip-content={`Run Updated Code (${metaKey()}+s)`}
             data-tooltip-place="bottom"
           >
             <Play className={cn(styles.iconButton, needRerun && "fill-black")} />
@@ -84,7 +112,7 @@ export function Editor({
           <button
             onClick={onRerun}
             data-tooltip-id="action-tooltip"
-            data-tooltip-content="Re-run Sketch"
+            data-tooltip-content="Re-run Notebook"
             data-tooltip-place="bottom"
           >
             <RefreshCcw className={cn(styles.iconButton)} />
@@ -97,6 +125,16 @@ export function Editor({
           >
             <Square className={cn(styles.iconButton)} />
           </button>
+          {onDuplicate && (
+            <button
+              onClick={onDuplicate}
+              data-tooltip-id="action-tooltip"
+              data-tooltip-content="Duplicate Notebook"
+              data-tooltip-place="bottom"
+            >
+              <Copy className={cn(styles.iconButton)} />
+            </button>
+          )}
         </div>
       </div>
       <div ref={containerRef}>

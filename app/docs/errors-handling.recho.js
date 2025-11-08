@@ -9,11 +9,12 @@
  *                           Errors Handling
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * Errors are echoed as normal output. There are two types of errors in Recho:
- * syntax errors and runtime errors.
+ * Errors are echoed as normal output. There are two types of errors in Recho
+ * Notebook: syntax errors and runtime errors.
  *
- * For syntax errors, they will be positioned at the beginning of the sketch.
- * The sketch will not run until the syntax error is fixed.
+ * For syntax errors, they will be positioned at the start of the line where 
+ * the error occurred.The notebook will not run until the syntax error is 
+ * fixed.
  * 
  * You can fix the following syntax error by removing the prefix `1` for the 
  * variable name, then click the ▶️ button.

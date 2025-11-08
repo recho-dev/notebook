@@ -1,18 +1,12 @@
-import {Sidebar} from "../Sidebar.js";
-import {cn} from "../cn.js";
 import {getAllJSDocs} from "../utils.js";
+import {DocsLayoutClient} from "./DocsLayoutClient.jsx";
 
 export const metadata = {
-  title: "Docs | Recho",
-  description: "Docs | Recho",
+  title: "Docs | Recho Notebook",
+  description: "Docs | Recho Notebook",
 };
 
 export default function Layout({children}) {
   const docs = getAllJSDocs();
-  return (
-    <div className={cn("flex", "h-[calc(100vh-65px)] overflow-auto")}>
-      <Sidebar docs={docs} />
-      <div className={cn("flex-1", "overflow-auto")}>{children}</div>
-    </div>
-  );
+  return <DocsLayoutClient docs={docs}>{children}</DocsLayoutClient>;
 }

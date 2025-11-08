@@ -3,11 +3,17 @@ import {outputLinesField} from "./outputLines";
 import {RangeSetBuilder} from "@codemirror/state";
 
 const highlight = Decoration.line({attributes: {class: "cm-output-line"}});
+const errorHighlight = Decoration.line({attributes: {class: "cm-output-line cm-error-line"}});
+// const linePrefix = Decoration.mark({attributes: {class: "cm-output-line-prefix"}});
+// const lineContent = Decoration.mark({attributes: {class: "cm-output-line-content"}});
 
 function createWidgets(lines) {
   const builder = new RangeSetBuilder();
-  for (const {from, to} of lines) {
-    builder.add(from, from, highlight);
+  for (const {from, type} of lines) {
+    if (type === "output") builder.add(from, from, highlight);
+    else if (type === "error") builder.add(from, from, errorHighlight);
+    // builder.add(from, from + 3, linePrefix);
+    // builder.add(from + 4, to, lineContent);
   }
   return builder.finish();
 }

@@ -2,8 +2,9 @@
 import {useSyncExternalStore} from "react";
 import {useRouter} from "next/navigation";
 import {isDirtyStore, countStore} from "./store.js";
+import Link from "next/link";
 
-export function SafeLink({href, children, className, ...props}) {
+export function SafeLink({href, children, className, onClick, ...props}) {
   const router = useRouter();
   const isDirty = useSyncExternalStore(
     isDirtyStore.subscribe,
@@ -14,18 +15,18 @@ export function SafeLink({href, children, className, ...props}) {
   const handleClick = (e) => {
     e.preventDefault();
     if (isDirty) {
-      e.preventDefault();
       const confirmLeave = window.confirm("Your changes will be lost.");
       if (!confirmLeave) return;
     }
     isDirtyStore.setDirty(false);
     if (href === "/") countStore.increment();
     router.push(href);
+    onClick?.();
   };
 
   return (
-    <a href={href} onClick={handleClick} className={className} {...props}>
+    <Link href={href} onClick={handleClick} className={className} {...props}>
       {children}
-    </a>
+    </Link>
   );
 }

@@ -27,7 +27,7 @@ const builtinFunctions = [
     type: "function",
     detail: "()",
     info: "Clears the output of the current block.",
-    apply: toApplyCompletion("clear()"),
+    apply: toApplyCompletion("echo.clear()"),
   },
   {
     label: "invalidation",
@@ -56,6 +56,27 @@ const builtinFunctions = [
     type: "function",
     info: "Imports one or more JavaScript packages. The import specifiers must be valid npm package names with optional version specifiers.",
     apply: toApplyCompletion('recho.require("$")'),
+  },
+  {
+    label: "toggle",
+    detail: "(value: boolean)",
+    type: "function",
+    info: "Display an interactive toggle in the editor.",
+    apply: toApplyCompletion("recho.toggle($)"),
+  },
+  {
+    label: "number",
+    detail: "(value: number, { min?, max?, step? })",
+    type: "function",
+    info: "Display a stepper control for a number value using a given step length within a specified range.",
+    apply: toApplyCompletion("recho.number($)"),
+  },
+  {
+    label: "radio",
+    detail: "(index: number, options: any[])",
+    type: "function",
+    info: "Display an interactive radio button group in the editor.",
+    apply: toApplyCompletion("recho.radio($, [])"),
   },
 ];
 

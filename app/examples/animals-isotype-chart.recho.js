@@ -16,7 +16,7 @@
  * > Ref. https://observablehq.com/@observablehq/plot-isotype-chart
  *
  * Recho is suitable for Isotype Chart (Unit Chart), because it allows you to
- * encode data as characters easily. This sketch shows how to create a animals
+ * encode data as characters easily. This notebook shows how to create a animals
  * isotype chart step by step. It's also a good example to show that Recho is
  * powerful in echoing intermediate results, helping you to understand the
  * data and the process of creating the chart.

@@ -2,6 +2,7 @@
 @import "../editor/index.css";
 @import "@fontsource-variable/inter";
 @import "@fontsource-variable/spline-sans-mono";
+@import "@fontsource-variable/spline-sans-mono/wght-italic";
 
 @theme {
   --default-font-family: "Inter Variable";

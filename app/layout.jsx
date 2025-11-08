@@ -3,8 +3,8 @@ import {Nav} from "./Nav.jsx";
 import {cn} from "./cn.js";
 
 export const metadata = {
-  title: "Recho",
-  description: "Recho",
+  title: "Recho Notebook",
+  description: "Recho Notebook - A interactive editor for algorithms and ASCII art",
 };
 
 export default function Layout({children}) {

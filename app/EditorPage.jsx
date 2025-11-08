@@ -1,16 +1,20 @@
 "use client";
 import {useState, useEffect, useRef, useCallback, useSyncExternalStore} from "react";
-import {notFound} from "next/navigation";
+import {notFound, useRouter} from "next/navigation";
 import {Pencil} from "lucide-react";
 import {Editor} from "./Editor.jsx";
-import {getSketchById, createSketch, addSketch, saveSketch} from "./api.js";
+import {getNotebookById, createNotebook, addNotebook, saveNotebook, getNotebooks, duplicateNotebook} from "./api.js";
 import {isDirtyStore, countStore} from "./store.js";
 import {cn} from "./cn.js";
+import {SafeLink} from "./SafeLink.jsx";
+import {BASE_PATH} from "./shared.js";
 
 const UNSET = Symbol("UNSET");
 
 export function EditorPage({id: initialId}) {
-  const [sketch, setSketch] = useState(UNSET);
+  const router = useRouter();
+  const [notebook, setNotebook] = useState(UNSET);
+  const [notebookList, setNotebookList] = useState([]);
   const [showInput, setShowInput] = useState(false);
   const [autoRun, setAutoRun] = useState(false);
   const [id, setId] = useState(initialId);
@@ -24,40 +28,45 @@ export function EditorPage({id: initialId}) {
     isDirtyStore.getServerSnapshot,
   );
   const prevCount = useRef(id ? count : null); // Last saved count.
-  const isAdded = prevCount.current === count; // Whether the sketch is added to the storage.
+  const isAdded = prevCount.current === count; // Whether the notebook is added to the storage.
   const timer = useRef(null);
 
   const onSave = useCallback(() => {
     isDirtyStore.setDirty(false);
     if (isAdded) {
-      saveSketch(sketch);
+      saveNotebook(notebook);
     } else {
-      addSketch(sketch);
+      addNotebook(notebook);
       prevCount.current = count;
-      const id = sketch.id;
+      const id = notebook.id;
       setId(id); // Force re-render.
-      window.history.pushState(null, "", `/sketches/${id}`); // Just update the url, no need to reload the page.
+      window.history.pushState(null, "", `${BASE_PATH}/works/${id}`); // Just update the url, no need to reload the page.
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sketch]);
+  }, [notebook]);
 
   // This effect is triggered when the count changes,
   // which happens when user clicks the "New" nav link.
   useEffect(() => {
-    const initialSketch = isAdded ? getSketchById(id) : createSketch();
-    setSketch(initialSketch);
-    setInitialCode(initialSketch.content);
-    setAutoRun(initialSketch.autoRun);
-    setTitle(initialSketch.title);
+    const initialNotebook = isAdded ? getNotebookById(id) : createNotebook();
+    setNotebook(initialNotebook);
+    setInitialCode(initialNotebook.content);
+    setAutoRun(initialNotebook.autoRun);
+    setTitle(initialNotebook.title);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [count]);
 
   useEffect(() => {
     // Use setTimeout to avoid changing to default title.
     setTimeout(() => {
-      document.title = `${isAdded ? sketch.title : "New"} | Recho`;
+      document.title = `${isAdded ? notebook.title : "New"} | Recho Notebook`;
     }, 100);
-  }, [sketch, isAdded]);
+  }, [notebook, isAdded]);
+
+  useEffect(() => {
+    const notebooks = getNotebooks();
+    setNotebookList(notebooks.slice(0, 4));
+  }, [isAdded]);
 
   useEffect(() => {
     const onBeforeUnload = (e) => {
@@ -79,34 +88,34 @@ export function EditorPage({id: initialId}) {
     if (showInput) titleRef.current.focus();
   }, [showInput]);
 
-  if (sketch === UNSET) return <div className={cn("max-w-screen-lg mx-auto my-10 editor-page")}>Loading...</div>;
+  if (notebook === UNSET) return <div className={cn("max-w-screen-lg mx-auto my-10 editor-page")}>Loading...</div>;
 
-  if (!sketch) return notFound();
+  if (!notebook) return notFound();
 
   function onUserInput(code) {
-    const newSketch = {...sketch, content: code};
+    const newNotebook = {...notebook, content: code};
     if (isAdded) {
-      saveSketch(newSketch);
-      setSketch(newSketch);
+      saveNotebook(newNotebook);
+      setNotebook(newNotebook);
     } else {
-      setSketch(newSketch);
+      setNotebook(newNotebook);
       isDirtyStore.setDirty(true);
     }
   }
 
   function onRename() {
     setShowInput(true);
-    setTitle(sketch.title);
+    setTitle(notebook.title);
   }
 
   // Only submit rename when blur with valid title.
   function onTitleBlur() {
     setShowInput(false);
     // The title can't be empty.
-    if (!title) return setTitle(sketch.title);
-    const newSketch = {...sketch, title};
-    setSketch(newSketch);
-    if (isAdded) saveSketch(newSketch);
+    if (!title) return setTitle(notebook.title);
+    const newNotebook = {...notebook, title};
+    setNotebook(newNotebook);
+    if (isAdded) saveNotebook(newNotebook);
     else isDirtyStore.setDirty(true);
   }
 
@@ -127,54 +136,114 @@ export function EditorPage({id: initialId}) {
   function onBeforeEachRun() {
     if (!isAdded) return;
     if (timer.current) clearTimeout(timer.current);
-    const newSketch = {...sketch, autoRun: false};
-    saveSketch(newSketch);
+    const newNotebook = {...notebook, autoRun: false};
+    saveNotebook(newNotebook);
     timer.current = setTimeout(() => {
-      const newSketch = {...sketch, autoRun: true};
-      saveSketch(newSketch);
+      const newNotebook = {...notebook, autoRun: true};
+      saveNotebook(newNotebook);
       timer.current = null;
     }, 100);
   }
 
+  function onDuplicate() {
+    const duplicated = duplicateNotebook(notebook);
+    addNotebook(duplicated);
+    router.push(`/works/${duplicated.id}`);
+  }
+
   return (
-    <div className={cn("max-w-screen-lg mx-auto my-10 editor-page")}>
-      <Editor
-        initialCode={initialCode}
-        key={sketch.id}
-        onUserInput={onUserInput}
-        onBeforeEachRun={onBeforeEachRun}
-        autoRun={autoRun}
-        toolBarStart={
-          <div className={cn("flex items-center gap-2")}>
-            {!isAdded && (
-              <button
-                onClick={onSave}
-                className={cn("bg-green-700 text-white rounded-md px-3 py-1 text-sm hover:bg-green-800")}
-              >
-                Create
-              </button>
+    <div>
+      {!isAdded && notebookList.length > 0 && (
+        <div className={cn("flex h-[72px] bg-gray-100 p-2 w-full border-b border-gray-200")}>
+          <div
+            className={cn(
+              "flex items-center justify-between gap-2 h-full max-w-screen-lg lg:mx-auto mx-4 w-full hidden md:flex",
             )}
-            {!showInput && isAdded && (
-              <button onClick={onRename}>
-                <Pencil className="w-4 h-4" />
-              </button>
-            )}
-            {showInput || !isAdded ? (
-              <input
-                type="text"
-                value={title}
-                onChange={onTitleChange}
-                onBlur={onTitleBlur}
-                onKeyDown={onTitleKeyDown}
-                ref={titleRef}
-                className={cn("border border-gray-200 rounded-md px-3 py-1 text-sm bg-white")}
-              />
-            ) : (
-              <span className={cn("text-sm py-1 border border-gray-100 rounded-md")}>{sketch.title}</span>
-            )}
+          >
+            {notebookList.map((notebook) => (
+              <div key={notebook.id} className={cn("flex items-start flex-col gap-1")}>
+                <SafeLink
+                  href={`/works/${notebook.id}`}
+                  className={cn(
+                    "font-semibold hover:underline text-blue-500 whitespace-nowrap line-clamp-1 max-w-[150px] text-ellipsis",
+                  )}
+                >
+                  {notebook.title}
+                </SafeLink>
+                <span
+                  className={cn("text-xs text-gray-500 line-clamp-1 whitespace-nowrap max-w-[150px] text-ellipsis")}
+                >
+                  Created {new Date(notebook.created).toLocaleDateString()}
+                </span>
+              </div>
+            ))}
+            <SafeLink href="/works" className={cn("font-semibold text-blue-500 hover:underline")}>
+              View your notebooks
+            </SafeLink>
           </div>
-        }
-      />
+          <div
+            className={cn(
+              "flex items-center justify-between gap-2 h-full max-w-screen-lg lg:mx-auto mx-4 w-full md:hidden",
+            )}
+          >
+            <SafeLink
+              href="/works"
+              className={cn(
+                "font-medium w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-center hover:bg-gray-200",
+              )}
+            >
+              View your notebooks
+            </SafeLink>
+          </div>
+        </div>
+      )}
+      {!isAdded && notebookList.length === 0 && (
+        <div className={cn("flex items-center justify-center h-[72px] mt-6 mb-10 lg:mb-0")}>
+          <p className={cn("text-3xl text-gray-800 font-light text-center mx-10")}>
+            Explore code and art with instant feedback.
+          </p>
+        </div>
+      )}
+      <div className={cn("max-w-screen-lg lg:mx-auto mx-4 lg:my-10 my-4 editor-page")}>
+        <Editor
+          initialCode={initialCode}
+          key={notebook.id}
+          onUserInput={onUserInput}
+          onBeforeEachRun={onBeforeEachRun}
+          autoRun={autoRun}
+          onDuplicate={isAdded ? onDuplicate : null}
+          toolBarStart={
+            <div className={cn("flex items-center gap-2")}>
+              {!isAdded && (
+                <button
+                  onClick={onSave}
+                  className={cn("bg-green-700 text-white rounded-md px-3 py-1 text-sm hover:bg-green-800")}
+                >
+                  Create
+                </button>
+              )}
+              {!showInput && isAdded && (
+                <button onClick={onRename}>
+                  <Pencil className="w-4 h-4" />
+                </button>
+              )}
+              {showInput || !isAdded ? (
+                <input
+                  type="text"
+                  value={title}
+                  onChange={onTitleChange}
+                  onBlur={onTitleBlur}
+                  onKeyDown={onTitleKeyDown}
+                  ref={titleRef}
+                  className={cn("border border-gray-200 rounded-md px-3 py-1 text-sm bg-white")}
+                />
+              ) : (
+                <span className={cn("text-sm py-1 border border-gray-100 rounded-md")}>{notebook.title}</span>
+              )}
+            </div>
+          }
+        />
+      </div>
     </div>
   );
 }
