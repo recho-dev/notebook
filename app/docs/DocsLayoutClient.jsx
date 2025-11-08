@@ -4,7 +4,7 @@ import {cn} from "../cn.js";
 import {useState, useEffect, useRef} from "react";
 import {TableOfContents} from "lucide-react";
 
-export function DocsLayoutClient({docs, children}) {
+export function DocsLayoutClient({navStructure, docsMap, children}) {
   const [overlayOpen, setOverlayOpen] = useState(false);
   const overlayRef = useRef(null);
 
@@ -32,7 +32,7 @@ export function DocsLayoutClient({docs, children}) {
     <div className={cn("flex", "h-[calc(100vh-65px)] overflow-auto")}>
       <div className={cn("hidden md:block")}>
         <div style={{width: "320px"}} className={cn("pt-4 h-full")}>
-          <Sidebar docs={docs} />
+          <Sidebar navStructure={navStructure} docsMap={docsMap} />
         </div>
       </div>
       <div className={cn("flex-1", "overflow-auto relative")}>
@@ -54,7 +54,7 @@ export function DocsLayoutClient({docs, children}) {
             <div className={cn("absolute inset-0 bg-black bg-opacity-50")} />
             <div ref={overlayRef} className={cn("absolute left-0 top-0 h-full w-80 bg-white shadow-xl overflow-auto")}>
               <div className={cn("pt-4")}>
-                <Sidebar docs={docs} onLinkClick={() => setOverlayOpen(false)} />
+                <Sidebar navStructure={navStructure} docsMap={docsMap} onLinkClick={() => setOverlayOpen(false)} />
               </div>
             </div>
           </div>
