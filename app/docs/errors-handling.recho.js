@@ -1,6 +1,5 @@
 /**
  * @title Errors Handling
- * @order 8
  */
 
 //➜ { [SyntaxError: Identifier directly after number (17:9)] pos: 611, loc: Position { line: 17, column: 9 }, raisedAt: 611, [Symbol(next.console.error.digest)]: "NEXT_CONSOLE_ERROR" }
