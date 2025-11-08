@@ -13,28 +13,34 @@ export const docsNavConfig = [
     slug: "getting-started",
   },
   {
-    type: "page",
-    slug: "inline-echoing",
-  },
-  {
-    type: "page",
-    slug: "reactive-blocks",
-  },
-  {
-    type: "page",
-    slug: "animations-authoring",
-  },
-  {
-    type: "page",
-    slug: "aynchronous-operations",
-  },
-  {
-    type: "page",
-    slug: "libraries-imports",
-  },
-  {
-    type: "page",
-    slug: "errors-handling",
+    type: "group",
+    title: "Features",
+    items: [
+      {
+        type: "page",
+        slug: "inline-echoing",
+      },
+      {
+        type: "page",
+        slug: "reactive-blocks",
+      },
+      {
+        type: "page",
+        slug: "animations-authoring",
+      },
+      {
+        type: "page",
+        slug: "aynchronous-operations",
+      },
+      {
+        type: "page",
+        slug: "libraries-imports",
+      },
+      {
+        type: "page",
+        slug: "errors-handling",
+      },
+    ],
   },
   {
     type: "group",

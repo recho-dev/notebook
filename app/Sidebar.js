@@ -20,14 +20,20 @@ function NavItem({doc, isActive, onClick}) {
 function NavGroup({group, docsMap, isActive, onClick}) {
   const pathname = usePathname();
   const isGroupActive = group.slug === pathname.split("/docs/")[1] || group.items.some((item) => isActive(item.slug));
-  const [isOpen, setIsOpen] = useState(group.slug === "api-reference" || isGroupActive);
+  const [isOpen, setIsOpen] = useState(true);
 
   return (
     <div>
       <div className={cn(isActive(group.slug) && "bg-gray-100", "flex items-center rounded-md hover:bg-gray-100")}>
-        <Link href={`/docs/${group.slug}`} className={cn("flex-1 px-3 py-2")} onClick={onClick}>
-          <span className="font-medium">{group.title}</span>
-        </Link>
+        {group.slug ? (
+          <Link href={`/docs/${group.slug}`} className={cn("flex-1 px-3 py-2")} onClick={onClick}>
+            <span className="font-medium">{group.title}</span>
+          </Link>
+        ) : (
+          <span className="font-medium cursor-pointer px-3 py-2 flex-1" onClick={() => setIsOpen(!isOpen)}>
+            {group.title}
+          </span>
+        )}
         <button
           onClick={() => setIsOpen(!isOpen)}
           className={cn("px-2 py-2 ")}
@@ -57,14 +63,13 @@ export function Sidebar({navStructure, docsMap, onLinkClick}) {
       onLinkClick();
     }
   };
-
   return (
     <ul className={cn("h-full", "overflow-auto px-4 w-full")}>
-      {navStructure.map((item, index) => {
+      {navStructure.map((item) => {
         if (item.type === "group") {
           return (
             <NavGroup
-              key={item.slug || index}
+              key={item.slug || item.title}
               group={item}
               docsMap={docsMap}
               isActive={isActive}
