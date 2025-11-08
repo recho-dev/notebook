@@ -75,6 +75,8 @@ export const commentLinkClickHandler = EditorView.domEventHandlers({
     if (!url) return false;
     if (event.metaKey || event.ctrlKey) {
       event.preventDefault();
+      // Notify the runtime to resume running.
+      window.dispatchEvent(new Event("openlink"));
       window.open(url, "_blank", "noopener,noreferrer");
       return true;
     }

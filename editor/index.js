@@ -88,6 +88,7 @@ export function createEditor(container, options) {
     runtimeRef.current.onChanges(dispatch);
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
+    window.addEventListener("openlink", onOpenLink);
   }
 
   function dispatch(changes) {
@@ -131,6 +132,12 @@ export function createEditor(container, options) {
     }
   }
 
+  function onOpenLink() {
+    if (!isStopByMetaKey) return;
+    isStopByMetaKey = false;
+    runtimeRef.current?.setIsRunning(true);
+  }
+
   return {
     run: () => {
       try {
@@ -146,12 +153,14 @@ export function createEditor(container, options) {
       runtimeRef.current = null;
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("openlink", onOpenLink);
     },
     on: (event, callback) => dispatcher.on(event, callback),
     destroy: () => {
       runtimeRef.current?.destroy();
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("openlink", onOpenLink);
       view.destroy();
     },
   };
