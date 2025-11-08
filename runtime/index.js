@@ -7,7 +7,6 @@ import * as stdlib from "./stdlib/index.js";
 import {Inspector} from "./stdlib/inspect.js";
 import {OUTPUT_MARK, ERROR_MARK} from "./constant.js";
 import {transpileRechoJavaScript} from "./transpile.js";
-import {Mutator} from "./mutator.js";
 
 const OUTPUT_PREFIX = `//${OUTPUT_MARK}`;
 
@@ -15,7 +14,6 @@ const ERROR_PREFIX = `//${ERROR_MARK}`;
 
 const BUILTINS = {
   recho: () => stdlib,
-  __Mutator__: () => Mutator,
 };
 
 function uid() {

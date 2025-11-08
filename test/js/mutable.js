@@ -1,13 +1,8 @@
-export const mutable = `const [a, mutator$$a] = __Mutator__(0);
+export const mutable = `const [a, setA] = recho.state(0);
 
-new Promise((resolve) => {
-  setTimeout(() => {
-    for (let i = 0; i < 10; i++) {
-      mutator$$a.value += 1;
-    }
-  }, 1000);
-});
+setTimeout(() => {
+  setA((a) => a + 1);
+}, 1000);
 
-{
-  echo(a);
-}`;
+echo(a);
+`;

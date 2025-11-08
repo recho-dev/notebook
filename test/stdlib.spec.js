@@ -8,4 +8,5 @@ it("should export expected functions from stdlib", () => {
   expect(stdlib.toggle).toBeDefined();
   expect(stdlib.number).toBeDefined();
   expect(stdlib.radio).toBeDefined();
+  expect(stdlib.state).toBeDefined();
 });

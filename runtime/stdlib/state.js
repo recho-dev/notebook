@@ -18,17 +18,9 @@ function Mutable(value) {
   });
 }
 
-export function Mutator(value) {
-  const mutable = Mutable(value);
-  return [
-    mutable,
-    {
-      get value() {
-        return mutable.value;
-      },
-      set value(v) {
-        mutable.value = v;
-      },
-    },
-  ];
+export function state(value) {
+  const state = Mutable(value);
+  const setState = (x) => (typeof x === "function" ? (state.value = x(state.value)) : (state.value = x));
+  const getState = () => state.value;
+  return [state, setState, getState];
 }
