@@ -61,11 +61,11 @@ export const docsNavConfig = [
       },
       {
         type: "page",
-        slug: "api-inspect",
+        slug: "api-state",
       },
       {
         type: "page",
-        slug: "api-state",
+        slug: "api-inspect",
       },
       {
         type: "page",
