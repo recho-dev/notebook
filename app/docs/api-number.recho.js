@@ -61,4 +61,3 @@ const temperature = recho.number(24, {min: -10, max: 40, step: 0.5});
   const fahrenheit = (temperature * 9) / 5 + 32;
   echo(`The room temperature is ${temperature} °C (${fahrenheit} °F).`);
 }
-

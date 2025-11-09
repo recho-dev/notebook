@@ -25,4 +25,3 @@ const isVisible = recho.toggle(false);
   echo(`The button is ${isEnabled ? "enabled" : "disabled"}.`);
   echo(`The button is ${isVisible ? "visible" : "hidden"}.`);
 }
-

@@ -38,4 +38,3 @@ const indentedObject = echo(recho.inspect({a: 1, b: 2, c: 3}, {indent: 2}));
 
 //➜ [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
 const array1000 = echo(recho.inspect(new Array(1000).fill(0), {limit: Infinity}));
-

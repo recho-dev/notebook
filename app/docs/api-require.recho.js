@@ -32,4 +32,3 @@ const d3 = recho.require("d3-array", "d3-random");
 
 //➜ [ 6, 4, 1, 2, 5, 3, 3, 0, 6, 2 ]
 echo(d3.range(10).map(d3.randomInt(0, 10)));
-

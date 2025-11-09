@@ -17,4 +17,3 @@ const interval = recho.interval(1000);
 
 //➜ 1
 echo(interval);
-

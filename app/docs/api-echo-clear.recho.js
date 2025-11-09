@@ -16,4 +16,3 @@
   echo("Hello, World!");
   setTimeout(() => echo.clear(), 1000);
 }
-

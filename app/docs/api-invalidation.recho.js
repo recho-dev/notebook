@@ -26,4 +26,3 @@
 
   invalidation.then(() => clearInterval(timer));
 }
-

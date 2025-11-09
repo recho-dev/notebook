@@ -21,4 +21,3 @@ const color = recho.radio(0, ["red", "green", "blue"]);
 
 //➜ "This is a red medium button."
 echo(`This is a ${color} ${size} button.`);
-

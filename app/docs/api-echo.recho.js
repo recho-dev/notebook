@@ -34,4 +34,3 @@ const numbers = echo(1, 2, 3);
 
 //➜ [ 1, 2, 3 ]
 echo(numbers);
-
