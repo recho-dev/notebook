@@ -112,7 +112,7 @@ const random = echo(Math.random());
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * With reactive evaluation, blocks can run multiple times. If you need to
  * "clear up" a block, say to cancel an animation loop or close a socket, use
- * the invalidation promise to register a disposal hook.
+ * echo.dispose to register a disposal hook.
  */
 
 //➜ 9
@@ -128,7 +128,7 @@ const random = echo(Math.random());
   }, 1000);
 
   // Clear the interval when the block is re-run.
-  invalidation.then(() => clearInterval(timer));
+  echo.dispose(() => clearInterval(timer));
 }
 
 /**

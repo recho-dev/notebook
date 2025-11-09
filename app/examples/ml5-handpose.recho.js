@@ -89,7 +89,7 @@ handPose.detectStart(video, (hands) => {
 });
 
 {
-  invalidation.then(() => removeCapture(video));
+  echo.dispose(() => removeCapture(video));
 }
 
 // Use p5 to create a capture video element.

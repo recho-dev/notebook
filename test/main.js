@@ -27,7 +27,7 @@ async function render() {
   if (preEditor) preEditor.destroy();
   const editorContainer = document.createElement("div");
   const code = jsTests[select.value];
-  const editor = createEditor(editorContainer, {code});
+  const editor = (preEditor = createEditor(editorContainer, {code}));
   editor.run();
   const runButton = document.createElement("button");
   runButton.textContent = "Run";

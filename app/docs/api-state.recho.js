@@ -42,7 +42,7 @@ const [timer, setTimer] = recho.state(10);
     });
   }, 1000);
 
-  invalidation.then(() => clearInterval(interval));
+  echo.dispose(() => clearInterval(interval));
 }
 
 //➜ 8

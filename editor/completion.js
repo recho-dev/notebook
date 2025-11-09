@@ -1,7 +1,5 @@
 import {syntaxTree} from "@codemirror/language";
 
-function documentation(source) {}
-
 function toApplyCompletion(template) {
   const offset = template.indexOf("$");
   const insert = offset < 0 ? template : template.slice(0, offset) + template.slice(offset + 1);
@@ -30,11 +28,25 @@ const builtinFunctions = [
     apply: toApplyCompletion("echo.clear()"),
   },
   {
-    label: "invalidation",
+    label: "dispose",
     type: "function",
-    detail: "()",
-    info: "Returns a promise that resolves before re-running the current block.",
-    apply: toApplyCompletion("invalidation()"),
+    detail: "(callback: Function)",
+    info: "Registers a disposal callback that runs before re-running the current block.",
+    apply: toApplyCompletion("echo.dispose($)"),
+  },
+  {
+    label: "state",
+    type: "function",
+    detail: "(value: any)",
+    info: "Creates a reactive state variable for a mutable value.",
+    apply: toApplyCompletion("recho.state($)"),
+  },
+  {
+    label: "inspect",
+    type: "function",
+    detail: "(value: any, options: { depth?: number, maxLength?: number })",
+    info: "Formats a value for inspection.",
+    apply: toApplyCompletion("recho.inspect($, {})"),
   },
   {
     label: "now",
