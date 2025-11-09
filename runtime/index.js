@@ -333,7 +333,10 @@ export function createRuntime(initialCode) {
             echo(state, value, ...args);
             return args.length ? [value, ...args] : value;
           };
+          const disposes = [];
           __echo__.clear = () => clear(state);
+          __echo__.dispose = (cb) => disposes.push(cb);
+          __echo__.__dispose__ = () => disposes.forEach((cb) => cb());
           return __echo__;
         },
       );
