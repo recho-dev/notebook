@@ -57,7 +57,7 @@ export const docsNavConfig = [
       },
       {
         type: "page",
-        slug: "api-dispose",
+        slug: "api-echo-dispose",
       },
       {
         type: "page",

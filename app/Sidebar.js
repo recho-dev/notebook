@@ -18,8 +18,8 @@ function NavItem({doc, isActive, onClick}) {
 }
 
 function NavGroup({group, docsMap, isActive, onClick}) {
-  const pathname = usePathname();
-  const isGroupActive = group.slug === pathname.split("/docs/")[1] || group.items.some((item) => isActive(item.slug));
+  // const pathname = usePathname();
+  // const isGroupActive = group.slug === pathname.split("/docs/")[1] || group.items.some((item) => isActive(item.slug));
   const [isOpen, setIsOpen] = useState(true);
 
   return (
@@ -57,7 +57,7 @@ function NavGroup({group, docsMap, isActive, onClick}) {
 
 export function Sidebar({navStructure, docsMap, onLinkClick}) {
   const pathname = usePathname();
-  const isActive = (slug) => pathname.startsWith(`/docs/${slug}`);
+  const isActive = (slug) => pathname === `/docs/${slug}`;
   const handleLinkClick = () => {
     if (onLinkClick) {
       onLinkClick();
