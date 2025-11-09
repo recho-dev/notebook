@@ -128,7 +128,7 @@ echo("~".repeat(x) + "(๑•̀ㅂ•́)و✧");
   const interval = setInterval(() => loop(), 1000);
 
   // Clear the interval when the block is re-run.
-  invalidation.then(() => clearInterval(interval));
+  echo.dispose(() => clearInterval(interval));
 }
 
 /**

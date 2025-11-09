@@ -15,5 +15,5 @@ export const clear = `{
 
   echo(count);
 
-  invalidation.then(() => clearInterval(timer));
+  echo.dispose(() => clearInterval(timer));
 }`;

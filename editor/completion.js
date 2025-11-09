@@ -30,11 +30,11 @@ const builtinFunctions = [
     apply: toApplyCompletion("echo.clear()"),
   },
   {
-    label: "invalidation",
+    label: "dispose",
     type: "function",
-    detail: "()",
-    info: "Returns a promise that resolves before re-running the current block.",
-    apply: toApplyCompletion("invalidation()"),
+    detail: "(callback: Function)",
+    info: "Registers a disposal callback that runs before re-running the current block.",
+    apply: toApplyCompletion("echo.dispose($)"),
   },
   {
     label: "now",
