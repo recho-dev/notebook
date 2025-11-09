@@ -37,6 +37,20 @@ const builtinFunctions = [
     apply: toApplyCompletion("echo.dispose($)"),
   },
   {
+    label: "state",
+    type: "function",
+    detail: "(value: any)",
+    info: "Creates a reactive state variable for a mutable value.",
+    apply: toApplyCompletion("recho.state($)"),
+  },
+  {
+    label: "inspect",
+    type: "function",
+    detail: "(value: any, options: { depth?: number, maxLength?: number })",
+    info: "Formats a value for inspection.",
+    apply: toApplyCompletion("recho.inspect($, {})"),
+  },
+  {
     label: "now",
     type: "function",
     detail: "()",
