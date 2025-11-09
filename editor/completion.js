@@ -1,7 +1,5 @@
 import {syntaxTree} from "@codemirror/language";
 
-function documentation(source) {}
-
 function toApplyCompletion(template) {
   const offset = template.indexOf("$");
   const insert = offset < 0 ? template : template.slice(0, offset) + template.slice(offset + 1);
