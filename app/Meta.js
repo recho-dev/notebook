@@ -24,10 +24,7 @@ export function Meta({example}) {
       {example.label && Array.isArray(example.label) && example.label.length > 0 && (
         <div className={cn("flex flex-wrap gap-1.5 mt-3")}>
           {example.label.map((label, index) => (
-            <span
-              key={index}
-              className={cn("text-xs px-2 py-0.5 rounded-md font-medium bg-gray-100 text-gray-700")}
-            >
+            <span key={index} className={cn("text-xs px-3 py-1 rounded-full font-medium bg-green-100 text-green-700")}>
               {label}
             </span>
           ))}
