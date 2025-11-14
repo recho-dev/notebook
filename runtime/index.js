@@ -140,7 +140,7 @@ export function createRuntime(initialCode) {
       // Group values by key. Each group is a row if using table, otherwise a column.
       const groupValues = groups(values, (v) => v.options?.key);
 
-      // We need remove the trailing newline for table.
+      // We need to remove the trailing newline for table.
       const format = withTable(groupValues) ? (...V) => table(...V).trimEnd() : columns;
 
       // If any value is an error, set the error flag.
