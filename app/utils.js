@@ -14,7 +14,10 @@ function parseJSMeta(content) {
       const value = m[2].trim();
       // Parse @label as comma-separated values
       if (key === "label") {
-        meta[key] = value.split(",").map((l) => l.trim()).filter((l) => l.length > 0);
+        meta[key] = value
+          .split(",")
+          .map((l) => l.trim())
+          .filter((l) => l.length > 0);
       } else {
         meta[key] = value;
       }
