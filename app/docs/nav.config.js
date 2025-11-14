@@ -53,6 +53,10 @@ export const docsNavConfig = [
       },
       {
         type: "page",
+        slug: "api-echo-key",
+      },
+      {
+        type: "page",
         slug: "api-echo-clear",
       },
       {
