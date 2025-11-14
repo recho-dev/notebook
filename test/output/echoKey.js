@@ -1,4 +1,13 @@
-export const echoKey = `binarySearch('d', ["a", "b", "c", "d", "e", "f"]);
+//➜ +-------+-----+-----+-----+
+//➜ |  {lo} |   0 |   3 |   3 |
+//➜ |-------|-----|-----|-----|
+//➜ |  {hi} |   5 |   5 |   3 |
+//➜ |-------|-----|-----|-----|
+//➜ |  {mi} |   2 |   4 |   3 |
+//➜ |-------|-----|-----|-----|
+//➜ | {val} | "c" | "e" | "d" |
+//➜ +-------+-----+-----+-----+
+binarySearch('d', ["a", "b", "c", "d", "e", "f"]);
 
 function binarySearch(key, array) {
   let lo = 0;
@@ -15,4 +24,4 @@ function binarySearch(key, array) {
     else return mi;
   }
   return -1;
-}`;
+}

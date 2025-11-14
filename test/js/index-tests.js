@@ -18,3 +18,4 @@ export {echoFunctionAsArgument} from "./echo-function-as-argument.js";
 export {echoInRecursiveFunction} from "./echo-in-recursive-function.js";
 export {echoInBracket} from "./echo-in-bracket.js";
 export {echoAsParams} from "./echo-as-params.js";
+export {echoKey} from "./echo-key.js";
