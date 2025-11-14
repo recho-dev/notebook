@@ -87,7 +87,7 @@ function addPrefix(string, prefix) {
   return lines.map((line) => `${prefix} ${line}`).join("\n");
 }
 
-function useTable(groups) {
+function withTable(groups) {
   return groups.length > 1 || groups[0][0] !== undefined;
 }
 
@@ -141,7 +141,7 @@ export function createRuntime(initialCode) {
       const groupValues = groups(values, (v) => v.options?.key);
 
       // We need remove the trailing newline for table.
-      const format = useTable(groupValues) ? (...V) => table(...V).trimEnd() : columns;
+      const format = withTable(groupValues) ? (...V) => table(...V).trimEnd() : columns;
 
       // If any value is an error, set the error flag.
       let error = false;
