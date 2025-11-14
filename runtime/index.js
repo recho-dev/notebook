@@ -91,7 +91,7 @@ function withTable(groups) {
   return groups.length > 1 || groups[0][0] !== undefined;
 }
 
-function columns(data) {
+function columns(data, options) {
   const values = data[0].slice(1);
   let output = "";
   for (let i = 0; i < values.length; i++) {
