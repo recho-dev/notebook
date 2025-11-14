@@ -28,6 +28,13 @@ const builtinFunctions = [
     apply: toApplyCompletion("echo.clear()"),
   },
   {
+    label: "key",
+    type: "function",
+    detail: "(key: string)",
+    info: "Specifies a key for the following output values.",
+    apply: toApplyCompletion("echo.key($)"),
+  },
+  {
     label: "dispose",
     type: "function",
     detail: "(callback: Function)",

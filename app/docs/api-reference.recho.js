@@ -19,6 +19,7 @@
  *
  * - echo(...values) - Echo values inline with your code as comments (https://recho.dev/notebook/docs/api-echo)
  * - echo.clear() - Clear the output of the current block (https://recho.dev/notebook/docs/api-echo-clear)
+ * - echo.key(key) - Specify a key for the following output values (https://recho.dev/notebook/docs/api-echo-key)
  * - echo.dispose(callback) - Register a disposal callback before re-running the current block (https://recho.dev/notebook/docs/api-echo-dispose)
  * - recho.state(value) - Create reactive state variables for mutable values (https://recho.dev/notebook/docs/api-state)
  * - recho.inspect(value[, options]) - Format values for inspection (https://recho.dev/notebook/docs/api-inspect)
