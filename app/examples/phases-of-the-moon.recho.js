@@ -4,6 +4,7 @@
  * @created 2025-09-12
  * @pull_request 90
  * @github chengluyu
+ * @label ASCII Art
  */
 
 /**
