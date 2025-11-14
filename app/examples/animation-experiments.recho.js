@@ -5,7 +5,6 @@
  * @created 2025-10-14
  * @pull_request 163
  * @thumbnail_start 71
- * @label ASCII Art
  */
 
 /**

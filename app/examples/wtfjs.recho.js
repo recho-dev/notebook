@@ -5,7 +5,6 @@
  * @pull_request 123
  * @github pearmini
  * @thumbnail_start 26
- * @label Algorithm
  */
 
 /**

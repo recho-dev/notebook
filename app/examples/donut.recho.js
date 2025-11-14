@@ -4,7 +4,6 @@
  * @created 2025-09-30
  * @pull_request 133
  * @github pearmini
- * @label ASCII Art
  */
 
 /**

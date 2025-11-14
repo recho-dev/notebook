@@ -6,7 +6,6 @@
  * @github pearmini
  * @thumbnail_start 32
  * @ref https://observablehq.com/@observablehq/plot-isotype-chart
- * @label ASCII Art
  */
 
 /**
