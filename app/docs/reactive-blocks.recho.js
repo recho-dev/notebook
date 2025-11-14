@@ -1,6 +1,5 @@
 /**
  * @title Reactive Blocks
- * @order 4
  */
 
 /**
@@ -8,8 +7,8 @@
  * =                            Reactive Blocks                               =
  * ============================================================================
  *
- * Reactive blocks are the fundamentals of Recho's reactive system, which is
- * built on the reactive model of Observable Notebook Kit[1].
+ * Reactive blocks are the fundamentals of Recho Notebook's reactive system,
+ * which is built on the reactive model of Observable Notebook Kit[1].
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *                            Top-level Statements
@@ -50,7 +49,7 @@ else echo("Odd");
 
 /**
  * !! NOTE: This can also avoid using `let` to define top-level mutable      !!
- * !! variables, which is not allowed in Recho yet.                          !!
+ * !! variables, which is not allowed in Recho Notebook yet.                 !!
  *
  * If you need to define a non-echoing top-level mutable variable, you can use
  * IIFE (Immediately Invoked Function Expression) to create a block and return
@@ -72,9 +71,9 @@ echo(alphabet);
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * All the blocks run automatically like running a vanilla JavaScript script.
- * The difference is that blocks in Recho run in topological order determined
- * by top-level variable references (a.k.a. **dataflow**), rather than the
- * top-down document order[2].
+ * The difference is that blocks in Recho Notebook run in topological order
+ * determined by top-level variable references (a.k.a. **dataflow**), rather
+ * than the top-down document order[2].
  *
  * For example, we have three blocks: `sum`, `a`, and `b` in top-down order.
  * Since `sum` depends on `a` and `b`, it will be evaluated after `a` and `b`.
@@ -86,8 +85,8 @@ const a = 1;
 const b = 2;
 
 /**
- * Since code (blocks) runs independent of its order in sketch, you can arrange
- * code however you want.
+ * Since code (blocks) runs independent of its order in notebook, you can
+ * arrange code however you want.
  *
  * In addition to that, when a block (`const sum = echo(a + b)`) references
  * top-level variables (`a` and `b`) defined by other blocks, the referencing
@@ -113,7 +112,7 @@ const random = echo(Math.random());
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * With reactive evaluation, blocks can run multiple times. If you need to
  * "clear up" a block, say to cancel an animation loop or close a socket, use
- * the invalidation promise to register a disposal hook.
+ * echo.dispose to register a disposal hook.
  */
 
 //➜ 9
@@ -123,13 +122,13 @@ const random = echo(Math.random());
   const timer = setInterval(() => {
     if (count-- <= 0) clearInterval(timer);
     else {
-      clear();
+      echo.clear();
       echo(count);
     }
   }, 1000);
 
   // Clear the interval when the block is re-run.
-  invalidation.then(() => clearInterval(timer));
+  echo.dispose(() => clearInterval(timer));
 }
 
 /**

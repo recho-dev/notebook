@@ -1,6 +1,5 @@
 /**
  * @title Animations Authoring
- * @order 5
  */
 
 /**
@@ -8,9 +7,9 @@
  * =                         Animations Authoring                             =
  * ============================================================================
  *
- * Animations are very powerful tools making your sketches more interactive and
- * engaging. In Recho, there are at least two ways to author animations. You
- * can choose either one which suits you best.
+ * Animations are very powerful tools making your notebooks more interactive
+ * and engaging. In Recho Notebook, there are at least two ways to author 
+ * animations. You can choose either one which suits you best.
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *                          Block-level Animations
@@ -69,11 +68,11 @@ const rocket = recho.interval(2);
 //➜                                    🚀💨
 {
   const x = (count) => 40 - (count % 40);
-  echo("🐌💨".padStart(x(snail)), {quote: false});
-  echo("🐢💨".padStart(x(turtle)), {quote: false});
-  echo("🚶‍♂️💨".padStart(x(human)), {quote: false});
-  echo("🚗💨".padStart(x(car)), {quote: false});
-  echo("🚀💨".padStart(x(rocket)), {quote: false});
+  echo("🐌💨".padStart(x(snail)));
+  echo("🐢💨".padStart(x(turtle)));
+  echo("🚶‍♂️💨".padStart(x(human)));
+  echo("🚗💨".padStart(x(car)));
+  echo("🚀💨".padStart(x(rocket)));
 }
 
 /**
@@ -94,7 +93,7 @@ echo(now);
 const x = echo(Math.abs(~~(Math.sin(now / 1000) * 22)));
 
 //➜ ~(๑•̀ㅂ•́)و✧
-echo("~".repeat(x) + "(๑•̀ㅂ•́)و✧", {quote: false});
+echo("~".repeat(x) + "(๑•̀ㅂ•́)و✧");
 
 /**
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -120,7 +119,7 @@ echo("~".repeat(x) + "(๑•̀ㅂ•́)و✧", {quote: false});
   const loop = () => {
     const x = 40 - (i++ % 40);
     const turtle = "🐢".padStart(x);
-    clear(); // Clear the output of the current block.
+    echo.clear(); // Clear the output of the current block.
     echo(turtle);
   };
 
@@ -129,7 +128,7 @@ echo("~".repeat(x) + "(๑•̀ㅂ•́)و✧", {quote: false});
   const interval = setInterval(() => loop(), 1000);
 
   // Clear the interval when the block is re-run.
-  invalidation.then(() => clearInterval(interval));
+  echo.dispose(() => clearInterval(interval));
 }
 
 /**

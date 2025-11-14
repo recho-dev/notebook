@@ -1,6 +1,5 @@
 /**
  * @title Inline Echoing
- * @order 3
  */
 
 /**
@@ -8,7 +7,7 @@
  * =                            Inline Echoing                                =
  * ============================================================================
  *
- * The core feature of Recho is to echo output inline with your code as
+ * The core feature of Recho Notebook is to echo output inline with your code as
  * comments. Each line of the output is prefixed with `//➜`. You can call the
  * built-in function `echo` to echo output.
  */
@@ -26,7 +25,7 @@ const message = echo("Hello, World!");
 
 /**
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *                              Instant Feedback
+ *                            Instant Feedback
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * `echo` allows you to quickly get feedback about the states of your code. You
@@ -147,51 +146,25 @@ const customDate = echo(new Date().toLocaleString());
 
 /**
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *                             Formatting Outputs
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * `echo` provides `options` to format the output. For example, you can format
- * the quote style of a string value using the `quote` option:
- */
-
-//➜ "Hello, World!"
-const defaultQuotedString = echo("Hello, World!");
-
-//➜ 'Hello, World!'
-const singleQuotedString = echo("Hello, World!", {quote: "single"});
-
-//➜ "Hello, World!"
-const doubleQuotedString = echo("Hello, World!", {quote: "double"});
-
-//➜ Hello, World!
-const unquotedString = echo("Hello, World!", {quote: false});
-
-/**
- * You can also format the indentation of the output using the `indent` option.
- * It must be "\t", null, or a positive integer, defaults to null. This is
- * useful when you want to the clearer structure of the output.
- */
-
-//➜ {
-//➜   a: 1,
-//➜   b: 2,
-//➜   c: 3
-//➜ }
-const indentedObject = echo({a: 1, b: 2, c: 3}, {indent: 2});
-
-/**
- * You can also limit the length of the output using the `limit` option. It
- * must be a positive integer, Infinity, defaults to 200.
- */
-
-//➜ [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
-const array1000 = echo(new Array(1000).fill(0), {limit: 80});
-
-/**
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *                           Echoing Multiple Values
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * You can call `echo` multiple times to echo multiple values in ForStatement,
+ * You can pass multiple values to `echo` in a single call. The values will be
+ * merged horizontally.
+ */
+
+//➜ 1 2 3
+echo(1, 2, 3);
+
+//➜ Hello World
+echo("Hello", "World");
+
+//➜ Peter:  Age = 20
+//➜         Height = 180
+echo("Peter: ", "Age = 20\nHeight = 180");
+
+/**
+ * You can also call `echo` multiple times to echo multiple values in ForStatement,
  * BlockStatement, and more. The values will be joined by a newline.
  */
 
@@ -211,16 +184,57 @@ for (let i = 0; i < 3; i++) echo(i);
 
 /**
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *                           Inspecting Options
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * You can use `recho.inspect()` with options to format the output. For example,
+ * you can format the quote style of a string value using the `quote` option:
+ */
+
+//➜ "Hello, World!"
+const defaultQuotedString = echo("Hello, World!");
+
+//➜ 'Hello, World!'
+const singleQuotedString = echo(recho.inspect("Hello, World!", {quote: "single"}));
+
+//➜ "Hello, World!"
+const doubleQuotedString = echo(recho.inspect("Hello, World!", {quote: "double"}));
+
+//➜ Hello, World!
+const unquotedString = echo(recho.inspect("Hello, World!", {quote: false}));
+
+/**
+ * You can also format the indentation of the output using the `indent` option.
+ * It must be "\t", null, or a positive integer, defaults to null. This is
+ * useful when you want to the clearer structure of the output.
+ */
+
+//➜ {
+//➜   a: 1,
+//➜   b: 2,
+//➜   c: 3
+//➜ }
+const indentedObject = echo(recho.inspect({a: 1, b: 2, c: 3}, {indent: 2}));
+
+/**
+ * You can also limit the length of the output using the `limit` option. It
+ * must be a positive integer, Infinity, defaults to 200.
+ */
+
+//➜ [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+const array1000 = echo(recho.inspect(new Array(1000).fill(0), {limit: 80}));
+
+/**
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *                           Clearing Output
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * You can call `clear` to clear the output of the current block. For example,
- * click the 🔁 button to see the output being cleared after 1 second.
+ * You can call `echo.clear()` to clear the output of the current block. For
+ * example, click the ▶️ button to see the output being cleared after 1 second.
  */
 
 {
   echo("hello world");
-  setTimeout(() => clear(), 1000);
+  setTimeout(() => echo.clear(), 1000);
 }
 
 /**

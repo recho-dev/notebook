@@ -27,9 +27,9 @@ export function Nav() {
   function handleUpload(e) {
     e.preventDefault();
     const confirm = window.confirm(
-      `Make a Pull Request to share your sketch to Examples!\n- Input the filename\n- Copy the code\n- Click the "Commit changes" button`,
+      `Make a Pull Request to share your notebook to Examples!\n- Input the filename\n- Copy the code\n- Click the "Commit changes" button`,
     );
-    if (confirm) window.open("https://github.com/recho-dev/recho/new/main/app/examples", "_blank");
+    if (confirm) window.open("https://github.com/recho-dev/notebook/new/main/app/examples", "_blank");
   }
 
   function isSelected(path) {
@@ -56,21 +56,29 @@ export function Nav() {
 
   return (
     <header className={cn("flex justify-between items-center p-4 border-b border-gray-200")}>
-      <div className={cn("flex md:gap-2 items-center")}>
+      <div className={cn("flex md:gap-2 items-center ")}>
+        <a href="https://recho.dev" target="_blank" rel="noopener noreferrer">
+          <h1 className={cn("text-xl font-extrabold")}>Recho</h1>
+        </a>
         <SafeLink href="/">
-          <h1 className={cn("text-2xl font-bold")}>Recho</h1>
+          <h1 className={cn("text-xl hidden md:inline font-medium")}>Notebook</h1>
         </SafeLink>
         {/* Desktop navigation */}
         <div className={cn("hidden md:flex gap-2 items-center")}>
           <SafeLink href="/docs" className={cn(styles.link, isSelected("/docs") && styles.selectedLink, "ml-3")}>
             Docs
           </SafeLink>
-          <SafeLink href="/news" className={cn(styles.link, isSelected("/news") && styles.selectedLink)}>
-            News
-          </SafeLink>
           <SafeLink href="/examples" className={cn(styles.link, isSelected("/examples") && styles.selectedLink)}>
             Examples
           </SafeLink>
+          <a
+            href="https://recho.dev/news"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(styles.link, isSelected("/news") && styles.selectedLink)}
+          >
+            News
+          </a>
         </div>
         {/* Mobile navigation */}
         <div className={cn("md:hidden relative")} ref={dropdownRef}>
@@ -91,19 +99,21 @@ export function Nav() {
                 Docs
               </SafeLink>
               <SafeLink
-                href="/news"
-                className={cn(styles.dropdownItem, isSelected("/news") && styles.dropdownItemSelected)}
-                onClick={() => setDropdownOpen(false)}
-              >
-                News
-              </SafeLink>
-              <SafeLink
                 href="/examples"
                 className={cn(styles.dropdownItem, isSelected("/examples") && styles.dropdownItemSelected)}
                 onClick={() => setDropdownOpen(false)}
               >
                 Examples
               </SafeLink>
+              <a
+                href="https://recho.dev/news"
+                className={cn(styles.dropdownItem, isSelected("/news") && styles.dropdownItemSelected)}
+                onClick={() => setDropdownOpen(false)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                News
+              </a>
             </div>
           )}
         </div>
@@ -113,22 +123,22 @@ export function Nav() {
           href="/"
           className={cn(styles.link, pathname === "/" && styles.selectedLink)}
           data-tooltip-id="nav-tooltip"
-          data-tooltip-content="Create new sketch"
+          data-tooltip-content="Create new notebook"
         >
           <Plus className={cn(styles.linkIcon)} />
         </SafeLink>
 
         <SafeLink
-          href="/sketches"
-          className={cn(styles.link, pathname === "/sketches" && styles.selectedLink)}
+          href="/works"
+          className={cn(styles.link, pathname === "/works" && styles.selectedLink)}
           data-tooltip-id="nav-tooltip"
-          data-tooltip-content="Open Sketches"
+          data-tooltip-content="Open Notebooks"
         >
           <FolderCode className={cn(styles.linkIcon)} />
         </SafeLink>
 
         <a
-          href="https://github.com/recho-dev/recho/new/main/app/examples"
+          href="https://github.com/recho-dev/notebook/new/main/app/examples"
           onClick={handleUpload}
           target="_blank"
           rel="noreferrer"
@@ -141,7 +151,7 @@ export function Nav() {
           <Share className={cn(styles.linkIcon)} />
         </a>
         <a
-          href="https://github.com/recho-dev/recho"
+          href="https://github.com/recho-dev/notebook"
           target="_blank"
           rel="noreferrer"
           className={cn(styles.link)}

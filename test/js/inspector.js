@@ -19,10 +19,10 @@ echo(new Map([[1, 2], [3, 4]]));
 
 echo(new Date('2025-09-23T12:00:00Z'));
 
-echo(new Map([[1, 2], [3, 4]]), {indent: 2});
+echo(recho.inspect(new Map([[1, 2], [3, 4]]), {indent: 2}));
 
 echo(new Array(100).fill(0));
 
-echo(new Array(100).fill(0), {limit: 100});
+echo(recho.inspect(new Array(100).fill(0), {limit: 100}));
 
-echo(new Array(100).fill(0), {limit: Infinity});`;
+echo(recho.inspect(new Array(100).fill(0), {limit: Infinity}));`;

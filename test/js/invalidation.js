@@ -2,5 +2,5 @@ export const invalidation = `// Change the value of count and click the run butt
 const count = 0;
 
 {
-  invalidation.then(() => alert("Previous Value: " + count));
+  echo.dispose(() => alert("Previous Value: " + count));
 }`;

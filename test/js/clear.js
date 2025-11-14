@@ -2,11 +2,11 @@ export const clear = `{
   let count = 10;
   
   const timer = setInterval(() => { 
-    clear();
+    echo.clear();
     if (count-- <= 0) {
       clearInterval(timer);
       setTimeout(() => {
-        clear();
+        echo.clear();
       }, 1000);
     } else {
       echo(count);
@@ -15,5 +15,5 @@ export const clear = `{
 
   echo(count);
 
-  invalidation.then(() => clearInterval(timer));
+  echo.dispose(() => clearInterval(timer));
 }`;

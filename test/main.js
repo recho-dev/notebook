@@ -27,7 +27,7 @@ async function render() {
   if (preEditor) preEditor.destroy();
   const editorContainer = document.createElement("div");
   const code = jsTests[select.value];
-  const editor = createEditor(editorContainer, {code});
+  const editor = (preEditor = createEditor(editorContainer, {code}));
   editor.run();
   const runButton = document.createElement("button");
   runButton.textContent = "Run";
@@ -48,28 +48,6 @@ function createSelect(onchange) {
   select.style.height = "20px";
   select.style.marginBottom = "10px";
   select.onchange = onchange;
-  document.onkeydown = (event) => {
-    if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) {
-      return;
-    }
-    switch (event.key) {
-      case "ArrowLeft": {
-        if (select.selectedIndex > 0) {
-          select.selectedIndex--;
-          select.onchange();
-        } else alert("This is the first test case.");
-        break;
-      }
-      case "ArrowRight": {
-        if (select.selectedIndex < select.options.length - 1) {
-          select.selectedIndex++;
-          select.onchange();
-        } else alert("This is the last test case.");
-        break;
-      }
-    }
-  };
-
   return select;
 }
 

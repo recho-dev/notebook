@@ -1,5 +1,5 @@
 import {it, expect} from "vitest";
-import * as stdlib from "../runtime/stdlib.js";
+import * as stdlib from "../runtime/stdlib/index.js";
 
 it("should export expected functions from stdlib", () => {
   expect(stdlib.require).toBeDefined();
@@ -8,4 +8,5 @@ it("should export expected functions from stdlib", () => {
   expect(stdlib.toggle).toBeDefined();
   expect(stdlib.number).toBeDefined();
   expect(stdlib.radio).toBeDefined();
+  expect(stdlib.state).toBeDefined();
 });

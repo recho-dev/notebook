@@ -1,10 +1,13 @@
 import {EditorView, basicSetup} from "codemirror";
 import {EditorState, Transaction} from "@codemirror/state";
 import {keymap} from "@codemirror/view";
-import {javascript, javascriptLanguage} from "@codemirror/lang-javascript";
+import {javascript, javascriptLanguage, esLint} from "@codemirror/lang-javascript";
+import {linter} from "@codemirror/lint";
 import {githubLightInit} from "@uiw/codemirror-theme-github";
 import {tags as t} from "@lezer/highlight";
 import {indentWithTab} from "@codemirror/commands";
+import {browser} from "globals";
+import * as eslint from "eslint-linter-browserify";
 import {createRuntime} from "../runtime/index.js";
 import {outputDecoration} from "./decoration.js";
 import {outputLines} from "./outputLines.js";
@@ -13,10 +16,24 @@ import {dispatch as d3Dispatch} from "d3-dispatch";
 import {controls} from "./controls/index.js";
 import {rechoCompletion} from "./completion.js";
 import {docStringTag} from "./docStringTag.js";
-import {commentLink} from "./commentLink.js";
+import {commentLink, commentLinkClickHandler} from "./commentLink.js";
+
+// @see https://github.com/UziTech/eslint-linter-browserify/blob/master/example/script.js
+// @see https://codemirror.net/examples/lint/
+const eslintConfig = {
+  languageOptions: {
+    globals: {
+      ...browser,
+    },
+    parserOptions: {
+      ecmaVersion: 2022,
+      sourceType: "module",
+    },
+  },
+};
 
 export function createEditor(container, options) {
-  const {code} = options;
+  const {code, onError} = options;
   const dispatcher = d3Dispatch("userInput");
   const runtimeRef = {current: null};
 
@@ -57,6 +74,8 @@ export function createEditor(container, options) {
       // outputProtection(),
       docStringTag,
       commentLink,
+      commentLinkClickHandler,
+      linter(esLint(new eslint.Linter(), eslintConfig)),
     ],
   });
 
@@ -69,6 +88,7 @@ export function createEditor(container, options) {
     runtimeRef.current.onChanges(dispatch);
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
+    window.addEventListener("openlink", onOpenLink);
   }
 
   function dispatch(changes) {
@@ -112,22 +132,35 @@ export function createEditor(container, options) {
     }
   }
 
+  function onOpenLink() {
+    if (!isStopByMetaKey) return;
+    isStopByMetaKey = false;
+    runtimeRef.current?.setIsRunning(true);
+  }
+
   return {
     run: () => {
-      if (!runtimeRef.current) initRuntime();
-      runtimeRef.current.run();
+      try {
+        if (!runtimeRef.current) initRuntime();
+        runtimeRef.current.run();
+      } catch (error) {
+        console.error(error);
+        onError?.(error);
+      }
     },
     stop: () => {
       runtimeRef.current?.destroy();
       runtimeRef.current = null;
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("openlink", onOpenLink);
     },
     on: (event, callback) => dispatcher.on(event, callback),
     destroy: () => {
       runtimeRef.current?.destroy();
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("openlink", onOpenLink);
       view.destroy();
     },
   };

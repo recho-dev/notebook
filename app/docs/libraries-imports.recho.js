@@ -1,6 +1,5 @@
 /**
  * @title Libraries Imports
- * @order 7
  */
 
 /**
@@ -8,8 +7,8 @@
  *                           Libraries Imports
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * Recho has some built-in libraries that you can access directly through the
- * namespace `recho`. There is no extra setup needed.
+ * Recho Notebook has some built-in libraries that you can access directly
+ * through the namespace `recho`. There is no extra setup needed.
  */
 
 const now = recho.now();
@@ -20,8 +19,8 @@ echo(now);
 /**
  * Refer to https://recho.dev/docs/api-reference for more built-in libraries.
  *
- * For using external libraries, Recho stdlib provides the `recho.require`
- * function to import one or more JavaScript packages.
+ * For using external libraries, Recho Notebook stdlib provides the
+ * `recho.require` function to import one or more JavaScript packages.
  *
  * For example, let's import the `d3-time` package to count the number of days
  * between two dates.
