@@ -41,7 +41,7 @@ echo("Hello World");
 
 This is a [pull request](https://github.com/recho-dev/notebook/pull/82) you can refer to.
 
-If you prefer a `snapshot thumbnail`, create an image file named `[NOTEBOOK-NAME].snap.[FORMAT]` in `app/examples`, such as [sin-wave-radios.snap.png](./app/examples/sin-wave-radios.snap.png) for [sin-wave-radios.recho.js](/app/examples/sin-wave-radios.recho.js).
+If you prefer a `snapshot thumbnail`, place an image file named `[NOTEBOOK-NAME].snap.[FORMAT]` in `public/examples/` and add `@snap [NOTEBOOK-NAME].snap.[FORMAT]` to the metadata block at the top of your `.recho.js` file. For example, [sin-wave-radios.recho.js](/app/examples/sin-wave-radios.recho.js) now references [sin-wave-radios.snap.png](./public/examples/sin-wave-radios.snap.png).
 
 ## Editor & Runtime Development
 

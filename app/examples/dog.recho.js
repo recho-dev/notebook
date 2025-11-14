@@ -5,6 +5,7 @@
  * @github pearmini
  * @pull_request 181
  * @thumbnail_start 10
+ * @label Algorithm, Beginner
  */
 
 /** A Quick Example! 🐶 */
