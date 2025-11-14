@@ -30,22 +30,6 @@ export function removeJSMeta(content) {
   return content.replace(/^\/\*\*([\s\S]*?)\*\//, "").trimStart();
 }
 
-function ensureSnapImageInPublic(snapFile, slug) {
-  if (!snapFile) return null;
-  const publicExamplesDir = path.join(process.cwd(), "public", "examples");
-  const publicSnapPath = path.join(publicExamplesDir, snapFile);
-  if (!fs.existsSync(publicExamplesDir)) {
-    fs.mkdirSync(publicExamplesDir, {recursive: true});
-  }
-  if (!fs.existsSync(publicSnapPath)) {
-    const sourcePath = path.join(process.cwd(), "app", "examples", snapFile);
-    if (fs.existsSync(sourcePath)) {
-      fs.copyFileSync(sourcePath, publicSnapPath);
-    }
-  }
-  return snapFile;
-}
-
 export function getAllJSDocs() {
   const dir = path.join(process.cwd(), "app/docs/");
   const files = fs.readdirSync(dir);
@@ -68,8 +52,6 @@ export function getAllJSExamples() {
       const meta = parseJSMeta(content);
       const {startLine, endLine} = findFirstOutputRange(content);
       const slug = file.replace(".recho.js", "");
-      const snap = files.find((f) => f.startsWith(slug + ".snap"));
-      const publicSnap = ensureSnapImageInPublic(snap, slug);
       if (!meta) {
         throw new Error(`No meta found in ${file}`);
       }
@@ -79,7 +61,7 @@ export function getAllJSExamples() {
         slug,
         outputStartLine: meta.thumbnail_start ?? startLine,
         outputEndLine: endLine,
-        snap: publicSnap,
+        snap: meta.snap ?? null,
       };
     });
 }
