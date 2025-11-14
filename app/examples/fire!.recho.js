@@ -5,7 +5,6 @@
  * @pull_request 83
  * @github pearmini
  * @thumbnail_start 37
- * @label ASCII Art
  */
 
 /**
