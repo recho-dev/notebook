@@ -39,11 +39,11 @@ export default async function Page({searchParams}) {
   const sortedExamples = filteredExamples.sort((a, b) => new Date(b.created) - new Date(a.created));
 
   return (
-    <div className={cn("max-w-screen-xl lg:mx-auto mx-4 lg:my-12 my-4")}>
+    <div className={cn("max-w-screen-xl lg:mx-auto mx-4 my-4")}>
       <Suspense fallback={<div className={cn("flex flex-wrap gap-2 items-center")}>Loading filters...</div>}>
         <LabelFilters allLabels={sortedLabels} />
       </Suspense>
-      <div className={cn("grid gap-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-8")}>
+      <div className={cn("grid gap-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-10")}>
         {sortedExamples.map((example) => (
           <div key={example.slug}>
             <Meta example={example} />

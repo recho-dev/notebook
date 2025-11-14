@@ -47,32 +47,35 @@ export function LabelFilters({allLabels}) {
   const isLabelSelected = (label) => selectedLabels.includes(label);
 
   return (
-    <div className={cn("flex flex-wrap gap-2 items-center")}>
+    <div className={cn("flex flex-wrap gap-1.5 items-center border-b border-gray-200 pb-4 border-dashed")}>
       <button
         onClick={() => toggleLabel("All")}
         className={cn(
-          "px-4 py-2 rounded-md text-sm font-medium transition-colors",
+          "px-2 py-1 rounded-md text-xs font-medium transition-colors",
           isAllSelected
-            ? "bg-blue-500 text-white hover:bg-blue-600"
+            ? "bg-gray-600 text-white hover:bg-gray-700"
             : "bg-gray-200 text-gray-700 hover:bg-gray-300"
         )}
       >
         All
       </button>
-      {allLabels.map((label) => (
-        <button
-          key={label}
-          onClick={() => toggleLabel(label)}
-          className={cn(
-            "px-4 py-2 rounded-md text-sm font-medium transition-colors",
-            isLabelSelected(label)
-              ? "bg-blue-500 text-white hover:bg-blue-600"
-              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-          )}
-        >
-          {label}
-        </button>
-      ))}
+      {allLabels.map((label) => {
+        const selected = isLabelSelected(label);
+        return (
+          <button
+            key={label}
+            onClick={() => toggleLabel(label)}
+            className={cn(
+              "px-2 py-1 rounded-md text-xs font-medium transition-colors",
+              selected
+                ? "bg-gray-600 text-white hover:bg-gray-700"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            )}
+          >
+            {label}
+          </button>
+        );
+      })}
     </div>
   );
 }
