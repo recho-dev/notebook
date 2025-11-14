@@ -9,7 +9,16 @@ function parseJSMeta(content) {
   const meta = {};
   for (const line of block.split("\n")) {
     const m = line.match(/@(\w+)\s+(.*)/);
-    if (m) meta[m[1]] = m[2].trim();
+    if (m) {
+      const key = m[1];
+      const value = m[2].trim();
+      // Parse @label as comma-separated values
+      if (key === "label") {
+        meta[key] = value.split(",").map((l) => l.trim()).filter((l) => l.length > 0);
+      } else {
+        meta[key] = value;
+      }
+    }
   }
   return meta;
 }
