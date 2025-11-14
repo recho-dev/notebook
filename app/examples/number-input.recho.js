@@ -5,6 +5,7 @@
  * @pull_request 134
  * @github chengluyu
  * @thumbnail_start 47
+ * @label Algorithm, Beginner
  */
 
 /**

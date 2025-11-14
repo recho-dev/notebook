@@ -4,6 +4,7 @@
  * @created 2025-09-12
  * @pull_request 87
  * @github pearmini
+ * @label Algorithm
  */
 
 /**
