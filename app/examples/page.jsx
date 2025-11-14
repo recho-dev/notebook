@@ -23,7 +23,7 @@ export default async function Page({searchParams}) {
   const sortedLabels = Array.from(allLabels).sort();
 
   // Get selected labels from searchParams (handle both Promise and non-Promise cases)
-  const params = searchParams instanceof Promise ? await searchParams : searchParams;
+  const params = await searchParams;
   const selectedLabels = params?.labels ? (Array.isArray(params.labels) ? params.labels : [params.labels]) : [];
 
   // Filter examples based on selected labels
