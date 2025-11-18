@@ -8,6 +8,7 @@ import {Inspector} from "./stdlib/inspect.js";
 import {OUTPUT_MARK, ERROR_MARK} from "./constant.js";
 import {transpileRechoJavaScript} from "./transpile.js";
 import {table, getBorderCharacters} from "table";
+import {ButtonRegistry, setButtonRegistry} from "./controls/button.js";
 
 const OUTPUT_PREFIX = `//${OUTPUT_MARK}`;
 
@@ -105,6 +106,10 @@ export function createRuntime(initialCode) {
   let code = initialCode;
   let prevCode = null;
   let isRunning = false;
+
+  // Create button registry for this runtime instance
+  const buttonRegistry = new ButtonRegistry();
+  setButtonRegistry(buttonRegistry);
 
   // Echo context management system for proper output routing.
   // Execution flow:
@@ -300,6 +305,10 @@ export function createRuntime(initialCode) {
     prevCode = code;
     isRunning = true;
 
+    // Start a new execution cycle for button registry
+    // This allows buttons to be re-registered while detecting duplicates within the same execution
+    buttonRegistry.startExecution();
+
     const nodes = split(code);
     if (!nodes) return;
 
@@ -401,5 +410,5 @@ export function createRuntime(initialCode) {
     rerun(code);
   }
 
-  return {setCode, setIsRunning, run, onChanges, destroy, isRunning: () => isRunning};
+  return {setCode, setIsRunning, run, onChanges, destroy, isRunning: () => isRunning, buttonRegistry};
 }
