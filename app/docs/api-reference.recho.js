@@ -30,7 +30,7 @@
  * - recho.toggle(value) - Interactive toggle (checkbox) control (https://recho.dev/notebook/docs/api-toggle)
  * - recho.radio(index, options) - Interactive radio button group (https://recho.dev/notebook/docs/api-radio)
  * - recho.number(value[, options]) - Interactive number input control (https://recho.dev/notebook/docs/api-number)
- * - recho.button(label[, id], options) - Interactive button control (https://recho.dev/notebook/docs/api-button)
+ * - recho.button(label[, id], callback) - Interactive button control (https://recho.dev/notebook/docs/api-button)
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *                               Generators
