@@ -1,4 +1,4 @@
-import {EditorView, Decoration, ViewUpdate, ViewPlugin, WidgetType} from "@codemirror/view";
+import {Decoration, ViewPlugin, WidgetType} from "@codemirror/view";
 import {syntaxTree} from "@codemirror/language";
 
 const WIDGET_CLASS_NAME = "cm-button-widget";
