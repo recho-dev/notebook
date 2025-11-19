@@ -149,7 +149,7 @@
 
   .cm-debug-mark {
     &.red {
-      background-color: #e4002440;
+      background-color: #fbbf2440;
     }
     &.green {
       background-color: #009a5753;

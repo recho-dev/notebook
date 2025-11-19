@@ -44,22 +44,30 @@ function createWidgets(lines, blockMetadata, state) {
   const set2 = builder2.finish();
   console.groupEnd();
 
-  const builder3 = new RangeSetBuilder();
-  for (const {output} of blockMetadata) {
-    if (output === null) continue;
-    builder3.add(output.from, output.to, debugRedDecoration);
-  }
-  const set3 = builder3.finish();
-
-  const builder4 = new RangeSetBuilder();
-  for (const {source} of blockMetadata) {
-    builder4.add(source.from, source.to, debugGreenDecoration);
-  }
-  const set4 = builder4.finish();
-
   // Range sets are required to be sorted. Fortunately, they provide a method
   // to merge multiple range sets into a single sorted range set.
-  return RangeSet.join([set1, set2, set3, set4]);
+  return RangeSet.join([set1, set2]);
+}
+
+function createDebugMarks(blockMetadata, state) {
+  // Build mark decorations separately from line decorations to avoid conflicts
+  const builder = new RangeSetBuilder();
+
+  for (const {output, source} of blockMetadata) {
+    // Add red marks for output ranges
+    if (output !== null && output.from < output.to) {
+      console.log(`Adding red decoration for output: ${output.from}-${output.to}`);
+      builder.add(output.from, output.to, debugRedDecoration);
+    }
+
+    // Add green marks for source ranges
+    if (source.from < source.to) {
+      console.log(`Adding green decoration for source: ${source.from}-${source.to}`);
+      builder.add(source.from, source.to, debugGreenDecoration);
+    }
+  }
+
+  return builder.finish();
 }
 
 export const outputDecoration = ViewPlugin.fromClass(
@@ -83,6 +91,29 @@ export const outputDecoration = ViewPlugin.fromClass(
       const blockMetadata = update.state.field(blockMetadataField);
       // A possible optimization would be to only update the changed lines.
       this.#decorations = createWidgets(newOutputLines, blockMetadata, update.state);
+    }
+  },
+  {decorations: (v) => v.decorations},
+);
+
+export const debugDecoration = ViewPlugin.fromClass(
+  class {
+    #decorations;
+
+    get decorations() {
+      return this.#decorations;
+    }
+
+    /** @param {EditorView} view */
+    constructor(view) {
+      const blockMetadata = view.state.field(blockMetadataField);
+      this.#decorations = createDebugMarks(blockMetadata, view.state);
+    }
+
+    /** @param {ViewUpdate} update */
+    update(update) {
+      const blockMetadata = update.state.field(blockMetadataField);
+      this.#decorations = createDebugMarks(blockMetadata, update.state);
     }
   },
   {decorations: (v) => v.decorations},

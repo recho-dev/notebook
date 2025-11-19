@@ -9,7 +9,7 @@ import {indentWithTab} from "@codemirror/commands";
 import {browser} from "globals";
 import * as eslint from "eslint-linter-browserify";
 import {createRuntime} from "../runtime/index.js";
-import {outputDecoration} from "./decoration.js";
+import {outputDecoration, debugDecoration} from "./decoration.js";
 import {outputLines} from "./outputLines.js";
 import {blockMetadataExtension, blockMetadataEffect} from "./blockMetadata.ts";
 // import {outputProtection} from "./protection.js";
@@ -76,6 +76,7 @@ export function createEditor(container, options) {
       outputLines,
       blockMetadataExtension,
       outputDecoration,
+      debugDecoration,
       controls(runtimeRef),
       // Disable this for now, because it prevents copying/pasting the code.
       // outputProtection(),
