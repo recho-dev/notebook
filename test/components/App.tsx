@@ -4,12 +4,15 @@ import {selectedTestAtom} from "../store";
 import {TestSelector} from "./TestSelector";
 import {Editor} from "./Editor";
 import {TransactionViewer} from "./TransactionViewer";
+import {BlockViewer} from "./BlockViewer";
+import {ResizableSplit} from "./ResizableSplit";
 import * as testSamples from "../js/index.js";
 import type {ViewPlugin} from "@codemirror/view";
 
 export function App() {
   const [selectedTest, setSelectedTest] = useAtom(selectedTestAtom);
   const [transactionViewerPlugin, setTransactionViewerPlugin] = useState<ViewPlugin<any> | undefined>();
+  const [blockViewerPlugin, setBlockViewerPlugin] = useState<ViewPlugin<any> | undefined>();
 
   // Initialize from URL on mount
   useEffect(() => {
@@ -37,12 +40,21 @@ export function App() {
       <main className="flex-1 flex overflow-hidden">
         {/* Editor panel */}
         <div className="flex-1 p-4 overflow-auto">
-          <Editor key={selectedTest} code={currentCode} transactionViewerPlugin={transactionViewerPlugin} />
+          <Editor
+            key={selectedTest}
+            code={currentCode}
+            transactionViewerPlugin={transactionViewerPlugin}
+            blockViewerPlugin={blockViewerPlugin}
+          />
         </div>
 
-        {/* Transaction viewer sidebar */}
+        {/* Sidebar with blocks and transactions */}
         <aside className="w-96 bg-white overflow-hidden">
-          <TransactionViewer onPluginCreate={setTransactionViewerPlugin} />
+          <ResizableSplit
+            top={<BlockViewer onPluginCreate={setBlockViewerPlugin} />}
+            bottom={<TransactionViewer onPluginCreate={setTransactionViewerPlugin} />}
+            defaultRatio={0.5}
+          />
         </aside>
       </main>
     </div>

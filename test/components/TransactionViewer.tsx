@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from "react";
-import { ViewPlugin } from "@codemirror/view";
-import { Transaction as CMTransaction } from "@codemirror/state";
-import { blockMetadataEffect } from "../../editor/blockMetadata.ts";
-import { cn } from "../../app/cn.js";
+import {useState, useEffect, useRef} from "react";
+import {ViewPlugin} from "@codemirror/view";
+import {Transaction as CMTransaction} from "@codemirror/state";
+import {blockMetadataEffect} from "../../editor/blockMetadata.ts";
+import {cn} from "../../app/cn.js";
 
 // Maximum number of transactions to keep in history
 const MAX_HISTORY = 100;
@@ -53,7 +53,7 @@ interface TransactionViewerProps {
   onPluginCreate: (plugin: ViewPlugin<any>) => void;
 }
 
-export function TransactionViewer({ onPluginCreate }: TransactionViewerProps) {
+export function TransactionViewer({onPluginCreate}: TransactionViewerProps) {
   const [transactions, setTransactions] = useState<TransactionData[]>([]);
   const [autoScroll, setAutoScroll] = useState(true);
   const listRef = useRef<HTMLDivElement>(null);
@@ -171,7 +171,7 @@ export function TransactionViewer({ onPluginCreate }: TransactionViewerProps) {
             notifyListeners();
           }
         }
-      }
+      },
     );
 
     listeners.add((newTransactions) => {
@@ -202,8 +202,7 @@ export function TransactionViewer({ onPluginCreate }: TransactionViewerProps) {
 
     for (let i = transactions.length - 1; i >= 0; i--) {
       const tr = transactions[i];
-      const isSelection =
-        tr.annotations.userEvent === "select" || tr.annotations.userEvent === "select.pointer";
+      const isSelection = tr.annotations.userEvent === "select" || tr.annotations.userEvent === "select.pointer";
 
       if (isSelection) {
         if (currentGroup && currentGroup.type === "selection") {
@@ -228,7 +227,7 @@ export function TransactionViewer({ onPluginCreate }: TransactionViewerProps) {
   };
 
   return (
-    <div className="flex flex-col h-full border-l border-gray-200 bg-white">
+    <div className="flex flex-col h-full bg-white">
       <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
         <h3 className="text-sm font-semibold text-gray-700 mb-2">Transactions</h3>
         <div className="flex items-center gap-3">
@@ -258,7 +257,7 @@ export function TransactionViewer({ onPluginCreate }: TransactionViewerProps) {
               <TransactionItem key={`tr-${group.transaction!.index}`} transaction={group.transaction!} />
             ) : (
               <SelectionGroupItem key={`group-${idx}`} transactions={group.transactions!} />
-            )
+            ),
           )
         )}
       </div>
@@ -266,7 +265,7 @@ export function TransactionViewer({ onPluginCreate }: TransactionViewerProps) {
   );
 }
 
-function TransactionItem({ transaction: tr }: { transaction: TransactionData }) {
+function TransactionItem({transaction: tr}: {transaction: TransactionData}) {
   const [isOpen, setIsOpen] = useState(false);
 
   const formatTime = (timestamp: number) => {
@@ -300,7 +299,7 @@ function TransactionItem({ transaction: tr }: { transaction: TransactionData }) 
       className={cn(
         "mb-2 border border-gray-200 rounded text-xs",
         tr.annotations.userEvent && "bg-blue-50",
-        tr.docChanged && "border-l-4 border-l-blue-500"
+        tr.docChanged && "border-l-4 border-l-blue-500",
       )}
     >
       <summary className="px-2 py-1.5 cursor-pointer hover:bg-gray-50 flex justify-between items-center">
@@ -329,7 +328,9 @@ function TransactionItem({ transaction: tr }: { transaction: TransactionData }) 
 
               return (
                 <div key={idx} className="ml-2 mt-1 p-1 bg-gray-50 rounded">
-                  <div>Change {idx + 1}: {posInfo}</div>
+                  <div>
+                    Change {idx + 1}: {posInfo}
+                  </div>
                   {deleted > 0 && <div className="text-red-600">Deleted {deleted} chars</div>}
                   {inserted > 0 && (
                     <div className="text-green-600">
@@ -368,16 +369,18 @@ function TransactionItem({ transaction: tr }: { transaction: TransactionData }) 
               <div key={idx} className="ml-2 mt-1">
                 {effect.type === "blockMetadataEffect" && effect.blockMetadata ? (
                   <div className="p-1 bg-purple-50 rounded">
-                    <div className="font-medium">Effect {idx + 1}: blockMetadataEffect ({effect.blockMetadata.length} blocks)</div>
+                    <div className="font-medium">
+                      Effect {idx + 1}: blockMetadataEffect ({effect.blockMetadata.length} blocks)
+                    </div>
                     {effect.blockMetadata.map((block: any, blockIdx: number) => (
                       <div key={blockIdx} className="ml-2 mt-1 text-xs">
                         <div className="font-medium">Block {blockIdx + 1}:</div>
                         <div>
-                          {block.output !== null
-                            ? `Output: ${block.output.from}-${block.output.to}`
-                            : "Output: null"}
+                          {block.output !== null ? `Output: ${block.output.from}-${block.output.to}` : "Output: null"}
                         </div>
-                        <div>Source: {block.source.from}-{block.source.to}</div>
+                        <div>
+                          Source: {block.source.from}-{block.source.to}
+                        </div>
                         {Object.keys(block.attributes).length > 0 && (
                           <div>Attributes: {JSON.stringify(block.attributes)}</div>
                         )}
@@ -386,7 +389,9 @@ function TransactionItem({ transaction: tr }: { transaction: TransactionData }) 
                     ))}
                   </div>
                 ) : (
-                  <div>Effect {idx + 1} ({effect.type}): {JSON.stringify(effect.value).substring(0, 100)}</div>
+                  <div>
+                    Effect {idx + 1} ({effect.type}): {JSON.stringify(effect.value).substring(0, 100)}
+                  </div>
                 )}
               </div>
             ))}
@@ -414,7 +419,7 @@ function TransactionItem({ transaction: tr }: { transaction: TransactionData }) 
   );
 }
 
-function SelectionGroupItem({ transactions }: { transactions: TransactionData[] }) {
+function SelectionGroupItem({transactions}: {transactions: TransactionData[]}) {
   const [isOpen, setIsOpen] = useState(false);
 
   const formatTime = (timestamp: number) => {
@@ -458,7 +463,10 @@ function SelectionGroupItem({ transactions }: { transactions: TransactionData[] 
             .join(", ");
 
           return (
-            <div key={tr.index} className="flex justify-between items-center py-1 border-b border-gray-100 last:border-0">
+            <div
+              key={tr.index}
+              className="flex justify-between items-center py-1 border-b border-gray-100 last:border-0"
+            >
               <span className="font-mono">#{tr.index}</span>
               <span className="flex-1 mx-2 text-gray-600">{selectionInfo}</span>
               <span className="text-gray-400 text-xs">{formatTime(tr.timestamp)}</span>

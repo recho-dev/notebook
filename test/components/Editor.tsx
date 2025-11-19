@@ -1,12 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import { Play, Square, RefreshCcw } from "lucide-react";
-import { createEditor } from "../../editor/index.js";
-import { cn } from "../../app/cn.js";
-import type { ViewPlugin } from "@codemirror/view";
+import {useEffect, useRef, useState} from "react";
+import {Play, Square, RefreshCcw} from "lucide-react";
+import {createEditor} from "../../editor/index.js";
+import {cn} from "../../app/cn.js";
+import type {ViewPlugin} from "@codemirror/view";
 
 interface EditorProps {
   code: string;
   transactionViewerPlugin?: ViewPlugin<any>;
+  blockViewerPlugin?: ViewPlugin<any>;
   onError?: (error: Error) => void;
 }
 
@@ -24,7 +25,7 @@ const onDefaultError = debounce(() => {
   }, 100);
 }, 0);
 
-export function Editor({ code, transactionViewerPlugin, onError = onDefaultError }: EditorProps) {
+export function Editor({code, transactionViewerPlugin, blockViewerPlugin, onError = onDefaultError}: EditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<any>(null);
   const [needRerun, setNeedRerun] = useState(false);
@@ -33,7 +34,9 @@ export function Editor({ code, transactionViewerPlugin, onError = onDefaultError
     if (containerRef.current) {
       containerRef.current.innerHTML = "";
 
-      const extensions = transactionViewerPlugin ? [transactionViewerPlugin] : [];
+      const extensions = [];
+      if (transactionViewerPlugin) extensions.push(transactionViewerPlugin);
+      if (blockViewerPlugin) extensions.push(blockViewerPlugin);
 
       editorRef.current = createEditor(containerRef.current, {
         code,
@@ -50,7 +53,7 @@ export function Editor({ code, transactionViewerPlugin, onError = onDefaultError
         editorRef.current.destroy();
       }
     };
-  }, [code, transactionViewerPlugin, onError]);
+  }, [code, transactionViewerPlugin, blockViewerPlugin, onError]);
 
   useEffect(() => {
     const onInput = () => {
@@ -112,11 +115,7 @@ export function Editor({ code, transactionViewerPlugin, onError = onDefaultError
           >
             <RefreshCcw className="w-4 h-4" />
           </button>
-          <button
-            onClick={onStop}
-            title="Stop Updating"
-            className="hover:scale-110 transition-transform duration-100"
-          >
+          <button onClick={onStop} title="Stop Updating" className="hover:scale-110 transition-transform duration-100">
             <Square className="w-4 h-4" />
           </button>
         </div>
