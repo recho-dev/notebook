@@ -10,9 +10,9 @@ export const metadata = {
   description: "Examples | Recho Notebook",
 };
 
-export default async function Page({searchParams}) {
-  const examples = getAllJSExamples();
+const examples = getAllJSExamples();
 
+export default async function Page({searchParams}) {
   // Extract all unique labels from examples
   const allLabels = new Set();
   examples.forEach((example) => {
