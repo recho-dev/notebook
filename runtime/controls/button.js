@@ -107,6 +107,7 @@ export class ButtonRegistry {
   clear() {
     this.callbackMap.clear();
     this.blockCallbacks.clear();
+    this.currentExecutionIds.clear();
   }
 }
 
