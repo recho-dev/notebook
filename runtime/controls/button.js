@@ -111,67 +111,62 @@ export class ButtonRegistry {
   }
 }
 
-// Global reference to the current runtime's button registry
-// This will be set by the runtime when it initializes
-// TODO: Find a better way to pass the registry to the button function
-let currentRegistry = null;
-
 /**
- * Set the current button registry.
- * Called by the runtime during initialization.
+ * Factory to create a button function bound to a specific ButtonRegistry.
+ *
+ * Usage:
+ *   const button = makeButton(registry);
+ *   button(label, callback) or button(label, id, callback)
  *
  * @param {ButtonRegistry} registry - The button registry instance
+ * @returns {Function} button function
  */
-export function setButtonRegistry(registry) {
-  currentRegistry = registry;
-}
-
-/**
- * Button control for executing callbacks on click.
- *
- * Two usage patterns:
- * 1. button(label, callback) - Uses label as ID
- * 2. button(label, id, callback) - Uses custom ID (for duplicate labels)
- *
- * @param {string} label - Button label text
- * @param {string|Function} idOrCallback - Either custom ID or callback function
- * @param {Function} [callback] - Callback function (if custom ID provided)
- * @returns {undefined}
- */
-export function button(label, idOrCallback, callback) {
-  if (!currentRegistry) {
-    console.warn("Button registry not initialized");
+export function makeButton(registry) {
+  /**
+   * Button control for executing callbacks on click.
+   *
+   * Two usage patterns:
+   * 1. button(label, callback) - Uses label as ID
+   * 2. button(label, id, callback) - Uses custom ID (for duplicate labels)
+   *
+   * @param {string} label - Button label text
+   * @param {string|Function} idOrCallback - Either custom ID or callback function
+   * @param {Function} [callback] - Callback function (if custom ID provided)
+   * @returns {undefined}
+   */
+  function button(label, idOrCallback, callback) {
+    if (!registry) {
+      console.warn("Button registry not initialized");
+      return undefined;
+    }
+    let id;
+    let actualCallback;
+    // Determine if we have 2 or 3 arguments
+    if (typeof idOrCallback === "function") {
+      // button(label, callback) - use label as ID
+      id = label;
+      actualCallback = idOrCallback;
+    } else if (typeof idOrCallback === "string" && typeof callback === "function") {
+      // button(label, id, callback) - use custom ID
+      id = idOrCallback;
+      actualCallback = callback;
+    } else {
+      throw new Error("Invalid button arguments. Expected: button(label, callback) or button(label, id, callback)");
+    }
+    // Try to register the button
+    const success = registry.register(id, actualCallback);
+    if (!success) {
+      // Duplicate ID detected in current execution
+      throw new Error(
+        `Duplicate button ID "${id}" in the same execution. ` +
+          (id === label
+            ? `Either change the label or provide a custom ID: recho.button("${label}", "unique_id", callback)`
+            : `The ID "${id}" is already in use. Please use a different ID.`),
+      );
+    }
     return undefined;
   }
-
-  let id;
-  let actualCallback;
-
-  // Determine if we have 2 or 3 arguments
-  if (typeof idOrCallback === "function") {
-    // button(label, callback) - use label as ID
-    id = label;
-    actualCallback = idOrCallback;
-  } else if (typeof idOrCallback === "string" && typeof callback === "function") {
-    // button(label, id, callback) - use custom ID
-    id = idOrCallback;
-    actualCallback = callback;
-  } else {
-    throw new Error("Invalid button arguments. Expected: button(label, callback) or button(label, id, callback)");
-  }
-
-  // Try to register the button
-  const success = currentRegistry.register(id, actualCallback);
-
-  if (!success) {
-    // Duplicate ID detected in current execution
-    throw new Error(
-      `Duplicate button ID "${id}" in the same execution. ` +
-        (id === label
-          ? `Either change the label or provide a custom ID: recho.button("${label}", "unique_id", callback)`
-          : `The ID "${id}" is already in use. Please use a different ID.`),
-    );
-  }
-
-  return undefined;
+  return button;
 }
+
+export const button = 0;

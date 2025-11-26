@@ -8,15 +8,11 @@ import {Inspector} from "./stdlib/inspect.js";
 import {OUTPUT_MARK, ERROR_MARK} from "./constant.js";
 import {transpileRechoJavaScript} from "./transpile.js";
 import {table, getBorderCharacters} from "table";
-import {ButtonRegistry, setButtonRegistry} from "./controls/button.js";
+import {ButtonRegistry, makeButton} from "./controls/button.js";
 
 const OUTPUT_PREFIX = `//${OUTPUT_MARK}`;
 
 const ERROR_PREFIX = `//${ERROR_MARK}`;
-
-const BUILTINS = {
-  recho: () => stdlib,
-};
 
 function uid() {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -109,7 +105,6 @@ export function createRuntime(initialCode) {
 
   // Create button registry for this runtime instance
   const buttonRegistry = new ButtonRegistry();
-  setButtonRegistry(buttonRegistry);
 
   // Echo context management system for proper output routing.
   // Execution flow:
@@ -122,8 +117,11 @@ export function createRuntime(initialCode) {
   const __getEcho__ = () => __echo__;
   const __setEcho__ = (echo) => (__echo__ = echo);
 
+  // The button function must be manually associated to the button registry.
+  const __stdlib__ = {...stdlib, button: makeButton(buttonRegistry)};
+
   const runtime = new Runtime({
-    ...BUILTINS,
+    recho: () => __stdlib__,
     __getEcho__: () => __getEcho__,
     __setEcho__: () => __setEcho__,
   });
