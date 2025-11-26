@@ -95,6 +95,10 @@ export const docsNavConfig = [
         type: "page",
         slug: "api-number",
       },
+      {
+        type: "page",
+        slug: "api-button",
+      },
     ],
   },
 ];

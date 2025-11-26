@@ -8,14 +8,11 @@ import {Inspector} from "./stdlib/inspect.js";
 import {OUTPUT_MARK, ERROR_MARK} from "./constant.js";
 import {transpileRechoJavaScript} from "./transpile.js";
 import {table, getBorderCharacters} from "table";
+import {ButtonRegistry, makeButton} from "./controls/button.js";
 
 const OUTPUT_PREFIX = `//${OUTPUT_MARK}`;
 
 const ERROR_PREFIX = `//${ERROR_MARK}`;
-
-const BUILTINS = {
-  recho: () => stdlib,
-};
 
 function uid() {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -106,6 +103,9 @@ export function createRuntime(initialCode) {
   let prevCode = null;
   let isRunning = false;
 
+  // Create button registry for this runtime instance
+  const buttonRegistry = new ButtonRegistry();
+
   // Echo context management system for proper output routing.
   // Execution flow:
   // 1. Before execution: __setEcho__(echo) stores the current cell's echo function
@@ -117,8 +117,11 @@ export function createRuntime(initialCode) {
   const __getEcho__ = () => __echo__;
   const __setEcho__ = (echo) => (__echo__ = echo);
 
+  // The button function must be manually associated to the button registry.
+  const __stdlib__ = {...stdlib, button: makeButton(buttonRegistry)};
+
   const runtime = new Runtime({
-    ...BUILTINS,
+    recho: () => __stdlib__,
     __getEcho__: () => __getEcho__,
     __setEcho__: () => __setEcho__,
   });
@@ -300,6 +303,10 @@ export function createRuntime(initialCode) {
     prevCode = code;
     isRunning = true;
 
+    // Start a new execution cycle for button registry
+    // This allows buttons to be re-registered while detecting duplicates within the same execution
+    buttonRegistry.startExecution();
+
     const nodes = split(code);
     if (!nodes) return;
 
@@ -401,5 +408,5 @@ export function createRuntime(initialCode) {
     rerun(code);
   }
 
-  return {setCode, setIsRunning, run, onChanges, destroy, isRunning: () => isRunning};
+  return {setCode, setIsRunning, run, onChanges, destroy, isRunning: () => isRunning, buttonRegistry};
 }
