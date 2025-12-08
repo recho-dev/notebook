@@ -20,7 +20,6 @@ const styles = {
 
 export function Nav() {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -35,11 +34,6 @@ export function Nav() {
   function isSelected(path) {
     return pathname.startsWith(path);
   }
-
-  useEffect(() => {
-    if (pathname === "/examples") setOpen(true);
-    else setOpen(false);
-  }, [pathname]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -143,10 +137,8 @@ export function Nav() {
           target="_blank"
           rel="noreferrer"
           className={cn(styles.link)}
-          data-tooltip-id="examples-tooltip"
+          data-tooltip-id="nav-tooltip"
           data-tooltip-content="Share to Examples"
-          onMouseEnter={() => setOpen(true)}
-          onMouseLeave={() => setOpen(false)}
         >
           <Share className={cn(styles.linkIcon)} />
         </a>
@@ -163,7 +155,6 @@ export function Nav() {
         </a>
       </div>
       <Tooltip id="nav-tooltip" className={cn(styles.tooltip)} />
-      <Tooltip id="examples-tooltip" className={cn(styles.tooltip)} isOpen={open} />
     </header>
   );
 }

@@ -223,7 +223,7 @@
     cursor: pointer;
   }
 
-  .cm-comment-link.cmd-clickable:hover {
-    color: #0550ae;
+  .cm-comment-link.cmd-clickable:hover > span {
+    color: #0550ae !important;
   }
 }

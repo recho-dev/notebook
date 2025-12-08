@@ -1,6 +1,5 @@
 /**
  * @title Inline Echoing
- * @order 3
  */
 
 /**
@@ -229,7 +228,7 @@ const array1000 = echo(recho.inspect(new Array(1000).fill(0), {limit: 80}));
  *                           Clearing Output
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * You can call `echo.clear()` to clear the output of the current block. For 
+ * You can call `echo.clear()` to clear the output of the current block. For
  * example, click the ▶️ button to see the output being cleared after 1 second.
  */
 

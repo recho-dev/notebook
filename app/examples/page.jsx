@@ -1,19 +1,49 @@
+import {Suspense} from "react";
 import {getAllJSExamples} from "../utils.js";
 import {cn} from "../cn.js";
 import {Meta} from "../Meta.js";
 import {ThumbnailServer} from "../ThumbnailServer.js";
+import {LabelFilters} from "./LabelFilters.jsx";
 
 export const metadata = {
   title: "Examples | Recho Notebook",
   description: "Examples | Recho Notebook",
 };
 
-export default function Page() {
+export default async function Page({searchParams}) {
   const examples = getAllJSExamples();
-  const sortedExamples = examples.sort((a, b) => new Date(b.created) - new Date(a.created));
+
+  // Extract all unique labels from examples
+  const allLabels = new Set();
+  examples.forEach((example) => {
+    if (example.label && Array.isArray(example.label)) {
+      example.label.forEach((label) => allLabels.add(label));
+    }
+  });
+  const sortedLabels = Array.from(allLabels).sort();
+
+  // Get selected labels from searchParams (handle both Promise and non-Promise cases)
+  const params = await searchParams;
+  const selectedLabels = params?.labels ? (Array.isArray(params.labels) ? params.labels : [params.labels]) : [];
+
+  // Filter examples based on selected labels
+  // If no labels selected or "All" is selected, show all examples
+  const filteredExamples =
+    selectedLabels.length === 0 || selectedLabels.includes("All")
+      ? examples
+      : examples.filter((example) => {
+          if (!example.label || !Array.isArray(example.label)) return false;
+          return selectedLabels.some((selectedLabel) => example.label.includes(selectedLabel));
+        });
+
+  const sortedExamples = filteredExamples.sort((a, b) => new Date(b.created) - new Date(a.created));
+
   return (
-    <div className={cn("max-w-screen-xl lg:mx-auto mx-4 lg:my-12 my-4")}>
-      <div className={cn("grid gap-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3")}>
+    <div className={cn("max-w-screen-xl lg:mx-auto mx-4 my-4")}>
+      <Suspense fallback={<div className={cn("flex flex-wrap gap-2 items-center")}>Loading filters...</div>}>
+        <LabelFilters allLabels={sortedLabels} />
+      </Suspense>
+      <div className={cn("grid gap-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-10")}>
         {sortedExamples.map((example) => (
           <div key={example.slug}>
             <Meta example={example} />

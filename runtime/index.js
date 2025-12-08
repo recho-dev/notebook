@@ -1,7 +1,7 @@
 import {transpileJavaScript} from "@observablehq/notebook-kit";
 import {Runtime} from "@observablehq/runtime";
 import {parse} from "acorn";
-import {group, max} from "d3-array";
+import {group, groups, max} from "d3-array";
 import {dispatch as d3Dispatch} from "d3-dispatch";
 import * as stdlib from "./stdlib/index.js";
 import {Inspector} from "./stdlib/inspect.js";
@@ -9,14 +9,12 @@ import {OUTPUT_MARK, ERROR_MARK} from "./constant.js";
 import {BlockMetadata, blockMetadataEffect} from "../editor/blockMetadata.ts";
 import {IntervalTree} from "../lib/IntervalTree.ts";
 import {transpileRechoJavaScript} from "./transpile.js";
+import {table, getBorderCharacters} from "table";
+import {ButtonRegistry, makeButton} from "./controls/button.js";
 
 const OUTPUT_PREFIX = `//${OUTPUT_MARK}`;
 
 const ERROR_PREFIX = `//${ERROR_MARK}`;
-
-const BUILTINS = {
-  recho: () => stdlib,
-};
 
 function uid() {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -88,10 +86,27 @@ function addPrefix(string, prefix) {
   return lines.map((line) => `${prefix} ${line}`).join("\n");
 }
 
+function withTable(groups) {
+  return groups.length > 1 || groups[0][0] !== undefined;
+}
+
+function columns(data, options) {
+  const values = data[0].slice(1);
+  let output = "";
+  for (let i = 0; i < values.length; i++) {
+    output += values[i];
+    output += i < values.length - 1 ? "\n" : "";
+  }
+  return output;
+}
+
 export function createRuntime(initialCode) {
   let code = initialCode;
   let prevCode = null;
   let isRunning = false;
+
+  // Create button registry for this runtime instance
+  const buttonRegistry = new ButtonRegistry();
 
   // Echo context management system for proper output routing.
   // Execution flow:
@@ -104,8 +119,11 @@ export function createRuntime(initialCode) {
   const __getEcho__ = () => __echo__;
   const __setEcho__ = (echo) => (__echo__ = echo);
 
+  // The button function must be manually associated to the button registry.
+  const __stdlib__ = {...stdlib, button: makeButton(buttonRegistry)};
+
   const runtime = new Runtime({
-    ...BUILTINS,
+    recho: () => __stdlib__,
     __getEcho__: () => __getEcho__,
     __setEcho__: () => __setEcho__,
   });
@@ -126,47 +144,78 @@ export function createRuntime(initialCode) {
     for (const node of nodes) {
       const start = node.start;
       const {values} = node.state;
+      if (!values.length) continue;
+
+      // Group values by key. Each group is a row if using table, otherwise a column.
+      const groupValues = groups(values, (v) => v.options?.key);
+
+      // We need to remove the trailing newline for table.
+      const format = withTable(groupValues) ? (...V) => table(...V).trimEnd() : columns;
+      
+      // The range of line numbers of output lines.
       let outputRange = null;
+
+      // If any value is an error, set the error flag.
       let error = false;
-      if (values.length) {
-        let output = "";
+
+      // Create a table to store the formatted values.
+      const data = [];
+
+      for (const [key, V] of groupValues) {
+        const values = V.map((v) => v.values);
+
+        // Format the key as a header for table.
+        const row = ["{" + key + "}"];
+
         for (let i = 0; i < values.length; i++) {
           const line = values[i];
           const n = line.length;
-          const formatted = line.map((v) => {
+
+          // Each cell can have multiple values. Format each value as a string.
+          const items = line.map((v) => {
             if (isError(v)) error = true;
+
             // Disable string quoting for multi-value outputs to improve readability.
             // Example: echo("a =", 1) produces "a = 1" instead of "a = "1""
             const options = n === 1 ? {} : {quote: false};
             const inspector = v instanceof Inspector ? v : new Inspector(v, options);
             return inspector.format();
           });
-          const merged = merge(...formatted);
-          output += merged;
-          output += i < values.length - 1 ? "\n" : "";
+
+          // Merge all formatted values into a single cell.
+          row.push(merge(...items));
         }
-        const prefix = error ? ERROR_PREFIX : OUTPUT_PREFIX;
-        const prefixed = addPrefix(output, prefix);
-        // Search for existing changes and update the inserted text if found.
-        const entry = removedIntervals.contains(start - 1);
-        if (entry === null) {
-          changes.push({from: start, insert: prefixed + "\n"});
-        } else {
-          const change = changes[entry.data];
-          change.insert = prefixed + "\n";
-          outputRange = {from: change.from, to: change.to};
-        }
+
+        data.push(row);
       }
+
+      // Format the table into a single string and add prefix.
+      const formatted = format(data, {
+        border: getBorderCharacters("ramac"),
+        columnDefault: {alignment: "right"},
+      });
+      const prefixed = addPrefix(formatted, error ? ERROR_PREFIX : OUTPUT_PREFIX);
+
+      // Search for existing changes and update the inserted text if found.
+      const entry = removedIntervals.contains(start - 1);
+      if (entry === null) {
+        changes.push({from: start, insert: prefixed + "\n"});
+      } else {
+        const change = changes[entry.data];
+        change.insert = prefixed + "\n";
+        outputRange = {from: change.from, to: change.to};
+      }
+
       // Add this block to the block metadata array.
       const block = BlockMetadata(outputRange, {from: node.start, to: node.end}, node.state.attributes);
       block.error = error;
       blocks.push(block);
+
+      blocks.sort((a, b) => a.from - b.from);
     }
-
-    blocks.sort((a, b) => a.from - b.from);
-
-    console.log(blocks);
-
+    
+    console.log("Dear blocks", blocks);
+    
     // Attach block positions and attributes as effects to the transaction.
     const effects = [blockMetadataEffect.of(blocks)];
 
@@ -207,7 +256,7 @@ export function createRuntime(initialCode) {
         const e = state.syntaxError || error;
         console.error(e);
         clear(state);
-        echo(state, e);
+        echo(state, {}, e);
       },
     };
   }
@@ -284,9 +333,9 @@ export function createRuntime(initialCode) {
     return changes;
   }
 
-  function echo(state, ...values) {
+  function echo(state, options, ...values) {
     if (!isRunning) return;
-    state.values.push(values);
+    state.values.push({options, values});
     rerun(code);
   }
 
@@ -301,6 +350,10 @@ export function createRuntime(initialCode) {
 
     prevCode = code;
     isRunning = true;
+
+    // Start a new execution cycle for button registry
+    // This allows buttons to be re-registered while detecting duplicates within the same execution
+    buttonRegistry.startExecution();
 
     const nodes = split(code);
     if (!nodes) return;
@@ -381,20 +434,25 @@ export function createRuntime(initialCode) {
       vd.define(
         inputs.filter((i) => i !== "echo"),
         () => {
+          const options = {};
           const version = v._version; // Capture version on input change.
           const __echo__ = (value, ...args) => {
             if (version < echoVersion) throw new Error("stale echo");
             else if (state.variables[0] !== v) throw new Error("stale echo");
             else if (version > echoVersion) clear(state);
             echoVersion = version;
-            echo(state, value, ...args);
+            echo(state, {...options}, value, ...args);
             return args.length ? [value, ...args] : value;
           };
+          const disposes = [];
           __echo__.clear = () => clear(state);
           __echo__.set = function (key, value) {
             state.attributes[key] = value;
             return this;
           };
+          __echo__.dispose = (cb) => disposes.push(cb);
+          __echo__.key = (k) => ((options.key = k), __echo__);
+          __echo__.__dispose__ = () => disposes.forEach((cb) => cb());
           return __echo__;
         },
       );
@@ -415,5 +473,5 @@ export function createRuntime(initialCode) {
     rerun(code);
   }
 
-  return {setCode, setIsRunning, run, onChanges, destroy, isRunning: () => isRunning};
+  return {setCode, setIsRunning, run, onChanges, destroy, isRunning: () => isRunning, buttonRegistry};
 }

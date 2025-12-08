@@ -46,10 +46,10 @@ async function render() {
 
   const editorContainer = document.createElement("div");
   const code = jsTests[select.value];
-  const editor = createEditor(editorContainer, {
+  const editor = (preEditor = createEditor(editorContainer, {
     code,
     extensions: [transactionViewer.plugin],
-  });
+  }));
   editor.run();
   preEditor = editor;
 

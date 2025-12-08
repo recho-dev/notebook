@@ -39,6 +39,7 @@
     "@tailwindcss/postcss": "^4.1.14",
     "@types/node": "24.10.1",
     "@types/react": "19.2.6",
+    "@vercel/analytics": "^1.5.0",
     "@vitejs/plugin-react": "^4.3.1",
     "clsx": "^2.1.1",
     "eslint": "^9.37.0",
@@ -89,6 +90,7 @@
     "react-dom": "^19.2.0",
     "shiki": "^3.13.0",
     "short-uuid": "^5.2.0",
-    "source-map-support": "^0.5.21"
+    "source-map-support": "^0.5.21",
+    "table": "^6.9.0"
   }
 }

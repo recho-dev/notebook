@@ -17,7 +17,7 @@ import {dispatch as d3Dispatch} from "d3-dispatch";
 import {controls} from "./controls/index.js";
 import {rechoCompletion} from "./completion.js";
 import {docStringTag} from "./docStringTag.js";
-import {commentLink} from "./commentLink.js";
+import {commentLink, commentLinkClickHandler} from "./commentLink.js";
 import {blockIndicator} from "./blockIndicator.ts";
 import {lineNumbers} from "@codemirror/view";
 
@@ -82,6 +82,7 @@ export function createEditor(container, options) {
       // outputProtection(),
       docStringTag,
       commentLink,
+      commentLinkClickHandler,
       linter(esLint(new eslint.Linter(), eslintConfig)),
       ...extensions,
     ],
@@ -96,6 +97,7 @@ export function createEditor(container, options) {
     runtimeRef.current.onChanges(dispatch);
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
+    window.addEventListener("openlink", onOpenLink);
   }
 
   function dispatch({changes, effects}) {
@@ -143,6 +145,12 @@ export function createEditor(container, options) {
     }
   }
 
+  function onOpenLink() {
+    if (!isStopByMetaKey) return;
+    isStopByMetaKey = false;
+    runtimeRef.current?.setIsRunning(true);
+  }
+
   return {
     run: () => {
       try {
@@ -158,12 +166,14 @@ export function createEditor(container, options) {
       runtimeRef.current = null;
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("openlink", onOpenLink);
     },
     on: (event, callback) => dispatcher.on(event, callback),
     destroy: () => {
       runtimeRef.current?.destroy();
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("openlink", onOpenLink);
       view.destroy();
     },
   };

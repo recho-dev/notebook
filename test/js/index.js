@@ -14,6 +14,8 @@ export {mandelbrotSet} from "./mandelbrot-set.js";
 export {matrixRain} from "./matrix-rain.js";
 export {jsDocString} from "./js-doc-string.js";
 export {commentLink} from "./comment-link.js";
+export {echoKey} from "./echo-key.js";
+export {mutable} from "./mutable.js";
 export {syntaxError3} from "./syntax-error3.js";
 export {syntaxError4} from "./syntax-error4.js";
 export {nonCallEcho} from "./non-call-echo.js";

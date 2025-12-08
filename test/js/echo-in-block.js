@@ -4,5 +4,5 @@ export const echoInBlock = `{
     echo(count--);
     if (count <= 0) clearInterval(timer);
   }, 1000);
-  invalidation.then(() => clearInterval(timer));
+  echo.dispose(() => clearInterval(timer));
 }`;

@@ -39,7 +39,7 @@ function rewriteEchoInFunction(input) {
 
   // Fallback to cell-level echo function if no echo function is available.
   // For example, `setTimeout(() => echo(1), 0)`
-  output.insertLeft(body.start, "let __cellEcho__ = __getEcho__();");
+  output.insertLeft(body.start, "let __cellEcho__ = __getEcho__();invalidation.then(__cellEcho__.__dispose__);");
 
   recursive(body, state, {
     Function(node, state, c) {

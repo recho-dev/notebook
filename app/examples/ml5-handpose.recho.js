@@ -5,6 +5,7 @@
  * @pull_request 115
  * @github pearmini
  * @thumbnail_start 40
+ * @label ASCII Art
  */
 
 /**
@@ -89,7 +90,7 @@ handPose.detectStart(video, (hands) => {
 });
 
 {
-  invalidation.then(() => removeCapture(video));
+  echo.dispose(() => removeCapture(video));
 }
 
 // Use p5 to create a capture video element.

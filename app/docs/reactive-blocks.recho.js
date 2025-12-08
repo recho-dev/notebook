@@ -1,6 +1,5 @@
 /**
  * @title Reactive Blocks
- * @order 4
  */
 
 /**
@@ -8,7 +7,7 @@
  * =                            Reactive Blocks                               =
  * ============================================================================
  *
- * Reactive blocks are the fundamentals of Recho Notebook's reactive system, 
+ * Reactive blocks are the fundamentals of Recho Notebook's reactive system,
  * which is built on the reactive model of Observable Notebook Kit[1].
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -72,8 +71,8 @@ echo(alphabet);
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * All the blocks run automatically like running a vanilla JavaScript script.
- * The difference is that blocks in Recho Notebook run in topological order 
- * determined by top-level variable references (a.k.a. **dataflow**), rather 
+ * The difference is that blocks in Recho Notebook run in topological order
+ * determined by top-level variable references (a.k.a. **dataflow**), rather
  * than the top-down document order[2].
  *
  * For example, we have three blocks: `sum`, `a`, and `b` in top-down order.
@@ -86,7 +85,7 @@ const a = 1;
 const b = 2;
 
 /**
- * Since code (blocks) runs independent of its order in notebook, you can 
+ * Since code (blocks) runs independent of its order in notebook, you can
  * arrange code however you want.
  *
  * In addition to that, when a block (`const sum = echo(a + b)`) references
@@ -113,7 +112,7 @@ const random = echo(Math.random());
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * With reactive evaluation, blocks can run multiple times. If you need to
  * "clear up" a block, say to cancel an animation loop or close a socket, use
- * the invalidation promise to register a disposal hook.
+ * echo.dispose to register a disposal hook.
  */
 
 //➜ 9
@@ -129,7 +128,7 @@ const random = echo(Math.random());
   }, 1000);
 
   // Clear the interval when the block is re-run.
-  invalidation.then(() => clearInterval(timer));
+  echo.dispose(() => clearInterval(timer));
 }
 
 /**
