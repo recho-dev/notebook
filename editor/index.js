@@ -9,14 +9,17 @@ import {indentWithTab} from "@codemirror/commands";
 import {browser} from "globals";
 import * as eslint from "eslint-linter-browserify";
 import {createRuntime} from "../runtime/index.js";
-import {outputDecoration} from "./decoration.js";
+import {outputDecoration, debugDecoration} from "./decoration.js";
 import {outputLines} from "./outputLines.js";
+import {blockMetadataExtension, blockMetadataEffect} from "./blockMetadata.ts";
 // import {outputProtection} from "./protection.js";
 import {dispatch as d3Dispatch} from "d3-dispatch";
 import {controls} from "./controls/index.js";
 import {rechoCompletion} from "./completion.js";
 import {docStringTag} from "./docStringTag.js";
 import {commentLink, commentLinkClickHandler} from "./commentLink.js";
+import {blockIndicator} from "./blockIndicator.ts";
+import {lineNumbers} from "@codemirror/view";
 
 // @see https://github.com/UziTech/eslint-linter-browserify/blob/master/example/script.js
 // @see https://codemirror.net/examples/lint/
@@ -33,14 +36,17 @@ const eslintConfig = {
 };
 
 export function createEditor(container, options) {
-  const {code, onError} = options;
+  const {code, onError, extensions = []} = options;
   const dispatcher = d3Dispatch("userInput");
   const runtimeRef = {current: null};
+
+  const myBasicSetup = Array.from(basicSetup);
+  myBasicSetup.splice(2, 0, blockIndicator);
 
   const state = EditorState.create({
     doc: code,
     extensions: [
-      basicSetup,
+      myBasicSetup,
       javascript(),
       githubLightInit({
         styles: [
@@ -68,7 +74,9 @@ export function createEditor(container, options) {
       ]),
       javascriptLanguage.data.of({autocomplete: rechoCompletion}),
       outputLines,
+      blockMetadataExtension,
       outputDecoration,
+      debugDecoration,
       controls(runtimeRef),
       // Disable this for now, because it prevents copying/pasting the code.
       // outputProtection(),
@@ -76,6 +84,7 @@ export function createEditor(container, options) {
       commentLink,
       commentLinkClickHandler,
       linter(esLint(new eslint.Linter(), eslintConfig)),
+      ...extensions,
     ],
   });
 
@@ -91,9 +100,13 @@ export function createEditor(container, options) {
     window.addEventListener("openlink", onOpenLink);
   }
 
-  function dispatch(changes) {
+  function dispatch({changes, effects}) {
     // Mark this transaction as from runtime so that it will not be filtered out.
-    view.dispatch({changes, annotations: [Transaction.remote.of("runtime")]});
+    view.dispatch({
+      changes,
+      effects,
+      annotations: [Transaction.remote.of(true)],
+    });
   }
 
   function onChange(update) {

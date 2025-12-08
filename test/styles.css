@@ -1,0 +1,41 @@
+@import "tailwindcss";
+@import "../editor/index.css";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/spline-sans-mono";
+
+@theme {
+  --default-font-family: "Inter Variable";
+  --font-mono: "Spline Sans Mono Variable";
+}
+
+button {
+  cursor: pointer;
+}
+
+.cm-gutters {
+  background-color: white !important;
+  border-right: none !important;
+  padding-left: 8px !important;
+}
+
+.cm-editor.cm-focused {
+  outline: none !important;
+}
+
+/* Details/Summary styling for transaction viewer */
+details summary {
+  list-style: none;
+}
+
+details summary::-webkit-details-marker {
+  display: none;
+}
+
+details summary::marker {
+  display: none;
+}
+
+details[open] > summary {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}

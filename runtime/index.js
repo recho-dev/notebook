@@ -6,6 +6,8 @@ import {dispatch as d3Dispatch} from "d3-dispatch";
 import * as stdlib from "./stdlib/index.js";
 import {Inspector} from "./stdlib/inspect.js";
 import {OUTPUT_MARK, ERROR_MARK} from "./constant.js";
+import {BlockMetadata, blockMetadataEffect} from "../editor/blockMetadata.ts";
+import {IntervalTree} from "../lib/IntervalTree.ts";
 import {transpileRechoJavaScript} from "./transpile.js";
 import {table, getBorderCharacters} from "table";
 import {ButtonRegistry, makeButton} from "./controls/button.js";
@@ -132,9 +134,13 @@ export function createRuntime(initialCode) {
 
   const refresh = debounce((code) => {
     const changes = removeChanges(code);
+    const removedIntervals = IntervalTree.from(changes, ({from, to}, index) =>
+      from === to ? null : {interval: {low: from, high: to - 1}, data: index},
+    );
 
     // Process and format output for all execution nodes
     const nodes = Array.from(nodesByKey.values()).flat(Infinity);
+    const blocks = [];
     for (const node of nodes) {
       const start = node.start;
       const {values} = node.state;
@@ -145,6 +151,9 @@ export function createRuntime(initialCode) {
 
       // We need to remove the trailing newline for table.
       const format = withTable(groupValues) ? (...V) => table(...V).trimEnd() : columns;
+      
+      // The range of line numbers of output lines.
+      let outputRange = null;
 
       // If any value is an error, set the error flag.
       let error = false;
@@ -186,10 +195,31 @@ export function createRuntime(initialCode) {
         columnDefault: {alignment: "right"},
       });
       const prefixed = addPrefix(formatted, error ? ERROR_PREFIX : OUTPUT_PREFIX);
-      changes.push({from: start, insert: prefixed + "\n"});
-    }
 
-    dispatch(changes);
+      // Search for existing changes and update the inserted text if found.
+      const entry = removedIntervals.contains(start - 1);
+      if (entry === null) {
+        changes.push({from: start, insert: prefixed + "\n"});
+      } else {
+        const change = changes[entry.data];
+        change.insert = prefixed + "\n";
+        outputRange = {from: change.from, to: change.to};
+      }
+
+      // Add this block to the block metadata array.
+      const block = BlockMetadata(outputRange, {from: node.start, to: node.end}, node.state.attributes);
+      block.error = error;
+      blocks.push(block);
+
+      blocks.sort((a, b) => a.from - b.from);
+    }
+    
+    console.log("Dear blocks", blocks);
+    
+    // Attach block positions and attributes as effects to the transaction.
+    const effects = [blockMetadataEffect.of(blocks)];
+
+    dispatch(changes, effects);
   }, 0);
 
   function setCode(newCode) {
@@ -200,8 +230,8 @@ export function createRuntime(initialCode) {
     isRunning = value;
   }
 
-  function dispatch(changes) {
-    dispatcher.call("changes", null, changes);
+  function dispatch(changes, effects = []) {
+    dispatcher.call("changes", null, {changes, effects});
   }
 
   function onChanges(callback) {
@@ -233,6 +263,9 @@ export function createRuntime(initialCode) {
 
   function split(code) {
     try {
+      // The `parse` call here is actually unnecessary. Parsing the entire code
+      // is quite expensive. If we can perform the splitting operation through
+      // the editor's syntax tree, we can save the parsing here.
       return parse(code, {ecmaVersion: "latest", sourceType: "module"}).body;
     } catch (error) {
       console.error(error);
@@ -258,29 +291,44 @@ export function createRuntime(initialCode) {
     }
   }
 
+  /**
+   * Get the changes that remove the output lines from the code.
+   * @param {string} code The code to remove changes from.
+   * @returns {{from: number, to: number, insert: ""}[]} An array of changes.
+   */
   function removeChanges(code) {
-    const changes = [];
-
-    const oldOutputs = code
-      .split("\n")
-      .map((l, i) => [l, i])
-      .filter(([l]) => l.startsWith(OUTPUT_PREFIX) || l.startsWith(ERROR_PREFIX))
-      .map(([_, i]) => i);
-
-    const lineOf = (i) => {
-      const lines = code.split("\n");
-      const line = lines[i];
-      const from = lines.slice(0, i).join("\n").length;
-      const to = from + line.length;
-      return {from, to};
-    };
-
-    for (const i of oldOutputs) {
-      const line = lineOf(i);
-      const from = line.from;
-      const to = line.to + 1 > code.length ? line.to : line.to + 1;
-      changes.push({from, to, insert: ""});
+    function matchAt(index) {
+      return code.startsWith(OUTPUT_PREFIX, index) || code.startsWith(ERROR_PREFIX, index);
     }
+
+    /** Line number ranges (left-closed and right-open) of lines that contain output or error. */
+    const lineNumbers = matchAt(0) ? [{begin: 0, end: 1}] : [];
+    /**
+     * The index of the first character of each line.
+     * If the code ends with a newline, the last index is the length of the code.
+     */
+    const lineStartIndices = [0];
+    let nextNewlineIndex = code.indexOf("\n", 0);
+    while (0 <= nextNewlineIndex && nextNewlineIndex < code.length) {
+      lineStartIndices.push(nextNewlineIndex + 1);
+      if (matchAt(nextNewlineIndex + 1)) {
+        const lineNumber = lineStartIndices.length - 1;
+        if (lineNumbers.length > 0 && lineNumber === lineNumbers[lineNumbers.length - 1].end) {
+          // Extend the last line number range.
+          lineNumbers[lineNumbers.length - 1].end += 1;
+        } else {
+          // Append a new line number range.
+          lineNumbers.push({begin: lineNumber, end: lineNumber + 1});
+        }
+      }
+      nextNewlineIndex = code.indexOf("\n", nextNewlineIndex + 1);
+    }
+
+    const changes = lineNumbers.map(({begin, end}) => ({
+      from: lineStartIndices[begin],
+      to: lineStartIndices[end],
+      insert: "",
+    }));
 
     return changes;
   }
@@ -309,6 +357,12 @@ export function createRuntime(initialCode) {
 
     const nodes = split(code);
     if (!nodes) return;
+
+    console.group("rerun");
+    for (const node of nodes) {
+      console.log(`Node ${node.type} (${node.start}-${node.end})`);
+    }
+    console.groupEnd();
 
     for (const node of nodes) {
       const cell = code.slice(node.start, node.end);
@@ -361,7 +415,14 @@ export function createRuntime(initialCode) {
     for (const node of enter) {
       const vid = uid();
       const {inputs, body, outputs, error = null} = node.transpiled;
-      const state = {values: [], variables: [], error: null, syntaxError: error, doc: false};
+      const state = {
+        values: [],
+        variables: [],
+        error: null,
+        syntaxError: error,
+        doc: false,
+        attributes: Object.create(null),
+      };
       node.state = state;
       const v = main.variable(observer(state), {shadow: {}});
 
@@ -385,6 +446,10 @@ export function createRuntime(initialCode) {
           };
           const disposes = [];
           __echo__.clear = () => clear(state);
+          __echo__.set = function (key, value) {
+            state.attributes[key] = value;
+            return this;
+          };
           __echo__.dispose = (cb) => disposes.push(cb);
           __echo__.key = (k) => ((options.key = k), __echo__);
           __echo__.__dispose__ = () => disposes.forEach((cb) => cb());

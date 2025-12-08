@@ -25,9 +25,9 @@ export class ButtonRegistry {
    */
   register(id, callback) {
     // Check if this ID was already registered in the current execution
-    if (this.currentExecutionIds.has(id)) {
-      return false; // Duplicate in current execution
-    }
+    // if (this.currentExecutionIds.has(id)) {
+    //   return false; // Duplicate in current execution
+    // }
 
     this.callbackMap.set(id, callback);
     this.currentExecutionIds.add(id);
