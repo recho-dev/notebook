@@ -2,8 +2,8 @@
  * @title Binary Search
  * @author Bairui Su
  * @github pearmini
- * @created 2025-12-09
- * @label Algorithm, Beginner
+ * @created 2025-12-08
+ * @label Algorithm
  * @pull_request 200
  */
 
