@@ -4,6 +4,7 @@
  * @github pearmini
  * @created 2025-12-09
  * @label Algorithm, Beginner
+ * @pull_request 200
  */
 
 /**
