@@ -144,14 +144,20 @@ export function createRuntime(initialCode) {
     for (const node of nodes) {
       const start = node.start;
       const {values} = node.state;
-      if (!values.length) continue;
+      const sourceRange = {from: node.start, to: node.end};
+
+      if (!values.length) {
+        // Create a block even if there are no values.
+        blocks.push(BlockMetadata(null, sourceRange, node.state.attributes));
+        continue;
+      }
 
       // Group values by key. Each group is a row if using table, otherwise a column.
       const groupValues = groups(values, (v) => v.options?.key);
 
       // We need to remove the trailing newline for table.
       const format = withTable(groupValues) ? (...V) => table(...V).trimEnd() : columns;
-      
+
       // The range of line numbers of output lines.
       let outputRange = null;
 
@@ -213,9 +219,7 @@ export function createRuntime(initialCode) {
 
       blocks.sort((a, b) => a.from - b.from);
     }
-    
-    console.log("Dear blocks", blocks);
-    
+
     // Attach block positions and attributes as effects to the transaction.
     const effects = [blockMetadataEffect.of(blocks)];
 

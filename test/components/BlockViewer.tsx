@@ -166,8 +166,11 @@ function BlockItem({block, onLocate}: {block: BlockData; onLocate: (block: Block
           >
             <Locate className="w-3 h-3" />
           </button>
-          <span className="text-gray-500 text-xs">
-            {block.sourceFrom}-{block.sourceTo}
+          <span className="text-stone-600 text-xs font-mono">
+            <span className="font-semibold text-stone-500">[</span>
+            {block.sourceFrom},<span class="font-sans"> </span>
+            {block.sourceTo}
+            <span className="font-semibold text-stone-500">)</span>
           </span>
         </div>
       </summary>

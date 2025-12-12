@@ -25,7 +25,7 @@ function createWidgets(lines, blockMetadata, state) {
   const set1 = builder1.finish();
 
   // Build the range set for block attributes.
-  console.groupCollapsed("Decorations for block attributes");
+  // console.groupCollapsed("Decorations for block attributes");
   const builder2 = new RangeSetBuilder();
   // Add block attribute decorations
   for (const {output, attributes} of blockMetadata) {
@@ -33,7 +33,7 @@ function createWidgets(lines, blockMetadata, state) {
     // Apply decorations to each line in the block range
     const startLine = state.doc.lineAt(output.from);
     const endLine = state.doc.lineAt(output.to);
-    console.log(`Make lines from ${startLine.number} to ${endLine.number} compact`);
+    // console.log(`Make lines from ${startLine.number} to ${endLine.number} compact`);
     if (attributes.compact === true) {
       for (let lineNum = startLine.number; lineNum <= endLine.number; lineNum++) {
         const line = state.doc.line(lineNum);
@@ -42,7 +42,7 @@ function createWidgets(lines, blockMetadata, state) {
     }
   }
   const set2 = builder2.finish();
-  console.groupEnd();
+  // console.groupEnd();
 
   // Range sets are required to be sorted. Fortunately, they provide a method
   // to merge multiple range sets into a single sorted range set.
@@ -56,13 +56,13 @@ function createDebugMarks(blockMetadata, state) {
   for (const {output, source} of blockMetadata) {
     // Add red marks for output ranges
     if (output !== null && output.from < output.to) {
-      console.log(`Adding red decoration for output: ${output.from}-${output.to}`);
+      // console.log(`Adding red decoration for output: ${output.from}-${output.to}`);
       builder.add(output.from, output.to, debugRedDecoration);
     }
 
     // Add green marks for source ranges
     if (source.from < source.to) {
-      console.log(`Adding green decoration for source: ${source.from}-${source.to}`);
+      // console.log(`Adding green decoration for source: ${source.from}-${source.to}`);
       builder.add(source.from, source.to, debugGreenDecoration);
     }
   }
