@@ -36,7 +36,7 @@ export function detectBlocksWithinRange(tree: Tree, doc: Text, from: number, to:
   const blocks: BlockMetadata[] = [];
 
   // Collect all top-level statements and their preceding output/error comment lines
-  const statementRanges: Range[] = [];
+  const statementRanges: (Range & {name: string})[] = [];
   const outputRanges = new Map<number, Range>(); // Map statement position to output range
 
   tree.iterate({
@@ -53,7 +53,7 @@ export function detectBlocksWithinRange(tree: Tree, doc: Text, from: number, to:
           node.name === "ImportDeclaration" ||
           node.name === "Block"
         ) {
-          statementRanges.push({from: node.from, to: node.to});
+          statementRanges.push({from: node.from, to: node.to, name: node.name});
 
           const outputRange = extendOutputForward(doc, node.node);
           if (outputRange !== null) {
@@ -123,7 +123,7 @@ export function detectBlocksWithinRange(tree: Tree, doc: Text, from: number, to:
 
   // Build block metadata from statements
   for (const range of statementRanges) {
-    blocks.push(new BlockMetadata(outputRanges.get(range.from) ?? null, range));
+    blocks.push(new BlockMetadata(range.name, outputRanges.get(range.from) ?? null, range));
   }
 
   return blocks;

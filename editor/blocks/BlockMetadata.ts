@@ -4,6 +4,7 @@ export type Range = {from: number; to: number};
 
 export class BlockMetadata {
   public constructor(
+    public readonly name: string,
     public readonly output: Range | null,
     public readonly source: Range,
     public attributes: Record<string, unknown> = {},
@@ -32,6 +33,6 @@ export class BlockMetadata {
     };
     const attributes = this.attributes;
     const error = this.error;
-    return new BlockMetadata(output, source, attributes, error);
+    return new BlockMetadata(this.name, output, source, attributes, error);
   }
 }

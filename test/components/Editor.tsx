@@ -5,6 +5,7 @@ import {cn} from "../../app/cn.js";
 import type {ViewPlugin} from "@codemirror/view";
 
 interface EditorProps {
+  className?: string;
   code: string;
   transactionViewerPlugin?: ViewPlugin<any>;
   blockViewerPlugin?: ViewPlugin<any>;
@@ -25,7 +26,13 @@ const onDefaultError = debounce(() => {
   }, 100);
 }, 0);
 
-export function Editor({code, transactionViewerPlugin, blockViewerPlugin, onError = onDefaultError}: EditorProps) {
+export function Editor({
+  className,
+  code,
+  transactionViewerPlugin,
+  blockViewerPlugin,
+  onError = onDefaultError,
+}: EditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<any>(null);
   const [needRerun, setNeedRerun] = useState(false);
@@ -97,7 +104,7 @@ export function Editor({code, transactionViewerPlugin, blockViewerPlugin, onErro
   }
 
   return (
-    <div className={cn("w-full border border-gray-200 rounded-md overflow-hidden")}>
+    <div className={cn("w-full border border-gray-200 rounded-md overflow-hidden", className)}>
       <div className={cn("flex justify-between items-center px-3 py-2 border-b border-gray-200 bg-gray-50")}>
         <div className="text-sm font-medium text-gray-700">Editor</div>
         <div className={cn("flex items-center gap-3")}>

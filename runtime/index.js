@@ -149,7 +149,7 @@ export function createRuntime(initialCode) {
 
       if (!values.length) {
         // Create a block even if there are no values.
-        blocks.push(new BlockMetadata(null, sourceRange, node.state.attributes));
+        blocks.push(new BlockMetadata(node.type, sourceRange, node.state.attributes));
         continue;
       }
 
@@ -214,7 +214,7 @@ export function createRuntime(initialCode) {
       }
 
       // Add this block to the block metadata array.
-      const block = new BlockMetadata(outputRange, {from: node.start, to: node.end}, node.state.attributes);
+      const block = new BlockMetadata(node.type, outputRange, {from: node.start, to: node.end}, node.state.attributes);
       block.error = error;
       blocks.push(block);
 
@@ -363,7 +363,7 @@ export function createRuntime(initialCode) {
     const nodes = split(code);
     if (!nodes) return;
 
-    console.group("rerun");
+    console.groupCollapsed("rerun");
     for (const node of nodes) {
       console.log(`Node ${node.type} (${node.start}-${node.end})`);
     }

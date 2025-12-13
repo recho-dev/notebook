@@ -1,13 +1,13 @@
-import {useEffect, useState} from "react";
-import {useAtom} from "jotai";
-import {selectedTestAtom} from "../store";
-import {TestSelector} from "./TestSelector";
-import {Editor} from "./Editor";
-import {TransactionViewer} from "./TransactionViewer";
-import {BlockViewer} from "./BlockViewer";
-import {ResizableSplit} from "./ResizableSplit";
-import * as testSamples from "../js/index.js";
 import type {ViewPlugin} from "@codemirror/view";
+import {useAtom} from "jotai";
+import {useEffect, useState} from "react";
+import {Panel, PanelGroup, PanelResizeHandle} from "react-resizable-panels";
+import * as testSamples from "../js/index.js";
+import {selectedTestAtom} from "../store.ts";
+import {BlockViewer} from "./BlockViewer.tsx";
+import {Editor} from "./Editor.tsx";
+import {TestSelector} from "./TestSelector.tsx";
+import {TransactionViewer} from "./TransactionViewer.tsx";
 
 export function App() {
   const [selectedTest, setSelectedTest] = useAtom(selectedTestAtom);
@@ -36,27 +36,31 @@ export function App() {
         </div>
       </header>
 
-      {/* Main content */}
-      <main className="flex-1 flex overflow-hidden">
-        {/* Editor panel */}
-        <div className="flex-1 p-4 overflow-auto">
-          <Editor
-            key={selectedTest}
-            code={currentCode}
-            transactionViewerPlugin={transactionViewerPlugin}
-            blockViewerPlugin={blockViewerPlugin}
-          />
-        </div>
-
-        {/* Sidebar with blocks and transactions */}
-        <aside className="w-96 bg-white overflow-hidden">
-          <ResizableSplit
-            top={<BlockViewer onPluginCreate={setBlockViewerPlugin} />}
-            bottom={<TransactionViewer onPluginCreate={setTransactionViewerPlugin} />}
-            defaultRatio={0.5}
-          />
-        </aside>
-      </main>
+      <PanelGroup direction="horizontal">
+        <Panel minSize={25} defaultSize={75}>
+          <div className="w-full h-full p-4 overflow-auto">
+            <Editor
+              className="shadow-xl"
+              key={selectedTest}
+              code={currentCode}
+              transactionViewerPlugin={transactionViewerPlugin}
+              blockViewerPlugin={blockViewerPlugin}
+            />
+          </div>
+        </Panel>
+        <PanelResizeHandle />
+        <Panel minSize={10}>
+          <PanelGroup direction="vertical">
+            <Panel minSize={10}>
+              <BlockViewer onPluginCreate={setBlockViewerPlugin} />
+            </Panel>
+            <PanelResizeHandle />
+            <Panel minSize={10}>
+              <TransactionViewer onPluginCreate={setTransactionViewerPlugin} />
+            </Panel>
+          </PanelGroup>
+        </Panel>
+      </PanelGroup>
     </div>
   );
 }
