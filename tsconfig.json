@@ -10,11 +10,9 @@
     "target": "esnext",
     "types": [],
     "moduleResolution": "nodenext",
+    "allowImportingTsExtensions": true,
     // For nodejs:
-    "lib": [
-      "esnext",
-      "DOM"
-    ],
+    "lib": ["esnext", "DOM"],
     // "types": ["node"],
     // and npm install -D @types/node
     // Other Outputs
@@ -50,13 +48,6 @@
       }
     ]
   },
-  "include": [
-    "next-env.d.ts",
-    ".next/types/**/*.ts",
-    "**/*.ts",
-    "**/*.tsx"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
 }

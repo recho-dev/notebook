@@ -6,7 +6,8 @@ import {dispatch as d3Dispatch} from "d3-dispatch";
 import * as stdlib from "./stdlib/index.js";
 import {Inspector} from "./stdlib/inspect.js";
 import {OUTPUT_MARK, ERROR_MARK} from "./constant.js";
-import {BlockMetadata, blockMetadataEffect} from "../editor/blockMetadata.ts";
+import {BlockMetadata} from "../editor/blocks/BlockMetadata.ts";
+import {blockMetadataEffect} from "../editor/blockMetadata.ts";
 import {IntervalTree} from "../lib/IntervalTree.ts";
 import {transpileRechoJavaScript} from "./transpile.js";
 import {table, getBorderCharacters} from "table";
@@ -148,7 +149,7 @@ export function createRuntime(initialCode) {
 
       if (!values.length) {
         // Create a block even if there are no values.
-        blocks.push(BlockMetadata(null, sourceRange, node.state.attributes));
+        blocks.push(new BlockMetadata(null, sourceRange, node.state.attributes));
         continue;
       }
 
@@ -213,7 +214,7 @@ export function createRuntime(initialCode) {
       }
 
       // Add this block to the block metadata array.
-      const block = BlockMetadata(outputRange, {from: node.start, to: node.end}, node.state.attributes);
+      const block = new BlockMetadata(outputRange, {from: node.start, to: node.end}, node.state.attributes);
       block.error = error;
       blocks.push(block);
 

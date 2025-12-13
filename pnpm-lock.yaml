@@ -44,6 +44,9 @@ importers:
       '@lezer/highlight':
         specifier: ^1.2.2
         version: 1.2.2
+      '@lezer/javascript':
+        specifier: ^1.5.4
+        version: 1.5.4
       '@observablehq/notebook-kit':
         specifier: ^1.4.1
         version: 1.4.1(@types/markdown-it@14.1.2)(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.1)

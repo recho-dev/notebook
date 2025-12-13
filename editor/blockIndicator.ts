@@ -1,5 +1,6 @@
 import {GutterMarker, gutter} from "@codemirror/view";
-import {BlockMetadata, blockMetadataField} from "./blockMetadata";
+import {BlockMetadata} from "./blocks/BlockMetadata.js";
+import {blockMetadataField} from "./blockMetadata.ts";
 
 export class BlockIndicator extends GutterMarker {
   constructor(private className: string) {

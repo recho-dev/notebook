@@ -11,7 +11,7 @@ import * as eslint from "eslint-linter-browserify";
 import {createRuntime} from "../runtime/index.js";
 import {outputDecoration, debugDecoration} from "./decoration.js";
 import {outputLines} from "./outputLines.js";
-import {blockMetadataExtension, blockMetadataEffect} from "./blockMetadata.ts";
+import {blockMetadataExtension} from "./blockMetadata.ts";
 // import {outputProtection} from "./protection.js";
 import {dispatch as d3Dispatch} from "d3-dispatch";
 import {controls} from "./controls/index.js";
