@@ -5,6 +5,7 @@ import {detectBlocksWithinRange} from "../lib/blocks/detect.ts";
 import {syntaxTree} from "@codemirror/language";
 import {MaxHeap} from "../lib/containers/heap.ts";
 import {type Range, BlockMetadata} from "./blocks/BlockMetadata.ts";
+import {deduplicateNaive} from "./blocks/dedup.ts";
 
 /**
  * Update block metadata according to the given transaction.
@@ -129,13 +130,10 @@ function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): BlockMetadat
 
   console.log("New blocks:", newBlocks);
 
-  // Lastly, we will merge blocks. We have elaborated on why there might exist
-  // overlapping blocks. Here, we employs a segment tree.
-
-  // mergeOverlappingBlocks(oldBlocks);
+  const deduplicatedBlocks = deduplicateNaive(newBlocks);
 
   console.groupEnd();
-  return newBlocks;
+  return deduplicatedBlocks;
 }
 
 export const blockMetadataEffect = StateEffect.define<BlockMetadata[]>();
@@ -163,7 +161,7 @@ export const blockMetadataField = StateField.define<BlockMetadata[]>({
       // Otherwise, we need to update the block attributes according to the
       // metadata sent from the runtime. Most importantly, we need to translate
       // the position of each block after the changes has been made.
-      // TODO: Does this really happen???
+      console.log(blocksFromEffect);
       return blocksFromEffect.map((block) => block.map(tr));
     }
   },

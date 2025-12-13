@@ -23,13 +23,13 @@ export class BlockMetadata {
     if (!tr.docChanged) return this;
     const output = this.output
       ? {
-          from: tr.changes.mapPos(this.output.from, 1),
-          to: tr.changes.mapPos(this.output.to, -1),
+          from: tr.changes.mapPos(this.output.from, -1),
+          to: tr.changes.mapPos(this.output.to, 1),
         }
       : null;
     const source = {
       from: tr.changes.mapPos(this.source.from, 1),
-      to: tr.changes.mapPos(this.source.to, -1),
+      to: tr.changes.mapPos(this.source.to, 1),
     };
     const attributes = this.attributes;
     const error = this.error;

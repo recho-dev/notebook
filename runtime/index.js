@@ -135,6 +135,8 @@ export function createRuntime(initialCode) {
 
   const refresh = debounce((code) => {
     const changes = removeChanges(code);
+
+    // Construct an interval tree containing the ranges to be deleted.
     const removedIntervals = IntervalTree.from(changes, ({from, to}, index) =>
       from === to ? null : {interval: {low: from, high: to - 1}, data: index},
     );
@@ -149,7 +151,7 @@ export function createRuntime(initialCode) {
 
       if (!values.length) {
         // Create a block even if there are no values.
-        blocks.push(new BlockMetadata(node.type, sourceRange, node.state.attributes));
+        blocks.push(new BlockMetadata(node.type, null, sourceRange, node.state.attributes));
         continue;
       }
 
@@ -158,9 +160,6 @@ export function createRuntime(initialCode) {
 
       // We need to remove the trailing newline for table.
       const format = withTable(groupValues) ? (...V) => table(...V).trimEnd() : columns;
-
-      // The range of line numbers of output lines.
-      let outputRange = null;
 
       // If any value is an error, set the error flag.
       let error = false;
@@ -203,10 +202,16 @@ export function createRuntime(initialCode) {
       });
       const prefixed = addPrefix(formatted, error ? ERROR_PREFIX : OUTPUT_PREFIX);
 
+      // The range of line numbers of output lines.
+      let outputRange = null;
+
       // Search for existing changes and update the inserted text if found.
       const entry = removedIntervals.contains(start - 1);
+
+      // Entry not found. This is a new output.
       if (entry === null) {
         changes.push({from: start, insert: prefixed + "\n"});
+        outputRange = {from: start, to: start};
       } else {
         const change = changes[entry.data];
         change.insert = prefixed + "\n";

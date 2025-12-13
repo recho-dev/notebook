@@ -1,4 +1,4 @@
-import {BlockMetadata} from "./BlockMetadata.js";
+import {BlockMetadata} from "./BlockMetadata.ts";
 
 export interface Interval {
   from: number;
