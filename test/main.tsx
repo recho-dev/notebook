@@ -1,7 +1,7 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import { Provider as JotaiProvider } from "jotai";
-import { App } from "./components/App";
+import {StrictMode} from "react";
+import {createRoot} from "react-dom/client";
+import {Provider as JotaiProvider} from "jotai";
+import {App} from "./components/App.tsx";
 import "./styles.css";
 
 const root = document.getElementById("root");
@@ -14,5 +14,5 @@ createRoot(root).render(
     <JotaiProvider>
       <App />
     </JotaiProvider>
-  </StrictMode>
+  </StrictMode>,
 );

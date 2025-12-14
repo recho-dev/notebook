@@ -113,7 +113,7 @@ export function TransactionItem({transaction: tr}: {transaction: TransactionData
             {tr.blockMetadata ? (
               <div className="p-1 bg-purple-50 rounded">
                 <div className="font-medium">blockMetadataEffect ({tr.blockMetadata.length} blocks)</div>
-                {tr.blockMetadata.map((block: any, blockIdx: number) => (
+                {tr.blockMetadata.map((block, blockIdx) => (
                   <div key={blockIdx} className="ml-2 mt-1 text-xs">
                     <div className="font-medium">Block {blockIdx + 1}:</div>
                     <div>

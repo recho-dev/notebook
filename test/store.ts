@@ -1,10 +1,10 @@
-import { atom } from "jotai";
+import {atom} from "jotai";
 
 // Types
 export interface Transaction {
   time: number;
   docChanged: boolean;
-  selection: { from: number; to: number } | null;
+  selection: {from: number; to: number} | null;
   effects: string[];
   annotations: string[];
 }
@@ -23,7 +23,7 @@ export const autoScrollAtom = atom<boolean>(true);
 export function createTransaction(data: {
   time: number;
   docChanged: boolean;
-  selection: { from: number; to: number } | null;
+  selection: {from: number; to: number} | null;
   effects: string[];
   annotations: string[];
 }): Transaction {
@@ -36,10 +36,7 @@ export function createTransaction(data: {
   };
 }
 
-export function addTransaction(
-  history: Transaction[],
-  transaction: Transaction
-): Transaction[] {
+export function addTransaction(history: Transaction[], transaction: Transaction): Transaction[] {
   const newHistory = [...history, transaction];
   // Keep max 100 transactions
   if (newHistory.length > 100) {

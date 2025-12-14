@@ -1,4 +1,4 @@
-import {CircleXIcon, Locate, SquareTerminalIcon, TerminalIcon} from "lucide-react";
+import {CircleXIcon, Locate, SquareTerminalIcon} from "lucide-react";
 import {useState} from "react";
 import type {BlockData} from "./types.ts";
 

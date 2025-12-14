@@ -1,4 +1,4 @@
-import type {ViewPlugin} from "@codemirror/view";
+import type {PluginValue, ViewPlugin} from "@codemirror/view";
 import {useAtom} from "jotai";
 import {useEffect, useState} from "react";
 import {Panel, PanelGroup, PanelResizeHandle} from "react-resizable-panels";
@@ -11,8 +11,8 @@ import {TransactionViewer} from "./TransactionViewer.tsx";
 
 export function App() {
   const [selectedTest, setSelectedTest] = useAtom(selectedTestAtom);
-  const [transactionViewerPlugin, setTransactionViewerPlugin] = useState<ViewPlugin<any> | undefined>();
-  const [blockViewerPlugin, setBlockViewerPlugin] = useState<ViewPlugin<any> | undefined>();
+  const [transactionViewerPlugin, setTransactionViewerPlugin] = useState<ViewPlugin<PluginValue> | undefined>();
+  const [blockViewerPlugin, setBlockViewerPlugin] = useState<ViewPlugin<PluginValue> | undefined>();
 
   // Initialize from URL on mount
   useEffect(() => {

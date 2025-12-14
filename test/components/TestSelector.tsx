@@ -1,5 +1,5 @@
-import { useAtom } from "jotai";
-import { selectedTestAtom, getTestSampleName } from "../store";
+import {useAtom} from "jotai";
+import {selectedTestAtom, getTestSampleName} from "../store.ts";
 import * as testSamples from "../js/index.js";
 
 export function TestSelector() {

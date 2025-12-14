@@ -1,12 +1,12 @@
-import {EditorSelection} from "@codemirror/state";
-import {EditorView, ViewPlugin} from "@codemirror/view";
+import {EditorSelection, type Transaction} from "@codemirror/state";
+import {EditorView, ViewPlugin, ViewUpdate, type PluginValue} from "@codemirror/view";
 import {useEffect, useRef, useState} from "react";
-import {blockMetadataField} from "../../editor/blockMetadata.ts";
+import {blockMetadataEffect, blockMetadataField} from "../../editor/blockMetadata.ts";
 import type {BlockData} from "./types.ts";
 import {BlockItem} from "./BlockItem.tsx";
 
 interface BlockViewerProps {
-  onPluginCreate: (plugin: ViewPlugin<any>) => void;
+  onPluginCreate: (plugin: ViewPlugin<PluginValue>) => void;
 }
 
 export function BlockViewer({onPluginCreate}: BlockViewerProps) {
@@ -23,11 +23,11 @@ export function BlockViewer({onPluginCreate}: BlockViewerProps) {
       listeners.forEach((fn) => fn([...currentBlocks]));
     }
 
-    function extractBlockData(view: any): BlockData[] {
+    function extractBlockData(view: EditorView): BlockData[] {
       const blockMetadata = view.state.field(blockMetadataField, false);
       if (!blockMetadata) return [];
 
-      return blockMetadata.map((block: any, index: number) => ({
+      return blockMetadata.map((block, index) => ({
         name: block.name,
         index,
         sourceFrom: block.source.from,
@@ -41,17 +41,17 @@ export function BlockViewer({onPluginCreate}: BlockViewerProps) {
 
     const plugin = ViewPlugin.fromClass(
       class {
-        constructor(view: any) {
+        constructor(view: EditorView) {
           viewRef.current = view;
           currentBlocks = extractBlockData(view);
           notifyListeners();
         }
 
-        update(update: any) {
+        update(update: ViewUpdate) {
           viewRef.current = update.view;
           if (
             update.docChanged ||
-            update.transactions.some((tr: any) => tr.effects.some((e: any) => e.is(blockMetadataField.init)))
+            update.transactions.some((tr: Transaction) => tr.effects.some((effect) => effect.is(blockMetadataEffect)))
           ) {
             currentBlocks = extractBlockData(update.view);
             notifyListeners();

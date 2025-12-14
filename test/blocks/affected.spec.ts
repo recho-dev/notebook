@@ -71,7 +71,6 @@ describe("findAffectedBlockRange", () => {
         {from: 5, to: 10},
         {from: 12, to: 15},
       ];
-      const N = blocks.length;
       expect(findAffectedBlockRange(blocks, 15, 15)).toStrictEqual([1, null]);
       expect(findAffectedBlockRange(blocks, 16, 16)).toStrictEqual([1, null]);
     });
@@ -215,10 +214,6 @@ describe("findAffectedBlockRange", () => {
     });
   });
 
-  function overlaps(m: {from: number; to: number}, n: {from: number; to: number}): boolean {
-    return m.from <= n.to && n.from < m.to;
-  }
-
   type Location =
     | {type: "contained"; index: number}
     | {
@@ -269,7 +264,7 @@ describe("findAffectedBlockRange", () => {
         // Test all valid ranges [from, to) where from <= to
         for (let from = 0; from <= maxPos + 1; from++) {
           for (let to = from; to <= maxPos + 1; to++) {
-            let fromLocation: Location = locateNaive(blocks, from);
+            const fromLocation = locateNaive(blocks, from);
             let expected: [number | null, number | null];
             if (from === to) {
               switch (fromLocation.type) {
@@ -293,7 +288,7 @@ describe("findAffectedBlockRange", () => {
                   break;
               }
             } else {
-              let toLocation: Location = locateNaive(blocks, to - 1);
+              const toLocation = locateNaive(blocks, to - 1);
               let fromIndex: number | null;
               switch (fromLocation.type) {
                 case "contained":

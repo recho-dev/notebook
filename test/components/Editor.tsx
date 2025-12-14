@@ -2,13 +2,13 @@ import {useEffect, useRef, useState} from "react";
 import {Play, Square, RefreshCcw} from "lucide-react";
 import {createEditor} from "../../editor/index.js";
 import {cn} from "../../app/cn.js";
-import type {ViewPlugin} from "@codemirror/view";
+import type {PluginValue, ViewPlugin} from "@codemirror/view";
 
 interface EditorProps {
   className?: string;
   code: string;
-  transactionViewerPlugin?: ViewPlugin<any>;
-  blockViewerPlugin?: ViewPlugin<any>;
+  transactionViewerPlugin?: ViewPlugin<PluginValue>;
+  blockViewerPlugin?: ViewPlugin<PluginValue>;
   onError?: (error: Error) => void;
 }
 
@@ -26,6 +26,13 @@ const onDefaultError = debounce(() => {
   }, 100);
 }, 0);
 
+type EditorRuntime = {
+  run: () => void;
+  stop: () => void;
+  on: (event: unknown, callback: () => void) => unknown;
+  destroy: () => void;
+};
+
 export function Editor({
   className,
   code,
@@ -34,7 +41,7 @@ export function Editor({
   onError = onDefaultError,
 }: EditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const editorRef = useRef<any>(null);
+  const editorRef = useRef<EditorRuntime>(null);
   const [needRerun, setNeedRerun] = useState(false);
 
   useEffect(() => {

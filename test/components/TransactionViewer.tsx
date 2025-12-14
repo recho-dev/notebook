@@ -90,7 +90,7 @@ export function TransactionViewer({onPluginCreate}: TransactionViewerProps) {
 
     const plugin = ViewPlugin.fromClass(
       class {
-        constructor(view: any) {
+        constructor() {
           notifyListeners();
         }
 
