@@ -149,18 +149,11 @@ export function TransactionViewer({onPluginCreate}: TransactionViewerProps) {
         if (currentGroup && currentGroup.type === "selection") {
           currentGroup.transactions!.push(tr);
         } else {
-          currentGroup = {
-            type: "selection",
-            transactions: [tr],
-          };
+          currentGroup = {type: "selection", transactions: [tr]};
           groups.push(currentGroup);
         }
       } else {
-        groups.push({
-          type: "individual",
-          transaction: tr,
-          transactions: undefined,
-        });
+        groups.push({type: "individual", transaction: tr});
         currentGroup = null;
       }
     }
@@ -203,11 +196,11 @@ export function TransactionViewer({onPluginCreate}: TransactionViewerProps) {
         {transactions.length === 0 ? (
           <div className="text-sm text-gray-500 text-center py-4">No transactions yet</div>
         ) : (
-          groupedTransactions.map((group, idx) =>
+          groupedTransactions.map((group) =>
             group.type === "individual" ? (
-              <TransactionItem key={`tr-${group.transaction!.index}`} transaction={group.transaction!} />
+              <TransactionItem key={`tr-${group.transaction.timestamp}`} transaction={group.transaction!} />
             ) : (
-              <SelectionGroupItem key={`group-${idx}`} transactions={group.transactions!} />
+              <SelectionGroupItem key={`group-${group.transactions[0].timestamp}`} transactions={group.transactions!} />
             ),
           )
         )}

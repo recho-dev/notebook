@@ -3,7 +3,8 @@ import type {TransactionData} from "./types.ts";
 import {ObjectInspector} from "react-inspector";
 import {cn} from "../../app/cn.js";
 import {UserEvent} from "./UserEvent.tsx";
-import {PencilLineIcon, RefreshCcw} from "lucide-react";
+import {PencilLineIcon} from "lucide-react";
+import {Remote} from "./Remote.tsx";
 
 export function TransactionItem({transaction: tr}: {transaction: TransactionData}) {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,7 +32,7 @@ export function TransactionItem({transaction: tr}: {transaction: TransactionData
   if (typeof tr.annotations.userEvent === "string") {
     summaryNodes.push(<UserEvent key="userEvent" userEvent={tr.annotations.userEvent} />);
   } else if (tr.annotations.remote) {
-    summaryNodes.push(<RefreshCcw key="docChanged" className="w-4 h-4 text-blue-500" />);
+    summaryNodes.push(<Remote key="remote" remoteValue={tr.annotations.remote} />);
   }
   if (tr.docChanged) {
     summaryNodes.push(<PencilLineIcon key="docChanged" className="w-4 h-4 text-blue-500" />);

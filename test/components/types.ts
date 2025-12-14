@@ -46,11 +46,15 @@ export interface TransactionData {
   blockMetadata: BlockMetadata[] | null;
 }
 
-export interface TransactionGroup {
-  type: "individual" | "selection";
-  transaction?: TransactionData;
-  transactions?: TransactionData[];
-}
+export type TransactionGroup =
+  | {
+      type: "individual";
+      transaction: TransactionData;
+    }
+  | {
+      type: "selection";
+      transactions: TransactionData[];
+    };
 
 export interface TransactionViewerProps {
   onPluginCreate: (plugin: ViewPlugin<PluginValue>) => void;
