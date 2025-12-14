@@ -2,8 +2,8 @@ import {useState, type ReactNode} from "react";
 import type {TransactionData} from "./types.ts";
 import {ObjectInspector} from "react-inspector";
 import {cn} from "../../app/cn.js";
-import {DeleteIcon, KeyboardIcon} from "lucide-react";
 import {UserEvent} from "./UserEvent.tsx";
+import {PencilLineIcon, RefreshCcw} from "lucide-react";
 
 export function TransactionItem({transaction: tr}: {transaction: TransactionData}) {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,17 +22,19 @@ export function TransactionItem({transaction: tr}: {transaction: TransactionData
     );
   };
 
-  const summaryNodes: ReactNode[] = [<span className="font-mono font-medium">#{tr.index}</span>];
+  const summaryNodes: ReactNode[] = [
+    <span key="index" className="font-mono font-medium">
+      #{tr.index}
+    </span>,
+  ];
 
-  let summaryLeft = `#${tr.index.toString().padStart(3, "0")}`;
   if (typeof tr.annotations.userEvent === "string") {
-    summaryLeft += ` [${tr.annotations.userEvent}]`;
-    summaryNodes.push(<UserEvent userEvent={tr.annotations.userEvent} />);
+    summaryNodes.push(<UserEvent key="userEvent" userEvent={tr.annotations.userEvent} />);
   } else if (tr.annotations.remote) {
-    summaryLeft += ` [remote: ${JSON.stringify(tr.annotations.remote)}]`;
+    summaryNodes.push(<RefreshCcw key="docChanged" className="w-4 h-4 text-blue-500" />);
   }
   if (tr.docChanged) {
-    summaryLeft += ` 📝`;
+    summaryNodes.push(<PencilLineIcon key="docChanged" className="w-4 h-4 text-blue-500" />);
   }
 
   return (

@@ -108,7 +108,7 @@ export function detectBlocksWithinRange(tree: Tree, doc: Text, from: number, to:
 
               // Find the next statement after these output lines
               // The output belongs to the statement immediately following it
-              let nextStatementLine = currentLineNum;
+              const nextStatementLine = currentLineNum;
               if (nextStatementLine <= totalLines) {
                 const nextStmtLine = doc.line(nextStatementLine);
                 // Store this output range to be associated with the next statement

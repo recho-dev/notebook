@@ -3,10 +3,17 @@ import {defineConfig} from "eslint/config";
 import eslintConfigPrettier from "eslint-config-prettier/flat";
 import reactPlugin from "eslint-plugin-react";
 import hooksPlugin from "eslint-plugin-react-hooks";
+import tseslint from "typescript-eslint";
 
 export default defineConfig([
   {
-    files: ["editor/**/*.js", "runtime/**/*.js", "test/**/*.js", "app/**/*.js", "app/**/*.jsx", "lib/**/*.js"],
+    files: [
+      "editor/**/*.{js,ts,tsx}",
+      "runtime/**/*.{js,ts}",
+      "test/**/*.{js,ts,tsx}",
+      "app/**/*.{js,jsx,ts,tsx}",
+      "lib/**/*.{js,ts}",
+    ],
     plugins: {
       react: reactPlugin,
       "react-hooks": hooksPlugin,
@@ -34,6 +41,11 @@ export default defineConfig([
       "spaced-comment": ["error", "always"],
     },
   },
+  // TypeScript-specific configuration
+  ...tseslint.configs.recommended.map((config) => ({
+    ...config,
+    files: ["editor/**/*.{ts,tsx}", "runtime/**/*.ts", "test/**/*.{ts,tsx}", "app/**/*.{ts,tsx}", "lib/**/*.ts"],
+  })),
   {
     ignores: ["**/*.recho.js", "test/output/**/*"],
   },

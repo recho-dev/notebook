@@ -1,4 +1,4 @@
-import type {ViewPlugin} from "@codemirror/view";
+import type {PluginValue, ViewPlugin} from "@codemirror/view";
 import type {BlockMetadata} from "../../editor/blocks/BlockMetadata.ts";
 
 export interface BlockData {
@@ -9,7 +9,7 @@ export interface BlockData {
   outputFrom: number | null;
   outputTo: number | null;
   hasError: boolean;
-  attributes: Record<string, any>;
+  attributes: Record<string, unknown>;
 }
 
 export interface TransactionRange {
@@ -30,7 +30,7 @@ export interface TransactionChange {
 }
 
 export interface TransactionEffect {
-  value: any;
+  value: unknown;
   type: string;
 }
 
@@ -38,7 +38,7 @@ export interface TransactionData {
   index: number;
   docChanged: boolean;
   changes: TransactionChange[];
-  annotations: Record<string, any>;
+  annotations: Record<string, unknown>;
   effects: TransactionEffect[];
   selection: TransactionRange[];
   scrollIntoView?: boolean;
@@ -53,5 +53,5 @@ export interface TransactionGroup {
 }
 
 export interface TransactionViewerProps {
-  onPluginCreate: (plugin: ViewPlugin<any>) => void;
+  onPluginCreate: (plugin: ViewPlugin<PluginValue>) => void;
 }

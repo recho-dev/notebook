@@ -2,9 +2,8 @@ import {useState, useEffect, useRef, useMemo} from "react";
 import {ViewPlugin, ViewUpdate} from "@codemirror/view";
 import {Transaction as Tr} from "@codemirror/state";
 import {blockMetadataEffect} from "../../editor/blockMetadata.ts";
-import {cn} from "../../app/cn.js";
 import {SelectionGroupItem} from "./SelectionGroupItem.tsx";
-import type {TransactionEffect, TransactionData, TransactionGroup, TransactionViewerProps} from "./types.ts";
+import type {TransactionData, TransactionGroup, TransactionViewerProps} from "./types.ts";
 import {TransactionItem} from "./TransactionItem.tsx";
 
 // Maximum number of transactions to keep in history

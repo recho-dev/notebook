@@ -25,12 +25,9 @@ export function findAdjacentBlocks(
     // boundary is exclusive, i.e., the range is empty when `left === right`.
     let left = 0;
     let right = blocks.length;
-    let DEBUG_hasEnteredLoop = false;
 
     // When the range is non-empty.
-    loop: while (left < right) {
-      DEBUG_hasEnteredLoop = true;
-
+    while (left < right) {
       const middle = (left + right) >>> 1;
       const pivot = blocks[middle]!;
 
@@ -40,7 +37,6 @@ export function findAdjacentBlocks(
           return [middle - 1, middle];
         } else {
           right = middle;
-          continue loop;
         }
       } else if (pivot.to <= pos) {
         // We should move to the right sub-range [middle, right).
@@ -54,9 +50,6 @@ export function findAdjacentBlocks(
         return middle;
       }
     }
-
-    // We can only reach here if we haven't enter the loop.
-    // console.assert(!DEBUG_hasEnteredLoop, "Did not return in the loop.");
 
     return null;
   } finally {

@@ -1,10 +1,9 @@
 import {StateField, StateEffect, Transaction} from "@codemirror/state";
-import {mergeOverlappingBlocks} from "./blocks/deduplication.ts";
 import {blockRangeLength, findAffectedBlockRange, getOnlyOneBlock} from "../lib/blocks.ts";
 import {detectBlocksWithinRange} from "../lib/blocks/detect.ts";
 import {syntaxTree} from "@codemirror/language";
 import {MaxHeap} from "../lib/containers/heap.ts";
-import {type Range, BlockMetadata} from "./blocks/BlockMetadata.ts";
+import {BlockMetadata} from "./blocks/BlockMetadata.ts";
 import {deduplicateNaive} from "./blocks/dedup.ts";
 
 /**

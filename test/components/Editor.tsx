@@ -12,9 +12,9 @@ interface EditorProps {
   onError?: (error: Error) => void;
 }
 
-function debounce(fn: (...args: any[]) => void, delay = 0) {
+function debounce<Args extends unknown[]>(fn: (...args: Args) => void, delay = 0) {
   let timeout: ReturnType<typeof setTimeout>;
-  return (...args: any[]) => {
+  return (...args: Args) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => fn(...args), delay);
   };
