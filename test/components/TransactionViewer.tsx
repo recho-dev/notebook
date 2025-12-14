@@ -1,6 +1,6 @@
 import {useState, useEffect, useRef, useMemo} from "react";
-import {ViewPlugin} from "@codemirror/view";
-import {Transaction as CMTransaction} from "@codemirror/state";
+import {ViewPlugin, ViewUpdate} from "@codemirror/view";
+import {Transaction as Tr} from "@codemirror/state";
 import {blockMetadataEffect} from "../../editor/blockMetadata.ts";
 import {cn} from "../../app/cn.js";
 import {SelectionGroupItem} from "./SelectionGroupItem.tsx";
@@ -9,6 +9,70 @@ import {TransactionItem} from "./TransactionItem.tsx";
 
 // Maximum number of transactions to keep in history
 const MAX_HISTORY = 100;
+
+function extractTransactionData(tr: Tr, index: number): TransactionData {
+  const data: TransactionData = {
+    index,
+    docChanged: tr.docChanged,
+    changes: [],
+    annotations: {},
+    effects: [],
+    selection: tr.state.selection.ranges.map((r) => ({
+      from: r.from,
+      to: r.to,
+      anchor: r.anchor,
+      head: r.head,
+    })),
+    scrollIntoView: tr.scrollIntoView,
+    timestamp: Date.now(),
+    blockMetadata: null,
+  };
+
+  // Extract changes
+  tr.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
+    const fromLine = tr.startState.doc.lineAt(fromA);
+    const toLine = tr.startState.doc.lineAt(toA);
+
+    data.changes.push({
+      from: fromA,
+      to: toA,
+      fromLine: fromLine.number,
+      fromCol: fromA - fromLine.from,
+      toLine: toLine.number,
+      toCol: toA - toLine.from,
+      insert: inserted.toString(),
+    });
+  });
+
+  // Extract annotations
+  const userEvent = tr.annotation(Tr.userEvent);
+  if (userEvent !== undefined) {
+    data.annotations.userEvent = userEvent;
+  }
+
+  const remote = tr.annotation(Tr.remote);
+  if (remote !== undefined) {
+    data.annotations.remote = remote;
+  }
+
+  const addToHistory = tr.annotation(Tr.addToHistory);
+  if (addToHistory !== undefined) {
+    data.annotations.addToHistory = addToHistory;
+  }
+
+  for (const effect of tr.effects) {
+    if (effect.is(blockMetadataEffect)) {
+      data.blockMetadata = Array.from(effect.value);
+    } else {
+      data.effects.push({
+        value: effect.value,
+        type: "StateEffect",
+      });
+    }
+  }
+
+  return data;
+}
 
 export function TransactionViewer({onPluginCreate}: TransactionViewerProps) {
   const [transactions, setTransactions] = useState<TransactionData[]>([]);
@@ -25,102 +89,14 @@ export function TransactionViewer({onPluginCreate}: TransactionViewerProps) {
       listeners.forEach((fn) => fn([...transactionsList]));
     }
 
-    function extractTransactionData(tr: CMTransaction, index: number): TransactionData {
-      const data: TransactionData = {
-        index,
-        docChanged: tr.docChanged,
-        changes: [],
-        annotations: {},
-        effects: [],
-        selection: tr.state.selection.ranges.map((r) => ({
-          from: r.from,
-          to: r.to,
-          anchor: r.anchor,
-          head: r.head,
-        })),
-        scrollIntoView: tr.scrollIntoView,
-        timestamp: Date.now(),
-      };
-
-      // Extract changes
-      tr.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
-        const fromLine = tr.startState.doc.lineAt(fromA);
-        const toLine = tr.startState.doc.lineAt(toA);
-
-        data.changes.push({
-          from: fromA,
-          to: toA,
-          fromLine: fromLine.number,
-          fromCol: fromA - fromLine.from,
-          toLine: toLine.number,
-          toCol: toA - toLine.from,
-          insert: inserted.toString(),
-        });
-      });
-
-      // Extract annotations
-      const userEvent = tr.annotation(CMTransaction.userEvent);
-      if (userEvent !== undefined) {
-        data.annotations.userEvent = userEvent;
-      }
-
-      const remote = tr.annotation(CMTransaction.remote);
-      if (remote !== undefined) {
-        data.annotations.remote = remote;
-      }
-
-      const addToHistory = tr.annotation(CMTransaction.addToHistory);
-      if (addToHistory !== undefined) {
-        data.annotations.addToHistory = addToHistory;
-      }
-
-      // Extract effects
-      for (const effect of tr.effects) {
-        let effectData: TransactionEffect;
-
-        if (effect.is(blockMetadataEffect)) {
-          const value = structuredClone(effect.value);
-          effectData = {
-            type: "blockMetadataEffect",
-            blockMetadata: value,
-            value: value,
-          };
-        } else {
-          effectData = {
-            value: effect.value,
-            type: "StateEffect",
-          };
-        }
-
-        data.effects.push(effectData);
-      }
-
-      return data;
-    }
-
     const plugin = ViewPlugin.fromClass(
       class {
         constructor(view: any) {
-          const initialTr: TransactionData = {
-            index: nextIndexRef.current++,
-            docChanged: false,
-            changes: [],
-            annotations: {},
-            effects: [],
-            selection: view.state.selection.ranges.map((r: any) => ({
-              from: r.from,
-              to: r.to,
-              anchor: r.anchor,
-              head: r.head,
-            })),
-            timestamp: Date.now(),
-          };
-          transactionsList.push(initialTr);
           notifyListeners();
         }
 
-        update(update: any) {
-          update.transactions.forEach((tr: CMTransaction) => {
+        update(update: ViewUpdate) {
+          update.transactions.forEach((tr: Tr) => {
             const transactionData = extractTransactionData(tr, nextIndexRef.current++);
             transactionsList.push(transactionData);
 

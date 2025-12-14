@@ -108,37 +108,34 @@ export function TransactionItem({transaction: tr}: {transaction: TransactionData
         {tr.effects.length > 0 ? (
           <div>
             <strong>Effects:</strong> {tr.effects.length}
+            {tr.blockMetadata ? (
+              <div className="p-1 bg-purple-50 rounded">
+                <div className="font-medium">blockMetadataEffect ({tr.blockMetadata.length} blocks)</div>
+                {tr.blockMetadata.map((block: any, blockIdx: number) => (
+                  <div key={blockIdx} className="ml-2 mt-1 text-xs">
+                    <div className="font-medium">Block {blockIdx + 1}:</div>
+                    <div>
+                      {block.output !== null ? `Output: ${block.output.from}-${block.output.to}` : "Output: null"}
+                    </div>
+                    <div>
+                      Source: {block.source.from}-{block.source.to}
+                    </div>
+                    {Object.keys(block.attributes).length > 0 && (
+                      <div>Attributes: {JSON.stringify(block.attributes)}</div>
+                    )}
+                    {block.error && <div className="text-red-600">Error: true</div>}
+                  </div>
+                ))}
+              </div>
+            ) : null}
             {tr.effects.map((effect, idx) => (
               <div key={idx} className="ml-2 mt-1">
-                {effect.type === "blockMetadataEffect" && effect.blockMetadata ? (
-                  <div className="p-1 bg-purple-50 rounded">
-                    <div className="font-medium">
-                      Effect {idx + 1}: blockMetadataEffect ({effect.blockMetadata.length} blocks)
-                    </div>
-                    {effect.blockMetadata.map((block: any, blockIdx: number) => (
-                      <div key={blockIdx} className="ml-2 mt-1 text-xs">
-                        <div className="font-medium">Block {blockIdx + 1}:</div>
-                        <div>
-                          {block.output !== null ? `Output: ${block.output.from}-${block.output.to}` : "Output: null"}
-                        </div>
-                        <div>
-                          Source: {block.source.from}-{block.source.to}
-                        </div>
-                        {Object.keys(block.attributes).length > 0 && (
-                          <div>Attributes: {JSON.stringify(block.attributes)}</div>
-                        )}
-                        {block.error && <div className="text-red-600">Error: true</div>}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div>
-                    <span>
-                      Effect {idx + 1} ({effect.type}):{" "}
-                    </span>
-                    <ObjectInspector data={effect.value} expandLevel={1} />
-                  </div>
-                )}
+                <div>
+                  <span>
+                    Effect {idx + 1} ({effect.type}):{" "}
+                  </span>
+                  <ObjectInspector data={effect.value} expandLevel={1} />
+                </div>
               </div>
             ))}
           </div>

@@ -1,4 +1,5 @@
 import type {ViewPlugin} from "@codemirror/view";
+import type {BlockMetadata} from "../../editor/blocks/BlockMetadata.ts";
 
 export interface BlockData {
   name: string;
@@ -31,7 +32,6 @@ export interface TransactionChange {
 export interface TransactionEffect {
   value: any;
   type: string;
-  blockMetadata?: any[];
 }
 
 export interface TransactionData {
@@ -43,6 +43,7 @@ export interface TransactionData {
   selection: TransactionRange[];
   scrollIntoView?: boolean;
   timestamp: number;
+  blockMetadata: BlockMetadata[] | null;
 }
 
 export interface TransactionGroup {
