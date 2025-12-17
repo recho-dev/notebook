@@ -63,7 +63,7 @@ function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): BlockMetadat
 
     const affectedBlockRange = findAffectedBlockRange(oldBlocks, oldFrom, oldTo);
 
-    console.log(`Affected block range: ${affectedBlockRange[0]}-${affectedBlockRange[1]}`);
+    console.log(`Affected block range: ${affectedBlockRange[0]} to ${affectedBlockRange[1] ?? "the end"}`);
 
     // Add the affected blocks to the set.
     for (let i = affectedBlockRange[0] ?? 0, n = affectedBlockRange[1] ?? oldBlocks.length; i < n; i++) {
@@ -79,6 +79,8 @@ function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): BlockMetadat
     const reparseFrom = affectedBlockRange[0] === null ? 0 : oldBlocks[affectedBlockRange[0]]!.from;
     const reparseTo = affectedBlockRange[1] === null ? tr.state.doc.length : oldBlocks[affectedBlockRange[1] - 1]!.to;
     const newBlocks = detectBlocksWithinRange(syntaxTree(tr.state), tr.state.doc, reparseFrom, reparseTo);
+
+    console.log("New blocks from reparsed range:", newBlocks);
 
     // If only one block is affected and only one new block is created, we can
     // simply inherit the attributes from the old block.
@@ -130,6 +132,8 @@ function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): BlockMetadat
   console.log("New blocks:", newBlocks);
 
   const deduplicatedBlocks = deduplicateNaive(newBlocks);
+
+  console.log("Deduplicated blocks:", deduplicatedBlocks);
 
   console.groupEnd();
   return deduplicatedBlocks;

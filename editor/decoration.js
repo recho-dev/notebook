@@ -34,8 +34,9 @@ function createWidgets(lines, blockMetadata, state) {
     const startLine = state.doc.lineAt(output.from);
     const endLine = state.doc.lineAt(output.to);
     // console.log(`Make lines from ${startLine.number} to ${endLine.number} compact`);
+    const endLineNumber = endLine.from < output.to ? endLine.number + 1 : endLine.number;
     if (attributes.compact === true) {
-      for (let lineNum = startLine.number; lineNum <= endLine.number; lineNum++) {
+      for (let lineNum = startLine.number; lineNum < endLineNumber; lineNum++) {
         const line = state.doc.line(lineNum);
         builder2.add(line.from, line.from, compactLineDecoration);
       }

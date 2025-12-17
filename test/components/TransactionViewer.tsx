@@ -1,137 +1,25 @@
 import {useState, useEffect, useRef, useMemo} from "react";
-import {ViewPlugin, ViewUpdate} from "@codemirror/view";
-import {Transaction as Tr} from "@codemirror/state";
-import {blockMetadataEffect} from "../../editor/blockMetadata.ts";
 import {SelectionGroupItem} from "./SelectionGroupItem.tsx";
-import type {TransactionData, TransactionGroup, TransactionViewerProps} from "./types.ts";
+import type {TransactionData, TransactionGroup} from "./transaction-data.ts";
 import {TransactionItem} from "./TransactionItem.tsx";
+import type { List } from "immutable";
 
-// Maximum number of transactions to keep in history
-const MAX_HISTORY = 100;
-
-function extractTransactionData(tr: Tr, index: number): TransactionData {
-  const data: TransactionData = {
-    index,
-    docChanged: tr.docChanged,
-    changes: [],
-    annotations: {},
-    effects: [],
-    selection: tr.state.selection.ranges.map((r) => ({
-      from: r.from,
-      to: r.to,
-      anchor: r.anchor,
-      head: r.head,
-    })),
-    scrollIntoView: tr.scrollIntoView,
-    timestamp: Date.now(),
-    blockMetadata: null,
-  };
-
-  // Extract changes
-  tr.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
-    const fromLine = tr.startState.doc.lineAt(fromA);
-    const toLine = tr.startState.doc.lineAt(toA);
-
-    data.changes.push({
-      from: fromA,
-      to: toA,
-      fromLine: fromLine.number,
-      fromCol: fromA - fromLine.from,
-      toLine: toLine.number,
-      toCol: toA - toLine.from,
-      insert: inserted.toString(),
-    });
-  });
-
-  // Extract annotations
-  const userEvent = tr.annotation(Tr.userEvent);
-  if (userEvent !== undefined) {
-    data.annotations.userEvent = userEvent;
-  }
-
-  const remote = tr.annotation(Tr.remote);
-  if (remote !== undefined) {
-    data.annotations.remote = remote;
-  }
-
-  const addToHistory = tr.annotation(Tr.addToHistory);
-  if (addToHistory !== undefined) {
-    data.annotations.addToHistory = addToHistory;
-  }
-
-  for (const effect of tr.effects) {
-    if (effect.is(blockMetadataEffect)) {
-      data.blockMetadata = Array.from(effect.value);
-    } else {
-      data.effects.push({
-        value: effect.value,
-        type: "StateEffect",
-      });
-    }
-  }
-
-  return data;
+export type TransactionViewerProps = {
+  transactions: List<TransactionData>;
+  onClear: () => void;
 }
 
-export function TransactionViewer({onPluginCreate}: TransactionViewerProps) {
-  const [transactions, setTransactions] = useState<TransactionData[]>([]);
+
+export function TransactionViewer({transactions, onClear}: TransactionViewerProps) {
   const [autoScroll, setAutoScroll] = useState(true);
   const [showEffects, setShowEffects] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
-  const nextIndexRef = useRef(0);
-
-  useEffect(() => {
-    const transactionsList: TransactionData[] = [];
-    const listeners = new Set<(transactions: TransactionData[]) => void>();
-
-    function notifyListeners() {
-      listeners.forEach((fn) => fn([...transactionsList]));
-    }
-
-    const plugin = ViewPlugin.fromClass(
-      class {
-        constructor() {
-          notifyListeners();
-        }
-
-        update(update: ViewUpdate) {
-          update.transactions.forEach((tr: Tr) => {
-            const transactionData = extractTransactionData(tr, nextIndexRef.current++);
-            transactionsList.push(transactionData);
-
-            if (transactionsList.length > MAX_HISTORY) {
-              transactionsList.shift();
-            }
-          });
-
-          if (update.transactions.length > 0) {
-            notifyListeners();
-          }
-        }
-      },
-    );
-
-    listeners.add((newTransactions) => {
-      setTransactions(newTransactions);
-    });
-
-    onPluginCreate(plugin);
-
-    return () => {
-      listeners.clear();
-    };
-  }, [onPluginCreate]);
 
   useEffect(() => {
     if (autoScroll && listRef.current) {
-      listRef.current.scrollTop = 0;
+      listRef.current.scrollTo({top: listRef.current.scrollHeight, behavior: "smooth"});
     }
   }, [transactions, autoScroll]);
-
-  const handleClear = () => {
-    setTransactions([]);
-    nextIndexRef.current = 0;
-  };
 
   const filteredTransactions = useMemo(() => {
     return showEffects ? transactions : transactions.filter((tr) => tr.effects.length === 0);
@@ -140,14 +28,11 @@ export function TransactionViewer({onPluginCreate}: TransactionViewerProps) {
   const groupedTransactions = useMemo(() => {
     const groups: TransactionGroup[] = [];
     let currentGroup: TransactionGroup | null = null;
-
-    for (let i = filteredTransactions.length - 1; i >= 0; i--) {
-      const tr = filteredTransactions[i]!;
+    filteredTransactions.forEach((tr) => {
       const isSelection = tr.annotations.userEvent === "select" || tr.annotations.userEvent === "select.pointer";
-
       if (isSelection) {
         if (currentGroup && currentGroup.type === "selection") {
-          currentGroup.transactions!.push(tr);
+          currentGroup.transactions.push(tr);
         } else {
           currentGroup = {type: "selection", transactions: [tr]};
           groups.push(currentGroup);
@@ -156,8 +41,7 @@ export function TransactionViewer({onPluginCreate}: TransactionViewerProps) {
         groups.push({type: "individual", transaction: tr});
         currentGroup = null;
       }
-    }
-
+    })
     return groups;
   }, [filteredTransactions]);
 
@@ -167,7 +51,7 @@ export function TransactionViewer({onPluginCreate}: TransactionViewerProps) {
         <h3 className="text-sm font-semibold text-gray-700 mb-2">Transactions</h3>
         <div className="flex flex-wrap items-center gap-3">
           <button
-            onClick={handleClear}
+            onClick={onClear}
             className="px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
           >
             Clear
@@ -193,7 +77,7 @@ export function TransactionViewer({onPluginCreate}: TransactionViewerProps) {
         </div>
       </div>
       <div ref={listRef} className="flex-1 overflow-y-auto p-2">
-        {transactions.length === 0 ? (
+        {transactions.size === 0 ? (
           <div className="text-sm text-gray-500 text-center py-4">No transactions yet</div>
         ) : (
           groupedTransactions.map((group) =>
