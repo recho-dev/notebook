@@ -48,7 +48,7 @@ export function TransactionItem({transaction: tr}: {transaction: TransactionData
         tr.docChanged && "border-l-4 border-l-blue-500",
       )}
     >
-      <summary className="px-2 py-1.5 cursor-pointer hover:bg-gray-50 flex justify-between items-center">
+      <summary className="px-2 py-1.5 cursor-pointer hover:bg-gray-50 flex flex-wrap justify-between items-center gap-1">
         <span className="flex flex-row items-center gap-2">{summaryNodes}</span>
         <span className="text-gray-500">{formatTime(tr.timestamp)}</span>
       </summary>

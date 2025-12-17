@@ -20,13 +20,13 @@ export function BlockItem({block, onLocate}: {block: BlockData; onLocate: (block
             : "border-gray-200 bg-white"
       }`}
     >
-      <summary className="px-2 py-1.5 cursor-pointer hover:bg-gray-50 flex justify-between items-center">
-        <section className="flex flex-row gap-1 items-center">
+      <summary className="px-2 py-1.5 cursor-pointer hover:bg-gray-50 flex justify-between items-center overflow-hidden">
+        <section className="flex flex-row gap-1 items-center flex-shrink-0">
           <span className="font-mono font-medium">{block.index + 1}</span>
           {block.hasError && <CircleXIcon className="w-4 h-4" />}
           {hasOutput && !block.hasError && <SquareTerminalIcon className="w-4 h-4" />}
         </section>
-        <span className="font-mono">{block.name}</span>
+        <span className="font-mono truncate min-w-0 flex-1 mx-2">{block.name}</span>
         <div className="flex items-center gap-2">
           <span className="text-stone-600 text-xs font-mono">
             <span className="font-semibold text-stone-500">[</span>

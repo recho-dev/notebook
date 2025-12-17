@@ -48,13 +48,13 @@ export function App() {
             />
           </div>
         </Panel>
-        <PanelResizeHandle />
+        <PanelResizeHandle className="w-1 bg-gray-200 hover:bg-blue-400 data-[resize-handle-state=drag]:bg-blue-400 transition-colors cursor-col-resize relative before:absolute before:inset-y-0 before:-inset-x-1 before:content-['']" />
         <Panel minSize={10}>
           <PanelGroup direction="vertical">
             <Panel minSize={10}>
               <BlockViewer onPluginCreate={setBlockViewerPlugin} />
             </Panel>
-            <PanelResizeHandle />
+            <PanelResizeHandle className="h-1 bg-gray-200 hover:bg-blue-400 data-[resize-handle-state=drag]:bg-blue-400 transition-colors cursor-row-resize relative before:absolute before:inset-x-0 before:-inset-y-1 before:content-['']" />
             <Panel minSize={10}>
               <TransactionViewer onPluginCreate={setTransactionViewerPlugin} />
             </Panel>

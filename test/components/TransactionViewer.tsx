@@ -165,7 +165,7 @@ export function TransactionViewer({onPluginCreate}: TransactionViewerProps) {
     <div className="flex flex-col h-full bg-white">
       <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
         <h3 className="text-sm font-semibold text-gray-700 mb-2">Transactions</h3>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={handleClear}
             className="px-2 py-1 text-xs bg-white border border-gray-300 rounded hover:bg-gray-50"
