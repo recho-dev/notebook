@@ -1,5 +1,5 @@
 import {useState} from "react";
-import type {TransactionData} from "./types.ts";
+import type {TransactionData} from "./transaction-data.ts";
 
 export function SelectionGroupItem({transactions}: {transactions: TransactionData[]}) {
   const [isOpen, setIsOpen] = useState(false);
