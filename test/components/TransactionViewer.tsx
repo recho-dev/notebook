@@ -2,13 +2,12 @@ import {useState, useEffect, useRef, useMemo} from "react";
 import {SelectionGroupItem} from "./SelectionGroupItem.tsx";
 import type {TransactionData, TransactionGroup} from "./transaction-data.ts";
 import {TransactionItem} from "./TransactionItem.tsx";
-import type { List } from "immutable";
+import type {List} from "immutable";
 
 export type TransactionViewerProps = {
   transactions: List<TransactionData>;
   onClear: () => void;
-}
-
+};
 
 export function TransactionViewer({transactions, onClear}: TransactionViewerProps) {
   const [autoScroll, setAutoScroll] = useState(true);
@@ -41,7 +40,7 @@ export function TransactionViewer({transactions, onClear}: TransactionViewerProp
         groups.push({type: "individual", transaction: tr});
         currentGroup = null;
       }
-    })
+    });
     return groups;
   }, [filteredTransactions]);
 

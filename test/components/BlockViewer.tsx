@@ -1,7 +1,7 @@
 import {useEffect, useRef, useState} from "react";
 import type {BlockData} from "./block-data.ts";
 import {BlockItem} from "./BlockItem.tsx";
-import type { List } from "immutable";
+import type {List} from "immutable";
 
 interface BlockViewerProps {
   blocks: List<BlockData>;
@@ -38,7 +38,10 @@ export function BlockViewer({blocks, onLocateBlock}: BlockViewerProps) {
         {blocks.size === 0 ? (
           <div className="text-sm text-gray-500 text-center py-4">No blocks yet</div>
         ) : (
-          blocks.toSeq().map((block) => <BlockItem key={block.index} block={block} onLocate={onLocateBlock} />).toArray()
+          blocks
+            .toSeq()
+            .map((block) => <BlockItem key={block.index} block={block} onLocate={onLocateBlock} />)
+            .toArray()
         )}
       </div>
     </div>

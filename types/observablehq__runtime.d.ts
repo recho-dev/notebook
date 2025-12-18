@@ -27,12 +27,7 @@ declare module "@observablehq/runtime" {
 
   // Variable class
   export class Variable<T = any> {
-    constructor(
-      type: number,
-      module: Module,
-      observer?: Observer<T> | boolean,
-      options?: VariableOptions
-    );
+    constructor(type: number, module: Module, observer?: Observer<T> | boolean, options?: VariableOptions);
 
     // Define a variable with optional name, inputs, and definition
     define(definition: DefinitionFunction<T> | T): this;
@@ -80,10 +75,7 @@ declare module "@observablehq/runtime" {
     variable(observer?: Observer | boolean, options?: VariableOptions): Variable;
 
     // Derive a new module with injected variables
-    derive(
-      injects: Array<string | { name: string; alias?: string }>,
-      injectModule: Module
-    ): Module;
+    derive(injects: Array<string | {name: string; alias?: string}>, injectModule: Module): Module;
 
     // Get the value of a variable by name
     value(name: string): Promise<any>;
@@ -110,7 +102,7 @@ declare module "@observablehq/runtime" {
     module(): Module;
     module(
       define: (runtime: Runtime, observer: (variable: Variable) => Observer) => void,
-      observer?: (variable: Variable) => Observer
+      observer?: (variable: Variable) => Observer,
     ): Module;
 
     // Dispose the runtime

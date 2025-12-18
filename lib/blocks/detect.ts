@@ -124,7 +124,7 @@ export function detectBlocksWithinRange(tree: Tree, doc: Text, from: number, to:
 
   // Build block metadata from statements
   for (const range of statementRanges) {
-    blocks.push(new BlockMetadata(nanoid(),range.name, outputRanges.get(range.from) ?? null, range));
+    blocks.push(new BlockMetadata(nanoid(), range.name, outputRanges.get(range.from) ?? null, range));
   }
 
   return blocks;

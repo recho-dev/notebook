@@ -56,31 +56,31 @@ export function BlockItem({block, onLocate}: {block: BlockData; onLocate: (from:
             <strong>Output Range:</strong> {block.outputFrom}-{block.outputTo}
             <span className="text-gray-500 ml-1">({block.outputTo! - block.outputFrom!} chars)</span>
             <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onLocate(block.outputFrom!, block.outputTo!);
-            }}
-            className="p-1 hover:bg-gray-200 rounded transition-colors"
-            title="Locate block in editor"
-          >
-            <Locate className="w-3 h-3" />
-          </button>
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onLocate(block.outputFrom!, block.outputTo!);
+              }}
+              className="p-1 hover:bg-gray-200 rounded transition-colors"
+              title="Locate block in editor"
+            >
+              <Locate className="w-3 h-3" />
+            </button>
           </div>
         ) : (
           <div className="flex flex-row gap-2 items-center">
             <strong>Output Range:</strong> <span className="text-gray-400">none</span>
             <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onLocate(block.outputFrom ?? block.sourceFrom, block.sourceTo);
-            }}
-            className="p-1 hover:bg-gray-200 rounded transition-colors"
-            title="Locate block in editor"
-          >
-            <Locate className="w-3 h-3" />
-          </button>
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onLocate(block.outputFrom ?? block.sourceFrom, block.sourceTo);
+              }}
+              className="p-1 hover:bg-gray-200 rounded transition-colors"
+              title="Locate block in editor"
+            >
+              <Locate className="w-3 h-3" />
+            </button>
           </div>
         )}
 
@@ -99,7 +99,6 @@ export function BlockItem({block, onLocate}: {block: BlockData; onLocate: (from:
             <Locate className="w-3 h-3" />
           </button>
         </div>
-
 
         <div>
           <strong>Total Range:</strong> {hasOutput ? block.outputFrom : block.sourceFrom}-{block.sourceTo}

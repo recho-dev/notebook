@@ -11,7 +11,7 @@ import {IntervalTree} from "../lib/IntervalTree.ts";
 import {transpileRechoJavaScript} from "./transpile.js";
 import {ButtonRegistry, makeButton} from "./controls/button.js";
 import {addPrefix, makeOutput, OUTPUT_PREFIX, ERROR_PREFIX} from "./output.js";
-import { Transaction } from "@codemirror/state";
+import {Transaction} from "@codemirror/state";
 
 function uid() {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);

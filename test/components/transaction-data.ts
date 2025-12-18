@@ -1,6 +1,6 @@
-import { blockMetadataEffect } from "../../editor/blockMetadata.ts";
-import type { BlockMetadata } from "../../editor/blocks/BlockMetadata.ts";
-import { Transaction as Tr } from "@codemirror/state";
+import {blockMetadataEffect} from "../../editor/blockMetadata.ts";
+import type {BlockMetadata} from "../../editor/blocks/BlockMetadata.ts";
+import {Transaction as Tr} from "@codemirror/state";
 
 export interface TransactionRange {
   from: number;

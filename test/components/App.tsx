@@ -8,10 +8,10 @@ import {BlockViewer} from "./BlockViewer.tsx";
 import {Editor} from "./Editor.tsx";
 import {TestSelector} from "./TestSelector.tsx";
 import {TransactionViewer} from "./TransactionViewer.tsx";
-import { type TransactionData, extractTransactionData } from "./transaction-data.ts";
-import { List } from "immutable";
-import { extractBlockData, type BlockData } from "./block-data.ts";
-import { EditorSelection } from "@codemirror/state";
+import {type TransactionData, extractTransactionData} from "./transaction-data.ts";
+import {List} from "immutable";
+import {extractBlockData, type BlockData} from "./block-data.ts";
+import {EditorSelection} from "@codemirror/state";
 
 export function App() {
   const [selectedTest, setSelectedTest] = useAtom(selectedTestAtom);
@@ -28,8 +28,8 @@ export function App() {
       class {
         update(update: ViewUpdate) {
           if (update.transactions.length > 0) {
-            setTransactions(oldTransactions => {
-              const transactionData = update.transactions.map(tr => extractTransactionData(tr, nextIndex++));
+            setTransactions((oldTransactions) => {
+              const transactionData = update.transactions.map((tr) => extractTransactionData(tr, nextIndex++));
               const newTransactions = oldTransactions.concat(transactionData);
               if (newTransactions.size > MAX_HISTORY) {
                 return newTransactions.slice(newTransactions.size - MAX_HISTORY);

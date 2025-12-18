@@ -3,7 +3,10 @@ import {BlockMetadata} from "./blocks/BlockMetadata.js";
 import {blockMetadataField} from "./blockMetadata.ts";
 
 export class BlockIndicator extends GutterMarker {
-  constructor(private className: string, private blockId: string | null = null) {
+  constructor(
+    private className: string,
+    private blockId: string | null = null,
+  ) {
     super();
   }
   toDOM() {
@@ -14,7 +17,10 @@ export class BlockIndicator extends GutterMarker {
   }
 }
 
-const constant = <T>(x: T) => (): T => x;
+const constant =
+  <T>(x: T) =>
+  (): T =>
+    x;
 
 const indicatorMarkers = {
   output: {
@@ -41,7 +47,7 @@ export const blockIndicator = gutter({
   class: "cm-blockIndicators",
   /**
    * Create a gutter marker for the given line.
-   * 
+   *
    * @param view the editor view
    * @param line a record used to represent information about a block-level element
    * in the editor view.
