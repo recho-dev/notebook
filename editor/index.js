@@ -19,7 +19,6 @@ import {rechoCompletion} from "./completion.js";
 import {docStringTag} from "./docStringTag.js";
 import {commentLink, commentLinkClickHandler} from "./commentLink.js";
 import {blockIndicator} from "./blockIndicator.ts";
-import {lineNumbers} from "@codemirror/view";
 
 // @see https://github.com/UziTech/eslint-linter-browserify/blob/master/example/script.js
 // @see https://codemirror.net/examples/lint/

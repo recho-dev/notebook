@@ -11,6 +11,7 @@ import {IntervalTree} from "../lib/IntervalTree.ts";
 import {transpileRechoJavaScript} from "./transpile.js";
 import {ButtonRegistry, makeButton} from "./controls/button.js";
 import {addPrefix, makeOutput, OUTPUT_PREFIX, ERROR_PREFIX} from "./output.js";
+import { Transaction } from "@codemirror/state";
 
 function uid() {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -93,7 +94,7 @@ export function createRuntime(initialCode) {
 
       if (!values.length) {
         // Create a block even if there are no values.
-        blocks.push(new BlockMetadata(node.type, null, sourceRange, node.state.attributes));
+        blocks.push(new BlockMetadata(node.id, node.type, null, sourceRange, node.state.attributes));
         continue;
       }
 
@@ -116,7 +117,7 @@ export function createRuntime(initialCode) {
       }
 
       // Add this block to the block metadata array.
-      const block = new BlockMetadata(node.type, outputRange, sourceRange, node.state.attributes);
+      const block = new BlockMetadata(node.id, node.type, outputRange, sourceRange, node.state.attributes);
       block.error = error;
       blocks.push(block);
     }
@@ -274,6 +275,7 @@ export function createRuntime(initialCode) {
     for (const node of nodes) {
       const cell = code.slice(node.start, node.end);
       const transpiled = transpile(cell);
+      node.id = uid();
       node.transpiled = transpiled;
     }
 
@@ -320,7 +322,7 @@ export function createRuntime(initialCode) {
     // Derived from Observable Notebook Kit's define.
     // https://github.com/observablehq/notebook-kit/blob/02914e034fd21a50ebcdca08df57ef5773864125/src/runtime/define.ts#L33
     for (const node of enter) {
-      const vid = uid();
+      const vid = node.id;
       const {inputs, body, outputs, error = null} = node.transpiled;
       const state = {
         values: [],

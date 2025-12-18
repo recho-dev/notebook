@@ -160,7 +160,6 @@ export const blockMetadataField = StateField.define<BlockMetadata[]>({
       // Otherwise, we need to update the block attributes according to the
       // metadata sent from the runtime. Most importantly, we need to translate
       // the position of each block after the changes has been made.
-      console.log(blocksFromEffect);
       return blocksFromEffect.map((block) => block.map(tr));
     }
   },

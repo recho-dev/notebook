@@ -2,6 +2,7 @@ import {type Text} from "@codemirror/state";
 import {OUTPUT_MARK, ERROR_MARK} from "../../runtime/constant.js";
 import {syntaxTree} from "@codemirror/language";
 import {BlockMetadata, type Range} from "../../editor/blocks/BlockMetadata.ts";
+import {nanoid} from "nanoid";
 
 const OUTPUT_MARK_CODE_POINT = OUTPUT_MARK.codePointAt(0);
 const ERROR_MARK_CODE_POINT = ERROR_MARK.codePointAt(0);
@@ -123,7 +124,7 @@ export function detectBlocksWithinRange(tree: Tree, doc: Text, from: number, to:
 
   // Build block metadata from statements
   for (const range of statementRanges) {
-    blocks.push(new BlockMetadata(range.name, outputRanges.get(range.from) ?? null, range));
+    blocks.push(new BlockMetadata(nanoid(), range.name, outputRanges.get(range.from) ?? null, range));
   }
 
   return blocks;

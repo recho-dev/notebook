@@ -12,6 +12,7 @@ export class BlockMetadata {
    * @param error whether this block has an error
    */
   public constructor(
+    public readonly id: string,
     public readonly name: string,
     public readonly output: Range | null,
     public readonly source: Range,
@@ -48,6 +49,6 @@ export class BlockMetadata {
       from: tr.changes.mapPos(this.source.from, 1),
       to: tr.changes.mapPos(this.source.to, 1),
     };
-    return new BlockMetadata(this.name, output, source, this.attributes, this.error);
+    return new BlockMetadata(this.id, this.name, output, source, this.attributes, this.error);
   }
 }
