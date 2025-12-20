@@ -5,6 +5,8 @@ import {
   DeleteIcon,
   KeyboardIcon,
   LanguagesIcon,
+  IndentIncreaseIcon,
+  IndentDecreaseIcon,
   ListPlusIcon,
   MoveIcon,
   RedoDotIcon,
@@ -49,6 +51,14 @@ export function UserEvent({userEvent}: {userEvent: string}) {
     case "input.complete":
       Icon = ListPlusIcon;
       text = "Complete";
+      break;
+    case "input.indent":
+      Icon = IndentIncreaseIcon;
+      text = "Indent";
+      break;
+    case "delete.dedent":
+      Icon = IndentDecreaseIcon;
+      text = "Dedent";
       break;
     case "delete.selection":
       Icon = TextCursorInputIcon;
