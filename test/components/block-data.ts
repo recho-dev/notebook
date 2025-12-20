@@ -1,4 +1,4 @@
-import {blockMetadataField} from "../../editor/blockMetadata.ts";
+import {blockMetadataField} from "../../editor/blocks/state.ts";
 import type {EditorView} from "@codemirror/view";
 
 export interface BlockData {

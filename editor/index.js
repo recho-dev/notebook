@@ -9,16 +9,12 @@ import {indentWithTab} from "@codemirror/commands";
 import {browser} from "globals";
 import * as eslint from "eslint-linter-browserify";
 import {createRuntime} from "../runtime/index.js";
-import {outputDecoration, debugDecoration} from "./decoration.js";
-import {outputLines} from "./outputLines.js";
-import {blockMetadataExtension} from "./blockMetadata.ts";
-// import {outputProtection} from "./protection.js";
 import {dispatch as d3Dispatch} from "d3-dispatch";
 import {controls} from "./controls/index.js";
 import {rechoCompletion} from "./completion.js";
 import {docStringTag} from "./docStringTag.js";
 import {commentLink, commentLinkClickHandler} from "./commentLink.js";
-import {blockIndicator} from "./blockIndicator.ts";
+import {blockExtensions, blockIndicator} from "./blocks";
 
 // @see https://github.com/UziTech/eslint-linter-browserify/blob/master/example/script.js
 // @see https://codemirror.net/examples/lint/
@@ -72,10 +68,7 @@ export function createEditor(container, options) {
         indentWithTab,
       ]),
       javascriptLanguage.data.of({autocomplete: rechoCompletion}),
-      outputLines,
-      blockMetadataExtension,
-      outputDecoration,
-      debugDecoration,
+      blockExtensions,
       controls(runtimeRef),
       // Disable this for now, because it prevents copying/pasting the code.
       // outputProtection(),

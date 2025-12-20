@@ -6,12 +6,11 @@ import {dispatch as d3Dispatch} from "d3-dispatch";
 import * as stdlib from "./stdlib/index.js";
 import {Inspector} from "./stdlib/inspect.js";
 import {BlockMetadata} from "../editor/blocks/BlockMetadata.ts";
-import {blockMetadataEffect} from "../editor/blockMetadata.ts";
+import {blockMetadataEffect} from "../editor/blocks/effect.ts";
 import {IntervalTree} from "../lib/IntervalTree.ts";
 import {transpileRechoJavaScript} from "./transpile.js";
 import {ButtonRegistry, makeButton} from "./controls/button.js";
 import {addPrefix, makeOutput, OUTPUT_PREFIX, ERROR_PREFIX} from "./output.js";
-import {Transaction} from "@codemirror/state";
 
 function uid() {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);

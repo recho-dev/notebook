@@ -1,10 +1,10 @@
-import {StateField, StateEffect, Transaction} from "@codemirror/state";
-import {blockRangeLength, findAffectedBlockRange, getOnlyOneBlock} from "../lib/blocks.ts";
-import {detectBlocksWithinRange} from "../lib/blocks/detect.ts";
+import {Transaction} from "@codemirror/state";
+import {blockRangeLength, findAffectedBlockRange, getOnlyOneBlock} from "../../lib/blocks.ts";
+import {detectBlocksWithinRange} from "../../lib/blocks/detect.ts";
 import {syntaxTree} from "@codemirror/language";
-import {MaxHeap} from "../lib/containers/heap.ts";
-import {BlockMetadata} from "./blocks/BlockMetadata.ts";
-import {deduplicateNaive} from "./blocks/dedup.ts";
+import {MaxHeap} from "../../lib/containers/heap.ts";
+import {BlockMetadata} from "./BlockMetadata.ts";
+import {deduplicateNaive} from "./deduplicate.ts";
 
 /**
  * Update block metadata according to the given transaction.
@@ -12,7 +12,7 @@ import {deduplicateNaive} from "./blocks/dedup.ts";
  * @param oldBlocks the current blocks
  * @param tr the editor transaction
  */
-function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): BlockMetadata[] {
+export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): BlockMetadata[] {
   // If the transaction does not change the document, then we return early.
   if (!tr.docChanged) return oldBlocks;
 
@@ -23,14 +23,9 @@ function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): BlockMetadat
     console.groupCollapsed(`updateBlocks`);
   }
 
-  // Collect all ranges that need to be rescanned
-  type ChangedRange = {oldFrom: number; oldTo: number; newFrom: number; newTo: number};
-  const changedRanges: ChangedRange[] = [];
-  tr.changes.iterChangedRanges((oldFrom, oldTo, newFrom, newTo) => {
-    changedRanges.push({oldFrom, oldTo, newFrom, newTo});
-  });
+  const isCopyingLines = userEvent === "input.copyline";
 
-  if (changedRanges.length === 0) {
+  if (tr.changes.empty) {
     console.log("No changes detected");
     console.groupEnd();
     return oldBlocks;
@@ -48,7 +43,7 @@ function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): BlockMetadat
   );
 
   // Process changed ranges one by one, because ranges are disjoint.
-  for (const {oldFrom, oldTo, newFrom, newTo} of changedRanges) {
+  tr.changes.iterChanges((oldFrom, oldTo, newFrom, newTo, inserted) => {
     if (oldFrom === oldTo) {
       if (newFrom === oldFrom) {
         console.groupCollapsed(`Insert ${newTo - newFrom} characters at ${oldFrom}`);
@@ -59,9 +54,28 @@ function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): BlockMetadat
       console.groupCollapsed(`Update: ${oldFrom}-${oldTo} -> ${newFrom}-${newTo}`);
     }
 
+    let changeFrom = oldFrom;
+    let changeTo = oldTo;
+    if (isCopyingLines) {
+      if (oldFrom === oldTo) {
+        const index = oldFrom; // The insertion point, should be either at the beginning or the end of the line.
+        const line = tr.startState.doc.lineAt(index);
+        if (index === line.from) {
+          changeFrom = changeTo = index + inserted.length;
+        } else if (index === line.to) {
+          // changeFrom = changeTo = index - inserted.length;
+          changeFrom = changeTo = index;
+        } else {
+          console.error("This is weird as the insertion point is not at the beginning or the end of the line");
+        }
+      } else {
+        console.error("This is weird as the cursor is not at the same position");
+      }
+    }
+
     // Step 1: Find the blocks that are affected by the change.
 
-    const affectedBlockRange = findAffectedBlockRange(oldBlocks, oldFrom, oldTo);
+    const affectedBlockRange = findAffectedBlockRange(oldBlocks, changeFrom, changeTo);
 
     console.log(`Affected block range: ${affectedBlockRange[0]} to ${affectedBlockRange[1] ?? "the end"}`);
 
@@ -72,7 +86,7 @@ function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): BlockMetadat
 
     // Check a corner case where the affected block range is empty but there are blocks.
     if (blockRangeLength(oldBlocks.length, affectedBlockRange) === 0 && oldBlocks.length > 0) {
-      reportError("This should never happen");
+      console.error("This should never happen");
     }
 
     // Now, we are going to compute the range which should be re-parsed.
@@ -95,17 +109,22 @@ function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): BlockMetadat
     }
 
     console.groupEnd();
-  }
+  });
 
   // Step 3: Combine the array of old blocks and the heap of new blocks.
 
   const newBlocks: BlockMetadata[] = [];
 
+  console.group("Combining old blocks and new blocks");
+
   for (let i = 0, n = oldBlocks.length; i < n; i++) {
     const oldBlock = oldBlocks[i]!;
 
     // Skip affected blocks, as they have been updated.
-    if (affectedBlocks.has(oldBlock)) continue;
+    if (affectedBlocks.has(oldBlock)) {
+      console.log("Skipping affected old block:", oldBlock);
+      continue;
+    }
 
     const newBlock = oldBlock.map(tr);
 
@@ -114,6 +133,7 @@ function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): BlockMetadat
 
     while (newlyCreatedBlocks.nonEmpty() && newlyCreatedBlocks.peek.from < newBlock.from) {
       newBlocks.push(newlyCreatedBlocks.peek);
+      console.log("Pushing new block from heap:", newlyCreatedBlocks.peek);
       newlyCreatedBlocks.extractMax();
     }
 
@@ -121,7 +141,10 @@ function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): BlockMetadat
     // the current old block's `from` position.
 
     newBlocks.push(newBlock);
+    console.log("Pushing mapped old block:", newBlock);
   }
+
+  console.groupEnd();
 
   // In the end, push any remaining blocks from the heap.
   while (newlyCreatedBlocks.nonEmpty()) {
@@ -138,35 +161,3 @@ function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): BlockMetadat
   console.groupEnd();
   return deduplicatedBlocks;
 }
-
-export const blockMetadataEffect = StateEffect.define<BlockMetadata[]>();
-
-export const blockMetadataField = StateField.define<BlockMetadata[]>({
-  create() {
-    return [];
-  },
-  update(blocks, tr) {
-    // Find if the block attributes effect is present.
-    let blocksFromEffect: BlockMetadata[] | null = null;
-    for (const effect of tr.effects) {
-      if (effect.is(blockMetadataEffect)) {
-        blocksFromEffect = effect.value;
-        break;
-      }
-    }
-
-    if (blocksFromEffect === null) {
-      // If the block attributes effect is not present, then this transaction
-      // is made by the user, we need to update the block attributes accroding
-      // to the latest syntax tree.
-      return updateBlocks(blocks, tr);
-    } else {
-      // Otherwise, we need to update the block attributes according to the
-      // metadata sent from the runtime. Most importantly, we need to translate
-      // the position of each block after the changes has been made.
-      return blocksFromEffect.map((block) => block.map(tr));
-    }
-  },
-});
-
-export const blockMetadataExtension = blockMetadataField.extension;

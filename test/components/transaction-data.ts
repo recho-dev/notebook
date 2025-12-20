@@ -1,4 +1,4 @@
-import {blockMetadataEffect} from "../../editor/blockMetadata.ts";
+import {blockMetadataEffect} from "../../editor/blocks/effect.ts";
 import type {BlockMetadata} from "../../editor/blocks/BlockMetadata.ts";
 import {Transaction as Tr} from "@codemirror/state";
 
