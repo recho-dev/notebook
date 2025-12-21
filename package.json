@@ -62,7 +62,7 @@
     "@codemirror/language-data": "^6.5.2",
     "@codemirror/lint": "^6.9.2",
     "@codemirror/state": "^6.5.2",
-    "@codemirror/view": "^6.39.2",
+    "@codemirror/view": "^6.39.4",
     "@fontsource-variable/inter": "^5.2.8",
     "@fontsource-variable/spline-sans-mono": "^5.2.8",
     "@lezer/highlight": "^1.2.3",

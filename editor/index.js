@@ -84,8 +84,13 @@ export function createEditor(container, options) {
   let isStopByMetaKey = false;
 
   function initRuntime() {
-    runtimeRef.current = createRuntime(view.state.doc.toString());
-    runtimeRef.current.onChanges(dispatch);
+    const runtime = createRuntime(view.state.doc.toString());
+    runtimeRef.current = runtime;
+    runtime.onChanges(dispatch);
+
+    // Stop the runtime when there is an error.
+    runtime.onError(stop);
+
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
     window.addEventListener("openlink", onOpenLink);
@@ -138,23 +143,39 @@ export function createEditor(container, options) {
     runtimeRef.current?.setIsRunning(true);
   }
 
+  function stop() {
+    runtimeRef.current?.destroy();
+    runtimeRef.current = null;
+    window.removeEventListener("keydown", onKeyDown);
+    window.removeEventListener("keyup", onKeyUp);
+    window.removeEventListener("openlink", onOpenLink);
+  }
+
+  /** Run the runtime. Initialize a new runtime if it doesn't exist. */
+  function run() {
+    try {
+      if (!runtimeRef.current) initRuntime();
+      runtimeRef.current.run();
+    } catch (error) {
+      console.error(error);
+      onError?.(error);
+    }
+  }
+
   return {
-    run: () => {
-      try {
-        if (!runtimeRef.current) initRuntime();
-        runtimeRef.current.run();
-      } catch (error) {
-        console.error(error);
-        onError?.(error);
+    /** @param {boolean} force - Whether to force run the code even if it's already running */
+    run: (force = false) => {
+      if (runtimeRef.current?.isRunning()) {
+        if (force) {
+          stop();
+          runtimeRef.current.run();
+        } else {
+          return;
+        }
       }
+      run();
     },
-    stop: () => {
-      runtimeRef.current?.destroy();
-      runtimeRef.current = null;
-      window.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("keyup", onKeyUp);
-      window.removeEventListener("openlink", onOpenLink);
-    },
+    stop,
     on: (event, callback) => dispatcher.on(event, callback),
     destroy: () => {
       runtimeRef.current?.destroy();
