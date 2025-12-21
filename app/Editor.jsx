@@ -64,7 +64,10 @@ export function Editor({
 
   useEffect(() => {
     const onKeyDown = (e) => {
-      if (e.metaKey && e.key === "s") setNeedRerun(false);
+      if (e.metaKey && e.key === "s") {
+        setNeedRerun(false);
+        editorRef.current.run(false);
+      }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
