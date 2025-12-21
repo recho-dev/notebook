@@ -85,7 +85,7 @@ export function createEditor(container, options) {
 
   function initRuntime() {
     const runtime = createRuntime(view.state.doc.toString());
-    runtimeRef.current = runtime
+    runtimeRef.current = runtime;
     runtime.onChanges(dispatch);
 
     // Stop the runtime when there is an error.
@@ -168,7 +168,7 @@ export function createEditor(container, options) {
       if (runtimeRef.current?.isRunning()) {
         if (force) {
           stop();
-          runtimeRef.current.run()
+          runtimeRef.current.run();
         } else {
           return;
         }
