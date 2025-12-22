@@ -73,7 +73,7 @@ export function createRuntime(initialCode) {
 
   const main = runtime.module();
   const nodesByKey = new Map();
-  const dispatcher = d3Dispatch("changes");
+  const dispatcher = d3Dispatch("changes", "error");
 
   const refresh = debounce((code) => {
     const changes = removeChanges(code);
@@ -145,6 +145,10 @@ export function createRuntime(initialCode) {
     dispatcher.on("changes", callback);
   }
 
+  function onError(callback) {
+    dispatcher.on("error", callback);
+  }
+
   function destroy() {
     runtime.dispose();
   }
@@ -185,6 +189,7 @@ export function createRuntime(initialCode) {
       const errorMsg = addPrefix(new Inspector(error).format(), ERROR_PREFIX) + "\n";
       changes.push({from, insert: errorMsg});
       dispatch(changes);
+      dispatcher.call("error", null, {source: "split", error});
       return null;
     }
   }
@@ -381,5 +386,5 @@ export function createRuntime(initialCode) {
     rerun(code);
   }
 
-  return {setCode, setIsRunning, run, onChanges, destroy, isRunning: () => isRunning, buttonRegistry};
+  return {setCode, setIsRunning, run, onChanges, onError, destroy, isRunning: () => isRunning, buttonRegistry};
 }
