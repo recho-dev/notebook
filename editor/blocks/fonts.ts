@@ -1,10 +1,6 @@
 import {Decoration} from "@codemirror/view";
 
-export const supportedTypefaces = new Set([
-  "Cascadia Code",
-  "Google Sans Code",
-  "Fira Code",
-]);
+export const supportedTypefaces = new Set(["Cascadia Code", "Google Sans Code", "Fira Code"]);
 
 // Map typeface names to Google Fonts API URLs and actual font family names
 export const typefaceConfig: Record<string, {url: string; family: string}> = {
@@ -24,7 +20,7 @@ export const typefaceConfig: Record<string, {url: string; family: string}> = {
     url: "https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&display=swap",
     family: "Geist Mono",
   },
-  "Iosevka": {
+  Iosevka: {
     url: "https://iosevka-webfonts.github.io/iosevka/Iosevka.css",
     family: "Iosevka Web",
   },
@@ -77,7 +73,7 @@ export async function loadFont(typeface: string): Promise<void> {
     link.rel = "stylesheet";
     link.href = config.url;
     link.crossOrigin = "anonymous";
-    
+
     // Wait for the stylesheet to load
     await new Promise<void>((resolve, reject) => {
       link.onload = () => {
@@ -111,4 +107,3 @@ export function createTypefaceDecoration(typeface: string) {
     },
   });
 }
-
