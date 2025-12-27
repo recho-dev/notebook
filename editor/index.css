@@ -143,6 +143,61 @@
     /*background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%237d7d7d' fill-opacity='0.4' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");*/
   }
 
+  .cm-output-line.cm-compact-line {
+    line-height: 1;
+  }
+
+  .cm-debug-mark {
+    &.red {
+      background-color: #fbbf2440;
+    }
+    &.green {
+      background-color: #009a5753;
+    }
+    &.blue {
+      background-color: #0088f653;
+    }
+  }
+
+  .cm-blockIndicators {
+    padding-left: 0.25rem;
+
+    --gap-between-blocks: 2px;
+  }
+
+  .cm-gutterElement .cm-block-indicator {
+    width: 0.25rem;
+    height: 100%;
+
+    &.output {
+      background: #72aa006e;
+    }
+
+    &.source {
+      background: #1f180021;
+    }
+
+    &.error {
+      background: #df2600d1;
+    }
+
+    &.head {
+      height: calc(100% - var(--gap-between-blocks));
+      /*border-top-left-radius: 0.25rem;
+      border-top-right-radius: 0.25rem;*/
+
+      &:not(.tail) {
+        transform: translate(0, var(--gap-between-blocks));
+      }
+    }
+
+    &.tail {
+      height: calc(100% - var(--gap-between-blocks));
+      /*border-bottom-left-radius: 0.25rem;
+      border-bottom-right-radius: 0.25rem;*/
+    }
+  }
+
   /* We can't see background color, which is conflict with selection background color.
    * So we use svg pattern to simulate the background color.
    */

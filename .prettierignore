@@ -1,2 +1,3 @@
 *.recho.js
 test/output/*
+pnpm-lock.yaml

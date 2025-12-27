@@ -1,25 +1,19 @@
 import {transpileJavaScript} from "@observablehq/notebook-kit";
 import {Runtime} from "@observablehq/runtime";
 import {parse} from "acorn";
-import {group, groups, max} from "d3-array";
+import {group} from "d3-array";
 import {dispatch as d3Dispatch} from "d3-dispatch";
 import * as stdlib from "./stdlib/index.js";
 import {Inspector} from "./stdlib/inspect.js";
-import {OUTPUT_MARK, ERROR_MARK} from "./constant.js";
+import {BlockMetadata} from "../editor/blocks/BlockMetadata.ts";
+import {blockMetadataEffect} from "../editor/blocks/effect.ts";
+import {IntervalTree} from "../lib/IntervalTree.ts";
 import {transpileRechoJavaScript} from "./transpile.js";
-import {table, getBorderCharacters} from "table";
 import {ButtonRegistry, makeButton} from "./controls/button.js";
-
-const OUTPUT_PREFIX = `//${OUTPUT_MARK}`;
-
-const ERROR_PREFIX = `//${ERROR_MARK}`;
+import {addPrefix, makeOutput, OUTPUT_PREFIX, ERROR_PREFIX} from "./output.js";
 
 function uid() {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-}
-
-function isError(value) {
-  return value instanceof Error;
 }
 
 function safeEval(code, inputs, __setEcho__) {
@@ -47,55 +41,6 @@ function debounce(fn, delay = 0) {
     clearTimeout(timeout);
     timeout = setTimeout(() => fn(...args), delay);
   };
-}
-
-function padStringWidth(string) {
-  const lines = string.split("\n");
-  const maxLength = max(lines, (line) => line.length);
-  return lines.map((line) => line.padEnd(maxLength)).join("\n");
-}
-
-function padStringHeight(string, height) {
-  const lines = string.split("\n");
-  const diff = height - lines.length;
-  return lines.join("\n") + "\n".repeat(diff);
-}
-
-function merge(...strings) {
-  const maxHeight = max(strings, (string) => string.split("\n").length);
-  const aligned = strings
-    .map((string) => padStringHeight(string, maxHeight))
-    .map((string) => padStringWidth(string))
-    .map((string) => string.split("\n"));
-  let output = "";
-  for (let i = 0; i < maxHeight; i++) {
-    for (let j = 0; j < aligned.length; j++) {
-      const line = aligned[j][i];
-      output += line;
-      output += j < aligned.length - 1 ? " " : "";
-    }
-    output += i < maxHeight - 1 ? "\n" : "";
-  }
-  return output;
-}
-
-function addPrefix(string, prefix) {
-  const lines = string.split("\n");
-  return lines.map((line) => `${prefix} ${line}`).join("\n");
-}
-
-function withTable(groups) {
-  return groups.length > 1 || groups[0][0] !== undefined;
-}
-
-function columns(data, options) {
-  const values = data[0].slice(1);
-  let output = "";
-  for (let i = 0; i < values.length; i++) {
-    output += values[i];
-    output += i < values.length - 1 ? "\n" : "";
-  }
-  return output;
 }
 
 export function createRuntime(initialCode) {
@@ -133,63 +78,55 @@ export function createRuntime(initialCode) {
   const refresh = debounce((code) => {
     const changes = removeChanges(code);
 
+    // Construct an interval tree containing the ranges to be deleted.
+    const removedIntervals = IntervalTree.from(changes, ({from, to}, index) =>
+      from === to ? null : {interval: {low: from, high: to - 1}, data: index},
+    );
+
     // Process and format output for all execution nodes
     const nodes = Array.from(nodesByKey.values()).flat(Infinity);
+    const blocks = [];
     for (const node of nodes) {
       const start = node.start;
       const {values} = node.state;
-      if (!values.length) continue;
+      const sourceRange = {from: node.start, to: node.end};
 
-      // Group values by key. Each group is a row if using table, otherwise a column.
-      const groupValues = groups(values, (v) => v.options?.key);
-
-      // We need to remove the trailing newline for table.
-      const format = withTable(groupValues) ? (...V) => table(...V).trimEnd() : columns;
-
-      // If any value is an error, set the error flag.
-      let error = false;
-
-      // Create a table to store the formatted values.
-      const data = [];
-
-      for (const [key, V] of groupValues) {
-        const values = V.map((v) => v.values);
-
-        // Format the key as a header for table.
-        const row = ["{" + key + "}"];
-
-        for (let i = 0; i < values.length; i++) {
-          const line = values[i];
-          const n = line.length;
-
-          // Each cell can have multiple values. Format each value as a string.
-          const items = line.map((v) => {
-            if (isError(v)) error = true;
-
-            // Disable string quoting for multi-value outputs to improve readability.
-            // Example: echo("a =", 1) produces "a = 1" instead of "a = "1""
-            const options = n === 1 ? {} : {quote: false};
-            const inspector = v instanceof Inspector ? v : new Inspector(v, options);
-            return inspector.format();
-          });
-
-          // Merge all formatted values into a single cell.
-          row.push(merge(...items));
-        }
-
-        data.push(row);
+      if (!values.length) {
+        // Create a block even if there are no values.
+        blocks.push(new BlockMetadata(node.id, node.type, null, sourceRange, node.state.attributes));
+        continue;
       }
 
-      // Format the table into a single string and add prefix.
-      const formatted = format(data, {
-        border: getBorderCharacters("ramac"),
-        columnDefault: {alignment: "right"},
-      });
-      const prefixed = addPrefix(formatted, error ? ERROR_PREFIX : OUTPUT_PREFIX);
-      changes.push({from: start, insert: prefixed + "\n"});
+      const {output, error} = makeOutput(values);
+
+      // The range of line numbers of output lines.
+      let outputRange = null;
+
+      // Search for existing changes and update the inserted text if found.
+      const entry = removedIntervals.contains(start - 1);
+
+      // Entry not found. This is a new output.
+      if (entry === null) {
+        changes.push({from: start, insert: output + "\n"});
+        outputRange = {from: start, to: start};
+      } else {
+        const change = changes[entry.data];
+        change.insert = output + "\n";
+        outputRange = {from: change.from, to: change.to};
+      }
+
+      // Add this block to the block metadata array.
+      const block = new BlockMetadata(node.id, node.type, outputRange, sourceRange, node.state.attributes);
+      block.error = error;
+      blocks.push(block);
     }
 
-    dispatch(changes);
+    blocks.sort((a, b) => a.from - b.from);
+
+    // Attach block positions and attributes as effects to the transaction.
+    const effects = [blockMetadataEffect.of(blocks)];
+
+    dispatch(changes, effects);
   }, 0);
 
   function setCode(newCode) {
@@ -200,8 +137,8 @@ export function createRuntime(initialCode) {
     isRunning = value;
   }
 
-  function dispatch(changes) {
-    dispatcher.call("changes", null, changes);
+  function dispatch(changes, effects = []) {
+    dispatcher.call("changes", null, {changes, effects});
   }
 
   function onChanges(callback) {
@@ -237,6 +174,9 @@ export function createRuntime(initialCode) {
 
   function split(code) {
     try {
+      // The `parse` call here is actually unnecessary. Parsing the entire code
+      // is quite expensive. If we can perform the splitting operation through
+      // the editor's syntax tree, we can save the parsing here.
       return parse(code, {ecmaVersion: "latest", sourceType: "module"}).body;
     } catch (error) {
       console.error(error);
@@ -263,29 +203,44 @@ export function createRuntime(initialCode) {
     }
   }
 
+  /**
+   * Get the changes that remove the output lines from the code.
+   * @param {string} code The code to remove changes from.
+   * @returns {{from: number, to: number, insert: ""}[]} An array of changes.
+   */
   function removeChanges(code) {
-    const changes = [];
-
-    const oldOutputs = code
-      .split("\n")
-      .map((l, i) => [l, i])
-      .filter(([l]) => l.startsWith(OUTPUT_PREFIX) || l.startsWith(ERROR_PREFIX))
-      .map(([_, i]) => i);
-
-    const lineOf = (i) => {
-      const lines = code.split("\n");
-      const line = lines[i];
-      const from = lines.slice(0, i).join("\n").length;
-      const to = from + line.length;
-      return {from, to};
-    };
-
-    for (const i of oldOutputs) {
-      const line = lineOf(i);
-      const from = line.from;
-      const to = line.to + 1 > code.length ? line.to : line.to + 1;
-      changes.push({from, to, insert: ""});
+    function matchAt(index) {
+      return code.startsWith(OUTPUT_PREFIX, index) || code.startsWith(ERROR_PREFIX, index);
     }
+
+    /** Line number ranges (left-closed and right-open) of lines that contain output or error. */
+    const lineNumbers = matchAt(0) ? [{begin: 0, end: 1}] : [];
+    /**
+     * The index of the first character of each line.
+     * If the code ends with a newline, the last index is the length of the code.
+     */
+    const lineStartIndices = [0];
+    let nextNewlineIndex = code.indexOf("\n", 0);
+    while (0 <= nextNewlineIndex && nextNewlineIndex < code.length) {
+      lineStartIndices.push(nextNewlineIndex + 1);
+      if (matchAt(nextNewlineIndex + 1)) {
+        const lineNumber = lineStartIndices.length - 1;
+        if (lineNumbers.length > 0 && lineNumber === lineNumbers[lineNumbers.length - 1].end) {
+          // Extend the last line number range.
+          lineNumbers[lineNumbers.length - 1].end += 1;
+        } else {
+          // Append a new line number range.
+          lineNumbers.push({begin: lineNumber, end: lineNumber + 1});
+        }
+      }
+      nextNewlineIndex = code.indexOf("\n", nextNewlineIndex + 1);
+    }
+
+    const changes = lineNumbers.map(({begin, end}) => ({
+      from: lineStartIndices[begin],
+      to: lineStartIndices[end],
+      insert: "",
+    }));
 
     return changes;
   }
@@ -318,6 +273,7 @@ export function createRuntime(initialCode) {
     for (const node of nodes) {
       const cell = code.slice(node.start, node.end);
       const transpiled = transpile(cell);
+      node.id = uid();
       node.transpiled = transpiled;
     }
 
@@ -364,9 +320,16 @@ export function createRuntime(initialCode) {
     // Derived from Observable Notebook Kit's define.
     // https://github.com/observablehq/notebook-kit/blob/02914e034fd21a50ebcdca08df57ef5773864125/src/runtime/define.ts#L33
     for (const node of enter) {
-      const vid = uid();
+      const vid = node.id;
       const {inputs, body, outputs, error = null} = node.transpiled;
-      const state = {values: [], variables: [], error: null, syntaxError: error, doc: false};
+      const state = {
+        values: [],
+        variables: [],
+        error: null,
+        syntaxError: error,
+        doc: false,
+        attributes: Object.create(null),
+      };
       node.state = state;
       const v = main.variable(observer(state), {shadow: {}});
 
@@ -390,6 +353,10 @@ export function createRuntime(initialCode) {
           };
           const disposes = [];
           __echo__.clear = () => clear(state);
+          __echo__.set = function (key, value) {
+            state.attributes[key] = value;
+            return this;
+          };
           __echo__.dispose = (cb) => disposes.push(cb);
           __echo__.key = (k) => ((options.key = k), __echo__);
           __echo__.__dispose__ = () => disposes.forEach((cb) => cb());

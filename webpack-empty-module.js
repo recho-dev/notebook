@@ -14,4 +14,3 @@ export default emptyModule;
 
 // Also export as named export for compatibility
 export {emptyModule};
-
