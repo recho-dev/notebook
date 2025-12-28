@@ -1,5 +1,15 @@
 import * as jsTests from "./js/index.js";
 import {createEditor} from "../editor/index.js";
+import {createTransactionViewer} from "./transactionViewer.js";
+
+// The main and side panels
+const mainPanel = document.createElement("main");
+mainPanel.id = "main-panel";
+document.body.append(mainPanel);
+
+const sidePanels = document.createElement("aside");
+sidePanels.id = "side-panels";
+document.body.append(sidePanels);
 
 // Select
 const select = createSelect(() => {
@@ -9,26 +19,40 @@ const select = createSelect(() => {
 });
 const options = Object.keys(jsTests).map(createOption);
 select.append(...options);
-document.body.append(select);
+mainPanel.append(select);
 
 const container = document.createElement("div");
 container.id = "container";
-document.body.append(container);
+mainPanel.append(container);
 
 // Init app name.
 const initialValue = new URL(location).searchParams.get("name");
 if (jsTests[initialValue]) select.value = initialValue;
 
 let preEditor = null;
+let transactionViewer = null;
 render();
 
 async function render() {
   container.innerHTML = "";
   if (preEditor) preEditor.destroy();
+  if (transactionViewer) transactionViewer.destroy();
+
+  // Clear and reset side panels
+  sidePanels.innerHTML = "";
+
+  // Create transaction viewer
+  transactionViewer = createTransactionViewer(sidePanels);
+
   const editorContainer = document.createElement("div");
   const code = jsTests[select.value];
-  const editor = (preEditor = createEditor(editorContainer, {code}));
+  const editor = (preEditor = createEditor(editorContainer, {
+    code,
+    extensions: [transactionViewer.plugin],
+  }));
   editor.run();
+  preEditor = editor;
+
   const runButton = document.createElement("button");
   runButton.textContent = "Run";
   runButton.onclick = () => editor.run();
