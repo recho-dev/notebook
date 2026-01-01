@@ -41,33 +41,40 @@ export default function Page() {
   }
 
   return (
-    <div className={cn("max-w-screen-lg lg:mx-auto mx-4 my-10")}>
-      {notebooks.map((notebook) => (
-        <div key={notebook.id} className={cn("mt-10")}>
-          <div className={cn("flex items-center justify-between mb-2")}>
-            <div>
-              <Link href={`/works/${notebook.id}`} className={cn("font-semibold hover:underline text-blue-500")}>
-                <span>{notebook.title}</span>
-              </Link>
-              <div className={cn("text-sm text-gray-500")}>
-                Created {new Date(notebook.created).toLocaleDateString()}
+    <div className={cn("max-w-screen-xl lg:mx-auto mx-4 my-4")}>
+      <div className={cn("grid gap-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-10")}>
+        {notebooks.map((notebook) => (
+          <div key={notebook.id}>
+            <div className={cn("flex items-center justify-between mb-3")}>
+              <div className={cn("flex-1 min-w-0")}>
+                <Link
+                  href={`/works/${notebook.id}`}
+                  className={cn("font-semibold hover:underline text-blue-500 block truncate")}
+                >
+                  <span>{notebook.title}</span>
+                </Link>
+                <div className={cn("text-sm text-gray-500")}>
+                  Created {new Date(notebook.created).toLocaleDateString()}
+                </div>
+              </div>
+              <button
+                onClick={() => onDelete(notebook.id)}
+                className={cn("hover:scale-110 transition-transform duration-100 ml-2 flex-shrink-0")}
+              >
+                <Trash className={cn("w-4 h-4")} />
+              </button>
+            </div>
+            <div className={cn("w-full pt-[62.5%] relative border border-gray-200 rounded-md overflow-hidden")}>
+              <div className={cn("absolute inset-0 px-3")}>
+                <ThumbnailClient
+                  code={notebook.content}
+                  outputStartLine={findFirstOutputRange(notebook.content).startLine}
+                />
               </div>
             </div>
-            <button
-              onClick={() => onDelete(notebook.id)}
-              className={cn("hover:scale-110 transition-transform duration-100")}
-            >
-              <Trash className={cn("w-4 h-4")} />
-            </button>
           </div>
-          <div className={cn("w-full  border border-gray-200 rounded-md overflow-hidden max-h-[180px] px-3")}>
-            <ThumbnailClient
-              code={notebook.content}
-              outputStartLine={findFirstOutputRange(notebook.content).startLine}
-            />
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
