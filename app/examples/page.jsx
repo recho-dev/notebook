@@ -32,7 +32,13 @@ export default function Page() {
       <Suspense fallback={<div className={cn("flex flex-wrap gap-2 items-center")}>Loading filters...</div>}>
         <LabelFilters allLabels={allLabels} />
       </Suspense>
-      <ExamplesClient examples={examples} />
+      <Suspense
+        fallback={
+          <div className={cn("grid gap-12 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mt-10")}>Loading examples...</div>
+        }
+      >
+        <ExamplesClient examples={examples} />
+      </Suspense>
     </div>
   );
 }

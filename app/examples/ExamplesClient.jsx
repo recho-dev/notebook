@@ -44,8 +44,7 @@ export function ExamplesClient({examples}) {
                   style={{backgroundImage: `url(/notebook/examples/${example.snap})`}}
                 />
               ) : (
-                // <ThumbnailClient code={example.content} outputStartLine={example.outputStartLine} />
-                <div>Loading...</div>
+                <ThumbnailClient code={example.content} outputStartLine={example.outputStartLine} />
               )}
             </div>
           </div>
