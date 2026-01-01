@@ -1,4 +1,4 @@
-import {Suspense} from "react";
+import {Suspense, cache} from "react";
 import {getAllJSExamples} from "../utils.js";
 import {cn} from "../cn.js";
 import {Meta} from "../Meta.js";
@@ -10,9 +10,11 @@ export const metadata = {
   description: "Examples | Recho Notebook",
 };
 
-const examples = getAllJSExamples();
+const getCachedExamples = cache(getAllJSExamples);
 
 export default async function Page({searchParams}) {
+  const examples = getCachedExamples();
+
   // Extract all unique labels from examples
   const allLabels = new Set();
   examples.forEach((example) => {
