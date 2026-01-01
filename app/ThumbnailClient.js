@@ -12,5 +12,5 @@ export function ThumbnailClient({code, outputStartLine = null}) {
       setHtml(html);
     });
   }, [code]);
-  return <Thumbnail html={html} outputStartLine={outputStartLine} />;
+  return <>{html ? <Thumbnail html={html} outputStartLine={outputStartLine} /> : <div>Rendering...</div>}</>;
 }
