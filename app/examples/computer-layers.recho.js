@@ -13,7 +13,7 @@
  * =                            Computer Layers                               =
  * ============================================================================
  *
- * > Computer can be seen as layers of technology, with increasing complexity and
+ * > Computers can be seen as layers of technology, with increasing complexity and
  * > abstraction as they go up. Programming can happen at different layers.
  *
  * - By Everest Pipkin, 2020
