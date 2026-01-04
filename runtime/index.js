@@ -1,5 +1,5 @@
 import {transpileJavaScript} from "@observablehq/notebook-kit";
-import {Runtime} from "@observablehq/runtime";
+import {Runtime} from "../lib/runtime";
 import {parse} from "acorn";
 import {group} from "d3-array";
 import {dispatch as d3Dispatch} from "d3-dispatch";
