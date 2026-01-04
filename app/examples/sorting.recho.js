@@ -3,9 +3,9 @@
  * @author Bairui Su
  * @created 2026-01-03
  * @github pearmini
- * @pull_request 207
+ * @pull_request 205
  * @thumbnail_start 24
- * @label Beginner
+ * @label Algorithm
  */
 
 /**
