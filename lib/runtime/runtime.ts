@@ -1,9 +1,9 @@
 import {noop, defer, defaultGlobal} from "./utils.ts";
 import {RuntimeError} from "./errors.ts";
 import {Module} from "./module.ts";
-import {Variable, type Observer} from "./variable.ts";
+import {Variable, type ObserverInput} from "./variable.ts";
 
-const frame =
+const frame: (callback: (value: unknown) => void) => void =
   typeof requestAnimationFrame === "function"
     ? requestAnimationFrame
     : typeof setImmediate === "function"
@@ -12,7 +12,7 @@ const frame =
 
 export type Builtins = Record<string, unknown>;
 export type GlobalFunction = (name: string) => unknown;
-export type ModuleDefinition = (runtime: Runtime, observer: (name?: string) => Observer) => Module;
+export type ModuleDefinition = (runtime: Runtime, observer: (name?: string) => ObserverInput) => Module;
 
 /**
  * Runtime manages the reactive computation graph.
@@ -242,11 +242,8 @@ export class Runtime {
    * @returns The created or existing module
    */
   module(): Module;
-  module(define: ModuleDefinition, observer?: (name?: string) => Observer): Module;
-  module(
-    define?: ModuleDefinition,
-    observer: (name?: string) => Observer = noop as unknown as (name?: string) => Observer,
-  ): Module {
+  module(define: ModuleDefinition, observer?: (name?: string) => ObserverInput): Module;
+  module(define?: ModuleDefinition, observer: (name?: string) => ObserverInput = noop as () => undefined): Module {
     let module: Module;
 
     if (define === undefined) {

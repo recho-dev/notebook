@@ -1,6 +1,13 @@
 import {constant, identity, rethrow} from "./utils.ts";
 import {RuntimeError} from "./errors.ts";
-import {Variable, no_observer, variable_stale, type ObserverLike, type VariableOptions} from "./variable.ts";
+import {
+  Variable,
+  no_observer,
+  variable_stale,
+  type ObserverInput,
+  type VariableDefineParameters,
+  type VariableOptions,
+} from "./variable.ts";
 import type {Runtime} from "./runtime.ts";
 
 export interface InjectSpecifier {
@@ -111,9 +118,13 @@ export class Module {
    * @param args The definition arguments (name, inputs, definition) - see Variable.define for details
    * @returns The newly created variable
    */
-  define(...args: Parameters<Variable["define"]>): Variable {
+  define(definition: unknown): Variable;
+  define(name: string | null, definition: unknown): Variable;
+  define(inputs: ArrayLike<string>, definition: unknown): Variable;
+  define(name: string | null, inputs: ArrayLike<string>, definition: unknown): Variable;
+  define(...args: VariableDefineParameters): Variable {
     const v = new Variable(Variable.Type.NORMAL, this);
-    return v.define(...args);
+    return v.define(...(args as Parameters<Variable["define"]>));
   }
 
   /**
@@ -121,9 +132,12 @@ export class Module {
    * @param args The import arguments (remote name, local name, module) - see Variable.import for details
    * @returns The newly created import variable
    */
-  import(...args: Parameters<Variable["import"]>): Variable {
+  import(remote: string, module: Module): Variable;
+  import(remote: string, name: string, module: Module): Variable;
+  import(remote: string, nameOrModule: string | Module, module?: Module): Variable;
+  import(...args: [string, Module] | [string, string, Module] | [string, string | Module, Module?]): Variable {
     const v = new Variable(Variable.Type.NORMAL, this);
-    return v.import(...args);
+    return v.import(...(args as Parameters<Variable["import"]>));
   }
 
   /**
@@ -132,7 +146,7 @@ export class Module {
    * @param options Optional variable options (e.g., shadow variables)
    * @returns The newly created variable
    */
-  variable(observer?: ObserverLike, options?: VariableOptions): Variable {
+  variable(observer?: ObserverInput, options?: VariableOptions): Variable {
     return new Variable(Variable.Type.NORMAL, this, observer, options);
   }
 

@@ -18,11 +18,20 @@ export interface Observer {
   _node?: Element;
 }
 
+/**
+ * A default observer that does nothing.
+ */
+const defaultObserver: Observer = {
+  pending: noop,
+  fulfilled: noop,
+  rejected: noop,
+};
+
 export interface VariableOptions {
   shadow?: Record<string, unknown>;
 }
 
-export type ObserverLike = boolean | Observer | symbol;
+export type ObserverInput = boolean | Observer | typeof no_observer | null | undefined;
 
 export type VariableDefinition = (...args: unknown[]) => unknown;
 
@@ -64,7 +73,7 @@ export class Variable {
   static readonly VISIBILITY = Symbol("visibility");
 
   // Read-only cross-class access (getters only)
-  private _observer: Observer | symbol;
+  private _observer: Observer | typeof no_observer;
   private _definition: VariableDefinition;
   private _duplicate?: VariableDefinition;
   private _duplicates?: Set<Variable>;
@@ -174,10 +183,14 @@ export class Variable {
    * @param observer - Optional observer for notifications (true creates default observer, false/undefined means no observer)
    * @param options - Optional configuration including shadow variables
    */
-  constructor(type: VariableType, module: Module, observer?: ObserverLike, options?: VariableOptions) {
-    if (!observer) observer = no_observer;
+  constructor(type: VariableType, module: Module, observer?: ObserverInput, options?: VariableOptions) {
+    if (observer === true) {
+      observer = defaultObserver;
+    } else if (!observer) {
+      observer = no_observer;
+    }
 
-    this._observer = observer as Observer | symbol;
+    this._observer = observer;
     this._definition = variable_undefined;
     this._duplicate = undefined;
     this._duplicates = undefined;
@@ -202,8 +215,8 @@ export class Variable {
    * @internal
    */
   _pending(): void {
-    if (this._observer !== no_observer && typeof (this._observer as Observer).pending === "function") {
-      (this._observer as Observer).pending!();
+    if (this._observer !== no_observer && typeof this._observer.pending === "function") {
+      this._observer.pending!();
     }
   }
 
@@ -214,8 +227,8 @@ export class Variable {
    * @internal
    */
   _fulfilled(value: unknown): void {
-    if (this._observer !== no_observer && typeof (this._observer as Observer).fulfilled === "function") {
-      (this._observer as Observer).fulfilled!(value, this._name);
+    if (this._observer !== no_observer && typeof this._observer.fulfilled === "function") {
+      this._observer.fulfilled!(value, this._name);
     }
   }
 
@@ -226,8 +239,8 @@ export class Variable {
    * @internal
    */
   _rejected(error: unknown): void {
-    if (this._observer !== no_observer && typeof (this._observer as Observer).rejected === "function") {
-      (this._observer as Observer).rejected!(error, this._name);
+    if (this._observer !== no_observer && typeof this._observer.rejected === "function") {
+      this._observer.rejected!(error, this._name);
     }
   }
 
