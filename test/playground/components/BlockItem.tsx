@@ -21,12 +21,12 @@ export function BlockItem({block, onLocate}: {block: BlockData; onLocate: (from:
       }`}
     >
       <summary className="px-2 py-1.5 cursor-pointer hover:bg-gray-50 flex justify-between items-center overflow-hidden">
-        <section className="flex flex-row gap-1 items-center flex-shrink-0">
+        <section className="flex flex-row gap-1 items-center shrink-0">
           <span className="font-mono font-medium">{block.index + 1}</span>
           {block.hasError && <CircleXIcon className="w-4 h-4" />}
           {hasOutput && !block.hasError && <SquareTerminalIcon className="w-4 h-4" />}
         </section>
-        <div className="min-w-0 flex-1 flex flex-col gap-0 5 min-w-0 flex-1">
+        <div className="min-w-0 flex-1 flex flex-col gap-0 5">
           <span className="font-mono truncate mx-2 font-semibold">{block.name}</span>
           <span className="font-mono truncate mx-2 text-stone-500 text-xs">{block.id}</span>
         </div>

@@ -2,7 +2,7 @@ import {EditorView, ViewPlugin, ViewUpdate, type PluginValue} from "@codemirror/
 import {useAtom} from "jotai";
 import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {Panel, PanelGroup, PanelResizeHandle} from "react-resizable-panels";
-import * as testSamples from "../js/index.js";
+import * as testSamples from "@/test/js/index.js";
 import {selectedTestAtom} from "../store.ts";
 import {BlockViewer} from "./BlockViewer.tsx";
 import {Editor} from "./Editor.tsx";

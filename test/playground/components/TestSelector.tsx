@@ -1,6 +1,6 @@
 import {useAtom} from "jotai";
 import {selectedTestAtom, getTestSampleName} from "../store.ts";
-import * as testSamples from "../js/index.js";
+import * as testSamples from "@/test/js/index.js";
 import {ChevronLeftIcon, ChevronRightIcon} from "lucide-react";
 import {useEffect, useMemo} from "react";
 
