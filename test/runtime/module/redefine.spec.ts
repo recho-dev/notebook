@@ -38,7 +38,4 @@ it("module.redefine(name, inputs, definition) throws an error if the specified v
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const foo = module.variable(true).define("foo", [], () => 42);
   assert.throws(() => module.redefine("bar", [], () => 43), /bar is not defined/);
-  // Note: The following line is the original test. But there is an additional
-  // argument 43.
-  // assert.throws(() => module.redefine("bar", [], () => 43, foo), /bar is not defined/);
 });

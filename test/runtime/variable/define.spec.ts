@@ -183,9 +183,6 @@ it("variable.define terminates previously reachable generators", async () => {
   assert.deepStrictEqual(await valueof(foo), {value: 1});
   foo.define("foo", [], () => "foo");
   assert.deepStrictEqual(await valueof(foo), {value: "foo"});
-  // Note: The property `_generator` has never appeared in the original
-  // implementation. I guess it's not necessary to check it.
-  // assert.strictEqual(bar._generator, undefined);
   assert.strictEqual(returned, true);
 });
 
