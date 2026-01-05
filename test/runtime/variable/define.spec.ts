@@ -170,8 +170,7 @@ it("variable.define terminates previously reachable generators", async () => {
   const runtime = new Runtime();
   const main = runtime.module();
   const module = runtime.module();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const bar = module.define("bar", [], function* () {
+  const _bar = module.define("bar", [], function* () {
     try {
       while (true) yield 1;
     } finally {

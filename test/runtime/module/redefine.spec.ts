@@ -35,7 +35,6 @@ it("module.redefine(name, inputs, definition) can’t redefine a duplicate defin
 it("module.redefine(name, inputs, definition) throws an error if the specified variable doesn’t exist", async () => {
   const runtime = new Runtime();
   const module = runtime.module();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const foo = module.variable(true).define("foo", [], () => 42);
+  const _foo = module.variable(true).define("foo", [], () => 42);
   assert.throws(() => module.redefine("bar", [], () => 43), /bar is not defined/);
 });
