@@ -207,7 +207,7 @@ export class Runtime {
     } while (updates.size);
 
     function postqueue(variable: Variable): void {
-      variable.indegree = --variable.indegree;
+      variable.decrementIndegree();
       if (variable.indegree === 0) {
         queue.push(variable);
       }

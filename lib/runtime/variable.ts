@@ -543,7 +543,7 @@ export class Variable {
    * Used during topological sorting to track how many dependencies need to resolve.
    */
   incrementIndegree(): void {
-    this._indegree = ++this._indegree;
+    this._indegree += 1;
   }
 
   /**
@@ -552,7 +552,7 @@ export class Variable {
    * Used during topological sorting to track when all dependencies have resolved.
    */
   decrementIndegree(): void {
-    this._indegree = --this._indegree;
+    this._indegree -= 1;
   }
 
   /**
