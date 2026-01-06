@@ -1,5 +1,5 @@
 import {it, expect, describe} from "vitest";
-import {findAdjacentBlocks} from "../lib/blocks.js";
+import {findAdjacentBlocks} from "../../lib/blocks.ts";
 
 describe("findAdjacentBlocks", () => {
   describe("with sorted non-continuous ranges", () => {

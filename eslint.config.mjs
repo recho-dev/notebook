@@ -47,6 +47,19 @@ export default defineConfig([
     files: ["editor/**/*.{ts,tsx}", "runtime/**/*.ts", "test/**/*.{ts,tsx}", "app/**/*.{ts,tsx}", "lib/**/*.ts"],
   })),
   {
+    files: ["editor/**/*.{ts,tsx}", "runtime/**/*.ts", "test/**/*.{ts,tsx}", "app/**/*.{ts,tsx}", "lib/**/*.ts"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+    },
+  },
+  {
     ignores: ["**/*.recho.js", "test/output/**/*"],
   },
   eslintConfigPrettier,

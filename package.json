@@ -26,12 +26,12 @@
   ],
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --config test/playground/vite.config.js",
     "app:dev": "next dev",
     "app:build": "next build",
     "app:start": "next start",
     "test": "npm run test:lint && npm run test:format && npm run test:js",
-    "test:js": "TZ=America/New_York vitest",
+    "test:js": "TZ=America/New_York vitest --config vite.config.js",
     "test:format": "prettier --check editor runtime test app",
     "test:lint": "eslint"
   },
@@ -79,7 +79,6 @@
     "@lezer/highlight": "^1.2.3",
     "@lezer/javascript": "^1.5.4",
     "@observablehq/notebook-kit": "^1.5.0",
-    "@observablehq/runtime": "^6.0.0",
     "@uiw/codemirror-theme-github": "^4.25.4",
     "acorn": "^8.15.0",
     "acorn-walk": "^8.3.4",
