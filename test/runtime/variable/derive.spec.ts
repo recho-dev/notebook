@@ -1,3 +1,9 @@
+// Originally developed by Observable, Inc.
+// Adapted and modified by Recho from @observablehq/runtime v6.0.0
+// Copyright 2018-2024 Observable, Inc.
+// Copyright 2025-2026 Recho
+// ISC License
+
 import {Runtime, type Module, type ModuleDefinition} from "@/lib/runtime/index.ts";
 import assert from "assert";
 import {it} from "vitest";

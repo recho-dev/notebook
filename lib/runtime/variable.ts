@@ -1,3 +1,9 @@
+// Originally developed by Observable, Inc.
+// Adapted and modified by Recho from @observablehq/runtime v6.0.0
+// Copyright 2018-2024 Observable, Inc.
+// Copyright 2025-2026 Recho
+// ISC License
+
 import {map, constant, identity, noop, generatorish, generatorReturn} from "./utils.ts";
 import {RuntimeError} from "./errors.ts";
 import type {Module} from "./module.ts";
