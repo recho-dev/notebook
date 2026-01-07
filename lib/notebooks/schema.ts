@@ -1,13 +1,15 @@
 import Type from "typebox";
 
+const TimestampSchema = Type.Union([Type.Number(), Type.Decode(Type.String(), (value) => new Date(value).getTime())]);
+
 /**
  * A schema for loading data from localStorage.
  */
 export const NotebookSchema = Type.Object({
   id: Type.String(),
   title: Type.String(),
-  created: Type.Number(),
-  updated: Type.Number(),
+  created: TimestampSchema,
+  updated: TimestampSchema,
 
   // For backward compatibility with old notebooks, we make `snapshots` and
   // `content` optional.
