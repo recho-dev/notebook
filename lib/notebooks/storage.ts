@@ -27,7 +27,7 @@ export function loadNotebooksFromStorage(): Notebook[] {
   try {
     const rawObject = JSON.parse(rawString);
     // Parse the notebook first.
-    const rawNotebooks = Value.Parse(NotebooksSchema, rawObject);
+    const rawNotebooks = Value.Decode(NotebooksSchema, rawObject);
     const notebooks: Notebook[] = [];
     for (let i = 0, n = rawNotebooks.length; i < n; i++) {
       let snapshots: Snapshot[];

@@ -1,5 +1,5 @@
-import {loadNotebooksFromStorage} from "../../../lib/notebooks/storage.ts";
-import {RECHO_FILES_KEY} from "../../../lib/notebooks/utils.ts";
+import {loadNotebooksFromStorage} from "@/lib/notebooks/storage.ts";
+import {RECHO_FILES_KEY} from "@/lib/notebooks/utils.ts";
 import {describe, it, expect} from "vitest";
 
 describe("loadNotebooksFromStorage", () => {
@@ -11,16 +11,16 @@ describe("loadNotebooksFromStorage", () => {
     expect(notebooks).toHaveLength(sampleData.length);
 
     for (let i = 0, n = sampleData.length; i < n; i++) {
-      const actual = notebooks[i];
-      const expected = sampleData[i];
-      expect(actual.id).toBe(expected.id);
-      expect(actual.title).toBe(expected.title);
-      expect(actual.created).toBe(expected.created);
-      expect(actual.updated).toBe(expected.updated);
-      expect(actual.autoRun).toBe(expected.autoRun);
-      expect(actual.runtime).toBe(expected.runtime);
-      expect(actual.snapshots).toHaveLength(1);
-      expect(actual.snapshots[0].content).toBe(expected.content);
+      const result = notebooks[i];
+      const original = sampleData[i];
+      expect(result.id).toBe(original.id);
+      expect(result.title).toBe(original.title);
+      expect(result.created).toBe(new Date(original.created).getTime());
+      expect(result.updated).toBe(new Date(original.updated).getTime());
+      expect(result.autoRun).toBe(original.autoRun);
+      expect(result.runtime).toBe(original.runtime);
+      expect(result.snapshots).toHaveLength(1);
+      expect(result.snapshots[0].content).toBe(original.content);
     }
   });
 });
