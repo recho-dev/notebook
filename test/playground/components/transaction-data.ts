@@ -1,5 +1,5 @@
-import {blockMetadataEffect} from "../../editor/blocks/effect.ts";
-import type {BlockMetadata} from "../../editor/blocks/BlockMetadata.ts";
+import {blockMetadataEffect} from "@/editor/blocks/effect.ts";
+import type {BlockMetadata} from "@/editor/blocks/BlockMetadata.ts";
 import {Transaction as Tr} from "@codemirror/state";
 
 export interface TransactionRange {

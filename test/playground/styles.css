@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "../editor/index.css";
+@import "@/editor/index.css";
 @import "@fontsource-variable/inter";
 @import "@fontsource-variable/spline-sans-mono";
 

@@ -1,5 +1,5 @@
 import {it, expect, describe, beforeEach} from "vitest";
-import {IntervalTree} from "../lib/IntervalTree.ts";
+import {IntervalTree} from "../../lib/IntervalTree.ts";
 
 describe("IntervalTree", () => {
   let tree;
