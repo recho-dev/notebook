@@ -1,6 +1,6 @@
 "use client";
 import {useState, useEffect} from "react";
-import {Camera, Trash2, RotateCcw} from "lucide-react";
+import {Camera, RotateCcw} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +14,7 @@ import {cn} from "../../app/cn.js";
 import {Editor} from "../../app/Editor.jsx";
 import {useSnapshots} from "@/lib/notebooks/hooks.ts";
 import type {Notebook, Snapshot} from "@/lib/notebooks/schema.ts";
+import {SnapshotEntry, formatDate} from "./SnapshotEntry.tsx";
 
 export type SnapshotsDialogProps = {
   notebook: Readonly<Notebook>;
@@ -25,7 +26,7 @@ export type SnapshotsDialogProps = {
 };
 
 export function SnapshotsDialog({notebook, open, onOpenChange, createSnapshot, onRestore}: SnapshotsDialogProps) {
-  const {snapshots, deleteSnapshot} = useSnapshots(notebook.id);
+  const {snapshots, renameSnapshot, deleteSnapshot} = useSnapshots(notebook.id);
   const [selectedSnapshot, setSelectedSnapshot] = useState<Snapshot | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
@@ -96,57 +97,21 @@ export function SnapshotsDialog({notebook, open, onOpenChange, createSnapshot, o
                   <p className={cn("text-sm")}>No snapshots yet. Create your first snapshot to get started.</p>
                 </div>
               ) : (
-                <div className={cn("flex flex-col")}>
+                <div className={cn("flex flex-col group")}>
                   {snapshots.map((snapshot, index) => (
-                    <div
+                    <SnapshotEntry
                       key={snapshot.id}
-                      className={cn(
-                        "p-3 border-b border-stone-100 cursor-pointer transition-colors",
-                        selectedSnapshot?.id === snapshot.id
-                          ? "bg-blue-50 border-l-4 border-l-blue-500"
-                          : "hover:bg-stone-50",
-                      )}
-                      onClick={() => setSelectedSnapshot(snapshot)}
-                    >
-                      <div className={cn("flex items-start justify-between gap-2")}>
-                        <div className={cn("flex-1 min-w-0")}>
-                          <div
-                            className={cn(
-                              "font-medium text-sm",
-                              index === 0
-                                ? "text-green-800"
-                                : snapshot.name === null
-                                  ? "text-stone-500"
-                                  : "text-stone-900",
-                            )}
-                          >
-                            {index === 0 ? "The Last Saved Version" : (snapshot.name ?? "Untitled snapshot")}
-                          </div>
-                          <div className={cn("text-xs text-stone-500 mt-1")}>{formatDate(snapshot.created)}</div>
-                        </div>
-                        <div className={cn("flex items-center")}>
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            onClick={(e) => handleDelete(snapshot.id, e)}
-                            className={cn("h-6 w-6 text-stone-500 hover:text-red-600")}
-                          >
-                            <Trash2 className={cn("w-4 h-4")} />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRestore(snapshot.id);
-                            }}
-                            className={cn("h-6 w-6 text-stone-500 hover:text-blue-600")}
-                          >
-                            <RotateCcw className={cn("w-4 h-4")} />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
+                      snapshot={snapshot}
+                      index={index}
+                      isSelected={selectedSnapshot?.id === snapshot.id}
+                      onSelect={setSelectedSnapshot}
+                      onDelete={handleDelete}
+                      onRestore={(id, e) => {
+                        e.stopPropagation();
+                        handleRestore(id);
+                      }}
+                      onRename={renameSnapshot}
+                    />
                   ))}
                 </div>
               )}
@@ -199,19 +164,4 @@ export function SnapshotsDialog({notebook, open, onOpenChange, createSnapshot, o
       </DialogContent>
     </Dialog>
   );
-}
-
-function formatDate(timestamp: number): string {
-  const date = new Date(timestamp);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-
-  if (diffMins < 1) return "Just now";
-  if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? "s" : ""} ago`;
-  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
-  if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
-  return date.toLocaleDateString() + " " + date.toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
 }

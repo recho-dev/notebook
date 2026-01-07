@@ -3,7 +3,7 @@
 import {useAtom, useAtomValue} from "jotai";
 import {useCallback, useEffect, useMemo, useRef, useState, type Dispatch} from "react";
 import {isDirtyAtom, notebooksAtom} from "./atom.ts";
-import {updateNotebook} from "./operations.ts";
+import {removeItem, updateItem, updateNotebook} from "./operations.ts";
 import type {Notebook, Snapshot} from "./schema.ts";
 import {createNotebook, createSnapshot, DEFAULT_CONTENT} from "./utils.ts";
 import {generate} from "short-uuid";
@@ -269,7 +269,7 @@ export function useNotebook(id: string | undefined): UseNotebookResult {
 
 export type UseSnapshotsResult = {
   snapshots: Readonly<Snapshot>[];
-  addSnapshot: (snapshot: Snapshot) => void;
+  renameSnapshot: (snapshotId: string, name: string) => void;
   deleteSnapshot: (snapshotId: string) => void;
 };
 
@@ -287,18 +287,24 @@ export function useSnapshots(id: string): UseSnapshotsResult {
     if (notebook === undefined) {
       return {
         snapshots: [],
-        addSnapshot: () => {},
+        renameSnapshot: () => {},
         deleteSnapshot: () => {},
       };
     } else {
       return {
         snapshots: notebook.snapshots,
-        addSnapshot: (snapshot: Snapshot) => {
-          setNotebooks(notebooks.map((n) => (n.id === id ? {...n, snapshots: [snapshot, ...n.snapshots]} : n)));
+        renameSnapshot: (snapshotId: string, name: string) => {
+          setNotebooks((oldNotebooks) =>
+            updateItem(oldNotebooks, id, (oldNotebook) => ({
+              snapshots: updateItem(oldNotebook.snapshots, snapshotId, {name}),
+            })),
+          );
         },
         deleteSnapshot: (snapshotId: string) => {
           setNotebooks(
-            notebooks.map((n) => (n.id === id ? {...n, snapshots: n.snapshots.filter((s) => s.id !== snapshotId)} : n)),
+            updateItem(notebooks, id, (oldNotebook) => ({
+              snapshots: removeItem(oldNotebook.snapshots, snapshotId),
+            })),
           );
         },
       };
