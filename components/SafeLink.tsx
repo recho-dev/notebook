@@ -2,7 +2,7 @@
 
 import {useRouter} from "next/navigation";
 import Link, {type LinkProps} from "next/link";
-import { useIsDirty } from "@/lib/notebooks/storage.ts";
+import {useIsDirty} from "@/lib/notebooks/storage.ts";
 
 export type SafeLinkProps = {
   href: string;

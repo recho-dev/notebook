@@ -65,7 +65,7 @@ export function SnapshotEntry({
     }
   }
 
-  const displayName = index === 0 ? "The Last Saved Version" : snapshot.name ?? "Untitled snapshot";
+  const displayName = index === 0 ? "The Last Saved Version" : (snapshot.name ?? "Untitled snapshot");
   const canEdit = index !== 0; // Don't allow editing the first/latest snapshot
 
   return (
@@ -182,4 +182,3 @@ export function formatDate(timestamp: number): string {
     minute: "2-digit",
   }).format(date);
 }
-

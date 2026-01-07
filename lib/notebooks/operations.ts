@@ -8,8 +8,14 @@ export function updateNotebook(notebooks: Notebook[], id: string, fields: Partia
   return notebooks.map((n) => (n.id === id ? {...n, ...fields} : n));
 }
 
-export function updateItem<T extends {id: string}>(items: T[], id: string, update: Partial<T> | ((item: T) => Partial<T>)): T[] {
-  return items.map((item) => (item.id === id ? {...item, ...(typeof update === "function" ? update(item) : update)} : item));
+export function updateItem<T extends {id: string}>(
+  items: T[],
+  id: string,
+  update: Partial<T> | ((item: T) => Partial<T>),
+): T[] {
+  return items.map((item) =>
+    item.id === id ? {...item, ...(typeof update === "function" ? update(item) : update)} : item,
+  );
 }
 
 export function removeItem<T extends {id: string}>(items: T[], id: string): T[] {
