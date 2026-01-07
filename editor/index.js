@@ -31,53 +31,60 @@ const eslintConfig = {
 };
 
 export function createEditor(container, options) {
-  const {code, onError, extensions = []} = options;
+  const {code, onError, extensions = [], readonly = false} = options;
   const dispatcher = d3Dispatch("userInput");
   const runtimeRef = {current: null};
 
   const myBasicSetup = Array.from(basicSetup);
   myBasicSetup.splice(2, 0, blockIndicator);
 
+  const editorExtensions = [
+    myBasicSetup,
+    javascript(),
+    githubLightInit({
+      styles: [
+        {tag: [t.variableName], color: "#1f2328"},
+        {tag: [t.function(t.variableName)], color: "#6f42c1"},
+      ],
+    }),
+    EditorView.lineWrapping,
+    EditorView.theme({
+      "&": {fontSize: "14px", fontFamily: "monospace"},
+      ".cm-content": {whiteSpace: "pre"},
+      ".cm-line": {wordWrap: "normal"},
+    }),
+    ...(readonly ? [] : [EditorView.updateListener.of(onChange)]),
+    ...(readonly
+      ? []
+      : [
+          keymap.of([
+            {
+              key: "Mod-s",
+              run: () => {
+                runtimeRef.current?.setIsRunning(true);
+                runtimeRef.current?.run();
+              },
+              preventDefault: true,
+            },
+            indentWithTab,
+          ]),
+        ]),
+    javascriptLanguage.data.of({autocomplete: rechoCompletion}),
+    blockExtensions,
+    ...(readonly ? [] : [controls(runtimeRef)]),
+    // Disable this for now, because it prevents copying/pasting the code.
+    // outputProtection(),
+    docStringTag,
+    commentLink,
+    commentLinkClickHandler,
+    ...(readonly ? [] : [linter(esLint(new eslint.Linter(), eslintConfig))]),
+    ...(readonly ? [EditorState.readOnly.of(true)] : []),
+    ...extensions,
+  ];
+
   const state = EditorState.create({
     doc: code,
-    extensions: [
-      myBasicSetup,
-      javascript(),
-      githubLightInit({
-        styles: [
-          {tag: [t.variableName], color: "#1f2328"},
-          {tag: [t.function(t.variableName)], color: "#6f42c1"},
-        ],
-      }),
-      EditorView.lineWrapping,
-      EditorView.theme({
-        "&": {fontSize: "14px", fontFamily: "monospace"},
-        ".cm-content": {whiteSpace: "pre"},
-        ".cm-line": {wordWrap: "normal"},
-      }),
-      EditorView.updateListener.of(onChange),
-      keymap.of([
-        {
-          key: "Mod-s",
-          run: () => {
-            runtimeRef.current?.setIsRunning(true);
-            runtimeRef.current?.run();
-          },
-          preventDefault: true,
-        },
-        indentWithTab,
-      ]),
-      javascriptLanguage.data.of({autocomplete: rechoCompletion}),
-      blockExtensions,
-      controls(runtimeRef),
-      // Disable this for now, because it prevents copying/pasting the code.
-      // outputProtection(),
-      docStringTag,
-      commentLink,
-      commentLinkClickHandler,
-      linter(esLint(new eslint.Linter(), eslintConfig)),
-      ...extensions,
-    ],
+    extensions: editorExtensions,
   });
 
   const view = new EditorView({state, parent: container});

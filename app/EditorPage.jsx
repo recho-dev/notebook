@@ -1,72 +1,47 @@
 "use client";
-import {useState, useEffect, useRef, useCallback, useSyncExternalStore} from "react";
+import {useState, useEffect, useRef, useCallback} from "react";
 import {notFound, useRouter} from "next/navigation";
-import {Pencil} from "lucide-react";
+import {Camera} from "lucide-react";
 import {Editor} from "./Editor.jsx";
-import {getNotebookById, createNotebook, addNotebook, saveNotebook, getNotebooks, duplicateNotebook} from "./api.js";
-import {isDirtyStore, countStore} from "./store.js";
 import {cn} from "./cn.js";
-import {SafeLink} from "./SafeLink.jsx";
 import {BASE_PATH} from "./shared.js";
-
-const UNSET = Symbol("UNSET");
+import {SnapshotsDialog} from "../components/notebooks/SnapshotsDialog.tsx";
+import {useNotebook} from "@/lib/notebooks/hooks.ts";
+import {NotebookTitle} from "../components/notebooks/NotebookTitle.tsx";
+import {EditorPageHero} from "../components/notebooks/EditorPageHero.tsx";
 
 export function EditorPage({id: initialId}) {
   const router = useRouter();
-  const [notebook, setNotebook] = useState(UNSET);
-  const [notebookList, setNotebookList] = useState([]);
-  const [showInput, setShowInput] = useState(false);
-  const [autoRun, setAutoRun] = useState(false);
-  const [id, setId] = useState(initialId);
-  const [initialCode, setInitialCode] = useState(null);
-  const [title, setTitle] = useState("");
-  const titleRef = useRef(null);
-  const count = useSyncExternalStore(countStore.subscribe, countStore.getSnapshot, countStore.getServerSnapshot);
-  const isDirty = useSyncExternalStore(
-    isDirtyStore.subscribe,
-    isDirtyStore.getSnapshot,
-    isDirtyStore.getServerSnapshot,
-  );
-  const prevCount = useRef(id ? count : null); // Last saved count.
-  const isAdded = prevCount.current === count; // Whether the notebook is added to the storage.
+  const {
+    notebook,
+    isDraft,
+    isDirty,
+    initialContent,
+    saveNotebook,
+    updateContent,
+    updateTitle,
+    createSnapshot,
+    restoreContent,
+  } = useNotebook(initialId);
+  const [showSnapshotsDialog, setShowSnapshotsDialog] = useState(false);
   const timer = useRef(null);
 
   const onSave = useCallback(() => {
-    isDirtyStore.setDirty(false);
-    if (isAdded) {
-      saveNotebook(notebook);
-    } else {
-      addNotebook(notebook);
-      prevCount.current = count;
-      const id = notebook.id;
-      setId(id); // Force re-render.
-      window.history.pushState(null, "", `${BASE_PATH}/works/${id}`); // Just update the url, no need to reload the page.
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [notebook]);
-
-  // This effect is triggered when the count changes,
-  // which happens when user clicks the "New" nav link.
-  useEffect(() => {
-    const initialNotebook = isAdded ? getNotebookById(id) : createNotebook();
-    setNotebook(initialNotebook);
-    setInitialCode(initialNotebook.content);
-    setAutoRun(initialNotebook.autoRun);
-    setTitle(initialNotebook.title);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [count]);
+    if (notebook === null) return;
+    saveNotebook();
+    // Just update the url, no need to reload the page.
+    const url = `${BASE_PATH}/works/${notebook.id}`;
+    window.history.pushState(null, "", url);
+  }, [notebook, saveNotebook]);
 
   useEffect(() => {
     // Use setTimeout to avoid changing to default title.
-    setTimeout(() => {
-      document.title = `${isAdded ? notebook.title : "New"} | Recho Notebook`;
-    }, 100);
-  }, [notebook, isAdded]);
-
-  useEffect(() => {
-    const notebooks = getNotebooks();
-    setNotebookList(notebooks.slice(0, 4));
-  }, [isAdded]);
+    if (notebook) {
+      setTimeout(() => {
+        document.title = `${isDirty ? "* " : ""}${isDraft ? "New" : notebook.title}| Recho Notebook`;
+      }, 100);
+    }
+  }, [notebook, isDirty, isDraft]);
 
   useEffect(() => {
     const onBeforeUnload = (e) => {
@@ -84,57 +59,13 @@ export function EditorPage({id: initialId}) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [onSave]);
 
-  useEffect(() => {
-    if (showInput) titleRef.current.focus();
-  }, [showInput]);
-
-  if (notebook === UNSET) return <div className={cn("max-w-screen-lg mx-auto my-10 editor-page")}>Loading...</div>;
-
   if (!notebook) return notFound();
-
-  function onUserInput(code) {
-    const newNotebook = {...notebook, content: code};
-    if (isAdded) {
-      saveNotebook(newNotebook);
-      setNotebook(newNotebook);
-    } else {
-      setNotebook(newNotebook);
-      isDirtyStore.setDirty(true);
-    }
-  }
-
-  function onRename() {
-    setShowInput(true);
-    setTitle(notebook.title);
-  }
-
-  // Only submit rename when blur with valid title.
-  function onTitleBlur() {
-    setShowInput(false);
-    // The title can't be empty.
-    if (!title) return setTitle(notebook.title);
-    const newNotebook = {...notebook, title};
-    setNotebook(newNotebook);
-    if (isAdded) saveNotebook(newNotebook);
-    else isDirtyStore.setDirty(true);
-  }
-
-  function onTitleChange(e) {
-    setTitle(e.target.value);
-  }
-
-  function onTitleKeyDown(e) {
-    if (e.key === "Enter") {
-      onTitleBlur();
-      titleRef.current.blur();
-    }
-  }
 
   // If long-running code is detected, set autoRun to false
   // to prevent the browser from freezing on infinite loops
   // and can't continue to edit the code.
   function onBeforeEachRun() {
-    if (!isAdded) return;
+    if (isDraft) return;
     if (timer.current) clearTimeout(timer.current);
     const newNotebook = {...notebook, autoRun: false};
     saveNotebook(newNotebook);
@@ -151,97 +82,53 @@ export function EditorPage({id: initialId}) {
     router.push(`/works/${duplicated.id}`);
   }
 
+  function onRestoreSnapshot(snapshot) {
+    restoreContent(snapshot.content);
+  }
+
   return (
     <div>
-      {!isAdded && notebookList.length > 0 && (
-        <div className={cn("flex h-[72px] bg-gray-100 p-2 w-full border-b border-gray-200")}>
-          <div
-            className={cn(
-              "flex items-center justify-between gap-2 h-full max-w-screen-lg lg:mx-auto mx-4 w-full hidden md:flex",
-            )}
-          >
-            {notebookList.map((notebook) => (
-              <div key={notebook.id} className={cn("flex items-start flex-col gap-1")}>
-                <SafeLink
-                  href={`/works/${notebook.id}`}
-                  className={cn(
-                    "font-semibold hover:underline text-blue-500 whitespace-nowrap line-clamp-1 max-w-[150px] text-ellipsis",
-                  )}
-                >
-                  {notebook.title}
-                </SafeLink>
-                <span
-                  className={cn("text-xs text-gray-500 line-clamp-1 whitespace-nowrap max-w-[150px] text-ellipsis")}
-                >
-                  Created {new Date(notebook.created).toLocaleDateString()}
-                </span>
-              </div>
-            ))}
-            <SafeLink href="/works" className={cn("font-semibold text-blue-500 hover:underline")}>
-              View your notebooks
-            </SafeLink>
-          </div>
-          <div
-            className={cn(
-              "flex items-center justify-between gap-2 h-full max-w-screen-lg lg:mx-auto mx-4 w-full md:hidden",
-            )}
-          >
-            <SafeLink
-              href="/works"
-              className={cn(
-                "font-medium w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-center hover:bg-gray-200",
-              )}
-            >
-              View your notebooks
-            </SafeLink>
-          </div>
-        </div>
-      )}
-      {!isAdded && notebookList.length === 0 && (
-        <div className={cn("flex items-center justify-center h-[72px] mt-6 mb-10 lg:mb-0")}>
-          <p className={cn("text-3xl text-gray-800 font-light text-center mx-10")}>
-            Explore code and art with instant feedback.
-          </p>
-        </div>
-      )}
+      <EditorPageHero show={isDraft} />
       <div className={cn("max-w-screen-lg lg:mx-auto mx-4 lg:my-10 my-4 editor-page")}>
         <Editor
-          initialCode={initialCode}
+          initialCode={initialContent}
           key={notebook.id}
-          onUserInput={onUserInput}
+          onUserInput={updateContent}
           onBeforeEachRun={onBeforeEachRun}
-          autoRun={autoRun}
-          onDuplicate={isAdded ? onDuplicate : null}
+          autoRun={notebook.autoRun}
+          onDuplicate={isDraft ? onDuplicate : null}
           toolBarStart={
-            <div className={cn("flex items-center gap-2")}>
-              {!isAdded && (
-                <button
-                  onClick={onSave}
-                  className={cn("bg-green-700 text-white rounded-md px-3 py-1 text-sm hover:bg-green-800")}
-                >
-                  Create
-                </button>
-              )}
-              {!showInput && isAdded && (
-                <button onClick={onRename}>
-                  <Pencil className="w-4 h-4" />
-                </button>
-              )}
-              {showInput || !isAdded ? (
-                <input
-                  type="text"
-                  value={title}
-                  onChange={onTitleChange}
-                  onBlur={onTitleBlur}
-                  onKeyDown={onTitleKeyDown}
-                  ref={titleRef}
-                  className={cn("border border-gray-200 rounded-md px-3 py-1 text-sm bg-white")}
-                />
-              ) : (
-                <span className={cn("text-sm py-1 border border-gray-100 rounded-md")}>{notebook.title}</span>
-              )}
-            </div>
+            <NotebookTitle
+              title={notebook.title}
+              setTitle={updateTitle}
+              isDraft={isDraft}
+              isDirty={isDirty}
+              onCreate={onSave}
+            />
           }
+          toolBarEnd={
+            isDraft ? null : (
+              <button
+                onClick={() => setShowSnapshotsDialog(true)}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-200 transition-colors",
+                )}
+                data-tooltip-id="action-tooltip"
+                data-tooltip-content="Manage Snapshots"
+                data-tooltip-place="bottom"
+              >
+                <Camera className={cn("w-4 h-4")} />
+                <span>Snapshots</span>
+              </button>
+            )
+          }
+        />
+        <SnapshotsDialog
+          notebook={notebook}
+          open={showSnapshotsDialog}
+          createSnapshot={createSnapshot}
+          onOpenChange={setShowSnapshotsDialog}
+          onRestore={onRestoreSnapshot}
         />
       </div>
     </div>

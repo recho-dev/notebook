@@ -18,16 +18,16 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
 
   const userEvent = tr.annotation(Transaction.userEvent);
   if (userEvent) {
-    console.group(`updateBlocks (${userEvent})`);
+    // console.group(`updateBlocks (${userEvent})`);
   } else {
-    console.groupCollapsed(`updateBlocks`);
+    // console.groupCollapsed(`updateBlocks`);
   }
 
   const isCopyingLines = userEvent === "input.copyline";
 
   if (tr.changes.empty) {
-    console.log("No changes detected");
-    console.groupEnd();
+    // console.log("No changes detected");
+    // console.groupEnd();
     return oldBlocks;
   }
 
@@ -46,12 +46,12 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
   tr.changes.iterChanges((oldFrom, oldTo, newFrom, newTo, inserted) => {
     if (oldFrom === oldTo) {
       if (newFrom === oldFrom) {
-        console.groupCollapsed(`Insert ${newTo - newFrom} characters at ${oldFrom}`);
+        // console.groupCollapsed(`Insert ${newTo - newFrom} characters at ${oldFrom}`);
       } else {
-        console.groupCollapsed(`Insert ${newTo - newFrom} characters: ${oldFrom} -> ${newFrom}-${newTo}`);
+        // console.groupCollapsed(`Insert ${newTo - newFrom} characters: ${oldFrom} -> ${newFrom}-${newTo}`);
       }
     } else {
-      console.groupCollapsed(`Update: ${oldFrom}-${oldTo} -> ${newFrom}-${newTo}`);
+      // console.groupCollapsed(`Update: ${oldFrom}-${oldTo} -> ${newFrom}-${newTo}`);
     }
 
     let changeFrom = oldFrom;
@@ -66,10 +66,10 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
           // changeFrom = changeTo = index - inserted.length;
           changeFrom = changeTo = index;
         } else {
-          console.error("This is weird as the insertion point is not at the beginning or the end of the line");
+          // console.error("This is weird as the insertion point is not at the beginning or the end of the line");
         }
       } else {
-        console.error("This is weird as the cursor is not at the same position");
+        // console.error("This is weird as the cursor is not at the same position");
       }
     }
 
@@ -77,7 +77,7 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
 
     const affectedBlockRange = findAffectedBlockRange(oldBlocks, changeFrom, changeTo);
 
-    console.log(`Affected block range: ${affectedBlockRange[0]} to ${affectedBlockRange[1] ?? "the end"}`);
+    // console.log(`Affected block range: ${affectedBlockRange[0]} to ${affectedBlockRange[1] ?? "the end"}`);
 
     // Add the affected blocks to the set.
     for (let i = affectedBlockRange[0] ?? 0, n = affectedBlockRange[1] ?? oldBlocks.length; i < n; i++) {
@@ -86,7 +86,7 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
 
     // Check a corner case where the affected block range is empty but there are blocks.
     if (blockRangeLength(oldBlocks.length, affectedBlockRange) === 0 && oldBlocks.length > 0) {
-      console.error("This should never happen");
+      // console.error("This should never happen");
     }
 
     // Now, we are going to compute the range which should be re-parsed.
@@ -94,7 +94,7 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
     const reparseTo = affectedBlockRange[1] === null ? tr.state.doc.length : oldBlocks[affectedBlockRange[1] - 1]!.to;
     const newBlocks = detectBlocksWithinRange(syntaxTree(tr.state), tr.state.doc, reparseFrom, reparseTo);
 
-    console.log("New blocks from reparsed range:", newBlocks);
+    // console.log("New blocks from reparsed range:", newBlocks);
 
     // If only one block is affected and only one new block is created, we can
     // simply inherit the attributes from the old block.
@@ -108,21 +108,21 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
       newlyCreatedBlocks.insert(newBlocks[i]!);
     }
 
-    console.groupEnd();
+    // console.groupEnd();
   });
 
   // Step 3: Combine the array of old blocks and the heap of new blocks.
 
   const newBlocks: BlockMetadata[] = [];
 
-  console.group("Combining old blocks and new blocks");
+  // console.group("Combining old blocks and new blocks");
 
   for (let i = 0, n = oldBlocks.length; i < n; i++) {
     const oldBlock = oldBlocks[i]!;
 
     // Skip affected blocks, as they have been updated.
     if (affectedBlocks.has(oldBlock)) {
-      console.log("Skipping affected old block:", oldBlock);
+      // console.log("Skipping affected old block:", oldBlock);
       continue;
     }
 
@@ -133,7 +133,7 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
 
     while (newlyCreatedBlocks.nonEmpty() && newlyCreatedBlocks.peek.from < newBlock.from) {
       newBlocks.push(newlyCreatedBlocks.peek);
-      console.log("Pushing new block from heap:", newlyCreatedBlocks.peek);
+      // console.log("Pushing new block from heap:", newlyCreatedBlocks.peek);
       newlyCreatedBlocks.extractMax();
     }
 
@@ -141,10 +141,10 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
     // the current old block's `from` position.
 
     newBlocks.push(newBlock);
-    console.log("Pushing mapped old block:", newBlock);
+    // console.log("Pushing mapped old block:", newBlock);
   }
 
-  console.groupEnd();
+  // console.groupEnd();
 
   // In the end, push any remaining blocks from the heap.
   while (newlyCreatedBlocks.nonEmpty()) {
@@ -152,12 +152,12 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
     newlyCreatedBlocks.extractMax();
   }
 
-  console.log("New blocks:", newBlocks);
+  // console.log("New blocks:", newBlocks);
 
   const deduplicatedBlocks = deduplicateNaive(newBlocks);
 
-  console.log("Deduplicated blocks:", deduplicatedBlocks);
+  // console.log("Deduplicated blocks:", deduplicatedBlocks);
 
-  console.groupEnd();
+  // console.groupEnd();
   return deduplicatedBlocks;
 }

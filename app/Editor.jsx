@@ -29,9 +29,11 @@ export function Editor({
   onBeforeEachRun = () => {},
   autoRun = true,
   toolBarStart = null,
+  toolBarEnd = null,
   pinToolbar = true,
   onDuplicate = null,
   onError = onDefaultError,
+  readonly = false,
 }) {
   const containerRef = useRef(null);
   const editorRef = useRef(null);
@@ -40,8 +42,8 @@ export function Editor({
   useEffect(() => {
     if (containerRef.current) {
       containerRef.current.innerHTML = "";
-      editorRef.current = createEditor(containerRef.current, {code: initialCode, onError});
-      if (autoRun) onRun();
+      editorRef.current = createEditor(containerRef.current, {code: initialCode, onError, readonly});
+      if (autoRun && !readonly) onRun();
     }
     return () => {
       if (editorRef.current) {
@@ -49,7 +51,7 @@ export function Editor({
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialCode]);
+  }, [initialCode, readonly]);
 
   useEffect(() => {
     const onInput = (code) => {
@@ -95,7 +97,7 @@ export function Editor({
   }
 
   return (
-    <div className={cn("w-full border border-gray-200 rounded-md")}>
+    <div className={cn("w-full border border-gray-200 rounded-md overflow-hidden")}>
       <div
         className={cn(
           "flex justify-between items-center p-2 border-b border-gray-200 bg-gray-100",
@@ -104,6 +106,7 @@ export function Editor({
       >
         {toolBarStart}
         <div className={cn("flex items-center gap-3")}>
+          {toolBarEnd}
           <button
             onClick={onRun}
             data-tooltip-id="action-tooltip"

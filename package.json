@@ -37,6 +37,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
+    "@types/friendly-words": "^1.2.2",
     "@types/node": "24.10.1",
     "@types/react": "19.2.6",
     "@types/react-dom": "^19.2.3",
@@ -106,6 +107,7 @@
     "shiki": "^3.20.0",
     "short-uuid": "^5.2.0",
     "source-map-support": "^0.5.21",
-    "table": "^6.9.0"
+    "table": "^6.9.0",
+    "typebox": "^1.0.73"
   }
 }
