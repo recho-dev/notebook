@@ -75,13 +75,15 @@ export function NotebookTitle({title, setTitle, isDraft, isDirty, onCreate}: Not
       ) : (
         <span className="text-sm py-1 border border-gray-100 rounded-md">{title}</span>
       )}
-      {isDraft || isDirty ? (
-        <AsteriskIcon
-          className="w-4 h-4 text-amber-600 animate-pulse"
-          data-tooltip-id="action-tooltip"
-          data-tooltip-content="Unsaved changes"
-          data-tooltip-place="bottom"
-        />
+      {isDraft ? (
+        isDirty ? (
+          <AsteriskIcon
+            className="w-4 h-4 text-amber-600 animate-pulse"
+            data-tooltip-id="action-tooltip"
+            data-tooltip-content="Unsaved changes"
+            data-tooltip-place="bottom"
+          />
+        ) : null
       ) : (
         <CheckIcon
           className="w-4 h-4 text-green-600"

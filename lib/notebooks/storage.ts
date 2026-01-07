@@ -1,6 +1,9 @@
 import Value from "typebox/value";
 import {NotebooksSchema, type Notebook, type Snapshot} from "./schema.ts";
 import {createSnapshot, DEFAULT_CONTENT, RECHO_FILES_KEY, saveSnapshot, snapshotKey} from "./utils.ts";
+import { isDirtyAtom } from "./atom.ts";
+import type { Dispatch, SetStateAction } from "react";
+import { useAtom } from "jotai";
 
 export function loadSnapshotsFromStorage(ids: string[]): Snapshot[] {
   const snapshots: Snapshot[] = [];
@@ -116,4 +119,8 @@ export function saveNotebooksToStorage(notebooks: Notebook[], previousNotebooks:
       localStorage.removeItem(snapshotKey(snapshot.id));
     }
   }
+}
+
+export function useIsDirty(): [boolean, Dispatch<SetStateAction<boolean>>] {
+  return useAtom(isDirtyAtom);
 }

@@ -14,3 +14,5 @@ export const notebooksAtom = atom<Notebook[], [SetStateAction<Notebook[]>], void
     saveNotebooksToStorage(newValue, oldValue);
   },
 );
+
+export const isDirtyAtom = atom<boolean>(false);

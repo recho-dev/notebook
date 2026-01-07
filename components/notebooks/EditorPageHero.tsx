@@ -1,5 +1,5 @@
 import {useLatestNotebooks} from "@/lib/notebooks/hooks.ts";
-import {SafeLink} from "../../app/SafeLink.jsx";
+import {SafeLink} from "../SafeLink.tsx";
 import {cn} from "../../app/cn.js";
 
 export type EditorPageHeroProps = {

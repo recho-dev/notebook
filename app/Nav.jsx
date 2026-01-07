@@ -2,7 +2,7 @@
 
 import {usePathname} from "next/navigation";
 import {useState, useEffect, useRef} from "react";
-import {SafeLink} from "./SafeLink.jsx";
+import {SafeLink} from "../components/SafeLink.tsx";
 import {cn} from "./cn.js";
 import {Plus, Share, Github, Menu, FolderCode} from "lucide-react";
 import {Tooltip} from "react-tooltip";

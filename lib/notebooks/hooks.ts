@@ -1,8 +1,8 @@
 "use client";
 
 import {useAtom, useAtomValue} from "jotai";
-import {useCallback, useMemo, useRef, useState, type Dispatch} from "react";
-import {notebooksAtom} from "./atom.ts";
+import {useCallback, useEffect, useMemo, useRef, useState, type Dispatch} from "react";
+import {isDirtyAtom, notebooksAtom} from "./atom.ts";
 import {updateNotebook} from "./operations.ts";
 import type {Notebook, Snapshot} from "./schema.ts";
 import {createNotebook, createSnapshot, DEFAULT_CONTENT} from "./utils.ts";
@@ -127,6 +127,12 @@ const notFoundResult: UseNotebookResult = Object.freeze({
 export function useNotebook(id: string | undefined): UseNotebookResult {
   const [notebooks, setNotebooks] = useAtom(notebooksAtom);
 
+  // The ID of the notebook that we are actually editing.
+  // - If the URL contains an ID, this is set to the ID.
+  // - If the URL does not contain an ID, this is set to `undefined`, which
+  //   means that we are editing a draft notebook.
+  // - When the draft notebook is saved, this is set to the ID of the notebook.
+  // - When the user creates a new notebook, this is set to `undefined` again.
   const [actualId, setActualId] = useState<string | undefined>(id);
 
   // The notebook found by the ID.
@@ -142,17 +148,31 @@ export function useNotebook(id: string | undefined): UseNotebookResult {
   // Initialize the last edit timestamp to the last saved timestamp.
   const lastEditTimestampRef = useRef<number>(lastSavedTimestamp);
 
-  const [isDirty, setIsDirty] = useState<boolean>(false);
+  const [isDirty, setIsDirty] = useAtom(isDirtyAtom);
 
   const [initialContent, setInitialContent] = useState<string>(foundNotebook?.snapshots[0].content ?? DEFAULT_CONTENT);
 
-  const updateContent = useCallback((content: string) => {
-    contentRef.current = content;
-    lastEditTimestampRef.current = Date.now();
-    setIsDirty(true);
-  }, []);
+  const updateContent = useCallback(
+    (content: string) => {
+      contentRef.current = content;
+      lastEditTimestampRef.current = Date.now();
+      setIsDirty(true);
+    },
+    [setIsDirty],
+  );
 
-  // The notebook that is currently being edited.
+  // When we receive the `renew-notebook` event, we need to create a new draft.
+  useEffect(() => {
+    const onRenewNotebook = (e: Event) => {
+      e.stopPropagation();
+      setIsDirty(false);
+      setActualId(undefined);
+      setDraftNotebook(createNotebook());
+    };
+    window.addEventListener("renew-notebook", onRenewNotebook);
+    return () => window.removeEventListener("renew-notebook", onRenewNotebook);
+  }, [setIsDirty]);
+
   return useMemo(() => {
     if (foundNotebook === undefined) {
       if (typeof actualId === "string") {
@@ -244,7 +264,7 @@ export function useNotebook(id: string | undefined): UseNotebookResult {
         },
       };
     }
-  }, [actualId, isDirty, draftNotebook, foundNotebook, setNotebooks, initialContent, updateContent]);
+  }, [actualId, isDirty, setIsDirty, draftNotebook, foundNotebook, setNotebooks, initialContent, updateContent]);
 }
 
 export type UseSnapshotsResult = {
