@@ -1,12 +1,13 @@
 "use client";
 
-import {useAtom, useAtomValue} from "jotai";
-import {useCallback, useEffect, useMemo, useRef, useState, type Dispatch} from "react";
-import {isDirtyAtom, notebooksAtom} from "./atom.ts";
-import {removeItem, updateItem, updateNotebook} from "./operations.ts";
-import type {Notebook, Snapshot} from "./schema.ts";
-import {createNotebook, createSnapshot, DEFAULT_CONTENT} from "./utils.ts";
-import {generate} from "short-uuid";
+import { isDirtyAtom } from "@/lib/atoms/isDirty.ts";
+import { useAtom, useAtomValue } from "jotai";
+import { useCallback, useEffect, useMemo, useRef, useState, type Dispatch } from "react";
+import { generate } from "short-uuid";
+import { notebooksAtom } from "./atom.ts";
+import { removeItem, updateItem, updateNotebook } from "./operations.ts";
+import type { Notebook, Snapshot } from "./schema.ts";
+import { createNotebook, createSnapshot, DEFAULT_CONTENT } from "./utils.ts";
 
 export type UseNotebookResult = {
   /**
