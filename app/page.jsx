@@ -4,6 +4,8 @@ import dynamic from "next/dynamic";
 
 const EditorPage = dynamic(() => import("./EditorPage.jsx").then((mod) => ({default: mod.EditorPage})), {
   loading: () => <LoadingIndicator />,
+  // As we are reading the notebooks from the localStorage, we don't need to
+  // render this page on the server side.
   ssr: false,
 });
 
