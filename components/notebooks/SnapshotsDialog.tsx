@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "../ui/dialog.tsx";
 import {Button} from "../ui/button.tsx";
+import {Input} from "../ui/input.tsx";
 import {cn} from "../../app/cn.js";
 import {Editor} from "../../app/Editor.jsx";
 import {useSnapshots} from "@/lib/notebooks/hooks.ts";
@@ -29,6 +30,7 @@ export function SnapshotsDialog({notebook, open, onOpenChange, createSnapshot, o
   const {snapshots, renameSnapshot, deleteSnapshot} = useSnapshots(notebook.id);
   const [selectedSnapshot, setSelectedSnapshot] = useState<Snapshot | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [snapshotName, setSnapshotName] = useState("");
 
   useEffect(() => {
     if (open && notebook?.id) {
@@ -44,8 +46,10 @@ export function SnapshotsDialog({notebook, open, onOpenChange, createSnapshot, o
     if (!notebook) return;
     setIsCreating(true);
     setTimeout(() => {
-      const snapshot = createSnapshot(null);
+      const name = snapshotName.trim() || null;
+      const snapshot = createSnapshot(name);
       setSelectedSnapshot(snapshot);
+      setSnapshotName("");
       setIsCreating(false);
     }, 100);
   }
@@ -79,7 +83,20 @@ export function SnapshotsDialog({notebook, open, onOpenChange, createSnapshot, o
         <div className={cn("flex-1 flex overflow-hidden min-h-0 border-t border-stone-200")}>
           {/* Sidebar */}
           <div className={cn("w-80 border-r border-stone-200 flex flex-col")}>
-            <div className={cn("p-4 border-b border-stone-200")}>
+            <div className={cn("p-4 border-b border-stone-200 flex flex-col gap-2")}>
+              <Input
+                type="text"
+                placeholder="Snapshot name (optional)"
+                value={snapshotName}
+                onChange={(e) => setSnapshotName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !isCreating && notebook) {
+                    handleCreateSnapshot();
+                  }
+                }}
+                disabled={isCreating || !notebook}
+                className={cn("h-8 text-sm")}
+              />
               <Button
                 onClick={handleCreateSnapshot}
                 disabled={isCreating || !notebook}

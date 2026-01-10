@@ -1,6 +1,6 @@
 "use client";
 import {useState, useRef, useEffect} from "react";
-import {Trash2, RotateCcw, Pencil, Check, X} from "lucide-react";
+import {Trash2, RotateCcw, Pencil, Check, X, FileCheck} from "lucide-react";
 import {Button} from "../ui/button.tsx";
 import {Input} from "../ui/input.tsx";
 import {cn} from "../../app/cn.js";
@@ -65,9 +65,52 @@ export function SnapshotEntry({
     }
   }
 
-  const displayName = index === 0 ? "The Last Saved Version" : (snapshot.name ?? "Untitled snapshot");
-  const canEdit = index !== 0; // Don't allow editing the first/latest snapshot
+  const isCurrentVersion = index === 0;
+  const displayName = snapshot.name ?? "Untitled snapshot";
+  const canEdit = !isCurrentVersion; // Don't allow editing the current version
 
+  // Current version (first entry) - distinct styling, no name (like git staging area)
+  if (isCurrentVersion) {
+    return (
+      <div
+        key={snapshot.id}
+        className={cn(
+          "p-3 cursor-pointer transition-colors border-b-2 border-stone-200",
+          isSelected
+            ? "bg-gradient-to-r from-emerald-50 to-teal-50 border-l-4 border-l-emerald-500"
+            : "bg-gradient-to-r from-stone-50/50 to-stone-100/50 hover:from-emerald-50/50 hover:to-teal-50/50",
+        )}
+        onClick={() => onSelect(snapshot)}
+      >
+        <div className={cn("flex items-center justify-between gap-2")}>
+          <div className={cn("flex items-center gap-2")}>
+            <div
+              className={cn(
+                "flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold",
+                "bg-emerald-100 text-emerald-700 border border-emerald-200",
+              )}
+            >
+              <FileCheck className={cn("w-3 h-3")} />
+              Current
+            </div>
+            <span className={cn("text-xs text-stone-500")}>{formatDate(snapshot.created)}</span>
+          </div>
+          <div className={cn("flex items-center")}>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={(e) => onDelete(snapshot.id, e)}
+              className={cn("h-6 w-6 text-stone-500 hover:text-red-600")}
+            >
+              <Trash2 className={cn("w-4 h-4")} />
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Historical snapshots - original styling
   return (
     <div
       key={snapshot.id}
@@ -110,10 +153,7 @@ export function SnapshotEntry({
             <>
               <div className={cn("flex items-center gap-1")}>
                 <div
-                  className={cn(
-                    "font-medium text-sm",
-                    index === 0 ? "text-green-800" : snapshot.name === null ? "text-stone-500" : "text-stone-900",
-                  )}
+                  className={cn("font-medium text-sm", snapshot.name === null ? "text-stone-500" : "text-stone-900")}
                 >
                   {displayName}
                 </div>
