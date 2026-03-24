@@ -10,40 +10,52 @@
 
 /**
  * ============================================================================
- * =                            Sorting Algorithms                            =
+ * =                     Sorting Algorithms Visualization                     =
  * ============================================================================
- * Insertion sort is efficient for small arrays. Think of it like playing
- * cards: you're holding sorted cards in your left hand (sorted prefix/subarray)
- * and holding a card in your right hand (key). You insert the current card into
- * the sorted cards until there is no card in the table (unsorted subarray).
+ *
+ * This example demonstrates four sorting algorithms: Bubble Sort, Insertion
+ * Sort, Selection Sort, and Quick Sort. Each algorithm is visualized with a
+ * bar chart of the array elements.
+ *
  */
 
 recho.button("Run", run);
 
-//➜ Insertion Sort                          
-//➜                        ▁                
-//➜                     ▃▃▇█▃  ▃   █        
-//➜               ▂▃▃▆▆██████▆ █  ██ ▇ ▁   ▄
-//➜             ▄▅████████████ █ ▅██▇█ █ ▂ █
-//➜      ▁▂▂▃▇████████████████ █▃███████▆█▃█
-//➜ ▁▄▅▆██████████████████████▄█████████████
-visualize(array, insertionSort, "Insertion Sort");
+//➜ Bubble Sort
+//➜                                        ▁
+//➜                          ▁▂▄▄▄▅▆▆▆██████
+//➜          ▁▁ ▂ ▇ ▇█ █ ▄   ███████████████
+//➜       ▂▅▆██ █ █▇████▆█   ███████████████
+//➜   ▂▅▇██████ █ ████████ ▅ ███████████████
+//➜ ▁▇█████████▂█▁████████▁█▂███████████████
+visualize(array.slice(), sortBubble, "Bubble Sort");
 
-function* insertionSort(array) {
-  for (let i = 1; i < array.length; i++) {
-    const key = array[i];
-    let j = i - 1;
-    while (j >= 0 && array[j] > key) {
-      array[j + 1] = array[j];
-      yield array.slice();
-      j--;
-    }
-    array[j + 1] = key;
-    yield array.slice();
-  }
-  yield array.slice();
-  return array;
-}
+//➜ Insertion Sort
+//➜                           ▁
+//➜           ▄▆▆██ ▆ ▁ ▂█▄   █   ▄█ █     ▅
+//➜        ▁▂████████ █ ███▇▁ █ ▇ ██ █ ▄   █
+//➜      ▅▆██████████ █▂█████ █ █▇████▆█   █
+//➜   ▂▇█████████████▅███████ █ ████████ ▅ █
+//➜ ▁▇███████████████████████▂█▁████████▁█▂█
+visualize(array.slice(), sortInsertion, "Insertion Sort");
+
+//➜ Selection Sort
+//➜                           ▁
+//➜                 ▆█▁▄▂█▄  ▆█   ▄█ █  █▆ ▅
+//➜               ▁████████▇▁███▇ ██ █ ▄██▂█
+//➜            ▂▅▆███████████████▇████▆█████
+//➜       ▂▅▅▇██████████████████████████████
+//➜ ▁▁▁▂▂▇██████████████████████████████████
+visualize(array.slice(), sortSelection, "Selection Sort");
+
+//➜ Quick Sort
+//➜                                    ▁
+//➜                          ▁▄▂▄▄▅███▆███▆▆
+//➜                  ▁▂▁▄▇▇█████████████████
+//➜            ▂▅▆▆▇████████████████████████
+//➜       ▂▅▅▇██████████████████████████████
+//➜ ▁▁▁▂▂▇██████████████████████████████████
+visualize(array.slice(), sortQuick, "Quick Sort");
 
 const [array, setArray] = recho.state(data());
 
@@ -83,8 +95,75 @@ function visualize(array, sorter, label) {
       }
       echo.set("compact", true)(output);
     }
-  }, 20);
+  }, 100);
   echo.dispose(() => clearInterval(timer));
+}
+
+function* sortSelection(array) {
+  const n = array.length;
+  yield array.slice();
+  for (let i = 0; i < n; i++) {
+    let minIndex = i;
+    for (let j = i + 1; j < n; j++) {
+      if (array[j] < array[minIndex]) {
+        minIndex = j;
+      }
+    }
+    [array[i], array[minIndex]] = [array[minIndex], array[i]];
+    yield array.slice();
+  }
+  yield array.slice();
+  return array;
+}
+
+function* sortInsertion(array) {
+  const n = array.length;
+  yield array.slice();
+  for (let i = 1; i < n; i++) {
+    const current = array[i];
+    let j = i - 1;
+    while (j >= 0 && array[j] > current) {
+      array[j + 1] = array[j];
+      j--;
+    }
+    array[j + 1] = current;
+    yield array.slice();
+  }
+  yield array.slice();
+  return array;
+}
+
+function* sortBubble(array) {
+  const n = array.length;
+  yield array.slice();
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n - i - 1; j++) {
+      if (array[j] > array[j + 1]) {
+        [array[j], array[j + 1]] = [array[j + 1], array[j]];
+      }
+    }
+    yield array.slice();
+  }
+  yield array.slice();
+  return array;
+}
+
+function* sortQuick(array, left = 0, right = array.length - 1) {
+  if (left >= right) return;
+
+  let pivot = array[right]; // Pick the rightmost element as pivot.
+  let i = left;
+  for (let j = left; j < right; j++) {
+    if (array[j] < pivot) {
+      [array[i], array[j]] = [array[j], array[i]];
+      i++;
+    }
+  }
+  [array[i], array[right]] = [array[right], array[i]];
+  yield array.slice();
+
+  yield* sortQuick(array, left, i - 1);
+  yield* sortQuick(array, i + 1, right);
 }
 
 const d3 = recho.require("d3");
