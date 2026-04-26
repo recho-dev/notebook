@@ -131,4 +131,4 @@ class Canvas {
   }
 }
 
-const d3 = recho.require("d3");
+const d3 = recho.require("d3-array");

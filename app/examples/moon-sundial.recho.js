@@ -83,7 +83,7 @@ const pos = d3.scaleLinear([0, size], [-1, 1]);
   echo(output);
 }
 
-const d3 = recho.require("d3");
+const d3 = recho.require("d3-scale");
 
 /**
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

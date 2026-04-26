@@ -121,4 +121,4 @@ function removeCapture(video) {
 
 const ml5 = await recho.require("https://unpkg.com/ml5@1/dist/ml5.js");
 const p5 = await recho.require("https://unpkg.com/p5@1.2.0/lib/p5.js");
-const d3 = await recho.require("d3");
+const d3 = await recho.require("d3-array", "d3-scale");
