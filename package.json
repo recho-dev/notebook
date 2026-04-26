@@ -25,8 +25,12 @@
     "computational-art"
   ],
   "type": "module",
+  "bin": {
+    "recho": "./terminal/cli.js"
+  },
   "scripts": {
     "dev": "vite",
+    "tui": "node terminal/cli.js",
     "app:dev": "next dev",
     "app:build": "next build",
     "app:start": "next start",
