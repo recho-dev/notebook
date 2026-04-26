@@ -92,6 +92,9 @@ export function truncateToWidth(s, n) {
 // A resize event: {type: "resize", rows, cols}
 // A paste event: {type: "paste", text}
 
+// Control bytes with a friendly name. Both CR (13) and LF (10) map to
+// `enter` so multi-line paste and Enter both work across terminals — that
+// means we can't bind ^J / ^M, which is fine.
 const NAMED = new Map([
   [13, "enter"],
   [10, "enter"],

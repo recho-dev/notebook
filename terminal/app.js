@@ -44,6 +44,11 @@ export class App {
     this.cursorBlinkOn = true;
     this.editorRowMap = new Map(); // screen row -> {pos, line}
     this.statusFlash = null;
+    // Captured stderr/console output (notebook code, the runtime, or async
+    // rejections — all things that would otherwise scribble over the screen).
+    this.console = []; // {ts, level, text}
+    this.consoleSeen = 0; // index up to which the user has dismissed
+    this.consoleSavedHandlers = null;
   }
 
   start() {
@@ -52,17 +57,108 @@ export class App {
     process.stdin.resume();
     process.stdin.setEncoding("utf8");
 
+    // Redirect stray writes BEFORE booting the runtime — Observable's
+    // variable rejections hit `console.error` synchronously and would
+    // otherwise corrupt the alt-screen.
+    this.captureConsole();
+    this.installProcessHandlers();
+
     this.initRuntime();
 
     process.stdin.on("data", (chunk) => this.onInput(chunk));
     process.stdout.on("resize", () => this.onResize());
-    process.on("SIGINT", () => this.quit());
-    process.on("SIGTERM", () => this.quit());
-    process.on("uncaughtException", (e) => this.onFatal(e));
-    process.on("unhandledRejection", (e) => this.onFatal(e));
 
     this.flash("Press ^S to run · ^E for examples · ^Q to quit", 4000);
     this.loop();
+  }
+
+  installProcessHandlers() {
+    const onSig = () => this.quit();
+    process.on("SIGINT", onSig);
+    process.on("SIGTERM", onSig);
+    // Don't tear the UI down on async failures from notebook code — capture
+    // them into the message log and keep going. Truly fatal TUI bugs surface
+    // as synchronous throws inside our render path, which we let crash.
+    process.on("uncaughtException", (e) => this.onAsyncError(e, "uncaughtException"));
+    process.on("unhandledRejection", (e) => this.onAsyncError(e, "unhandledRejection"));
+  }
+
+  captureConsole() {
+    if (this.consoleSavedHandlers) return;
+    this.consoleSavedHandlers = {
+      error: console.error,
+      warn: console.warn,
+      log: console.log,
+      info: console.info,
+      stderrWrite: process.stderr.write.bind(process.stderr),
+    };
+    const push = (level, args) => {
+      const text = args
+        .map((a) => {
+          if (a instanceof Error) return a.message + (a.stack ? "\n" + a.stack : "");
+          if (typeof a === "string") return a;
+          try {
+            return JSON.stringify(a);
+          } catch {
+            return String(a);
+          }
+        })
+        .join(" ");
+      this.pushConsole(level, text);
+    };
+    console.error = (...args) => push("error", args);
+    console.warn = (...args) => push("warn", args);
+    console.log = (...args) => push("log", args);
+    console.info = (...args) => push("log", args);
+    // Some libraries write directly to stderr; swallow those too while the
+    // alt-screen is up so they don't tear the layout.
+    process.stderr.write = (chunk) => {
+      const text = typeof chunk === "string" ? chunk : Buffer.isBuffer(chunk) ? chunk.toString("utf8") : String(chunk);
+      if (text.trim()) this.pushConsole("error", text.replace(/\n+$/, ""));
+      return true;
+    };
+  }
+
+  restoreConsole() {
+    if (!this.consoleSavedHandlers) return;
+    console.error = this.consoleSavedHandlers.error;
+    console.warn = this.consoleSavedHandlers.warn;
+    console.log = this.consoleSavedHandlers.log;
+    console.info = this.consoleSavedHandlers.info;
+    process.stderr.write = this.consoleSavedHandlers.stderrWrite;
+    this.consoleSavedHandlers = null;
+  }
+
+  pushConsole(level, text) {
+    // De-duplicate consecutive identical messages — the runtime can fire the
+    // same rejection many times while a generator re-runs. We bump a count on
+    // the previous entry instead of flooding the log.
+    const last = this.console[this.console.length - 1];
+    if (last && last.level === level && last.text === text) {
+      last.count = (last.count || 1) + 1;
+      last.ts = Date.now();
+    } else {
+      this.console.push({ts: Date.now(), level, text, count: 1});
+      if (this.console.length > 500) this.console.splice(0, this.console.length - 500);
+    }
+    if (level === "error") {
+      const summary = text.split("\n")[0].slice(0, 200);
+      this.flash("✗ " + summary, 4000);
+    }
+    this.dirty = true;
+  }
+
+  unseenErrorCount() {
+    let n = 0;
+    for (let i = this.consoleSeen; i < this.console.length; i++) {
+      if (this.console[i].level === "error") n++;
+    }
+    return n;
+  }
+
+  onAsyncError(error, source) {
+    const msg = error?.stack || error?.message || String(error);
+    this.pushConsole("error", `[${source}] ${msg}`);
   }
 
   loop() {
@@ -100,6 +196,16 @@ export class App {
       this.runtime?.destroy?.();
       process.stdin.setRawMode?.(false);
       process.stdout.write(scr.disableMouse + scr.showCursor + scr.leaveAlt + reset);
+      this.restoreConsole();
+      // Replay anything that was captured while the alt-screen was up so the
+      // user isn't left wondering what happened (only show errors to avoid
+      // flooding the regular terminal with debug noise).
+      const errors = this.console.filter((m) => m.level === "error");
+      if (errors.length) {
+        for (const e of errors.slice(-10)) {
+          process.stderr.write(`recho: ${e.text.split("\n")[0]}\n`);
+        }
+      }
     } catch {
       /* ignore */
     }
@@ -118,9 +224,11 @@ export class App {
       this.runtime.setCode(this.buffer.text);
       this.dirty = true;
     });
-    this.runtime.onError(({error}) => {
-      this.runError = error;
+    this.runtime.onError(({error, source}) => {
+      // Parse / split errors are reported here. They end up as `//✗` lines
+      // in the buffer too, but we want a status-bar nudge as well.
       this.runState = "error";
+      this.pushConsole("error", `[${source || "runtime"}] ${error?.message || String(error)}`);
       this.dirty = true;
     });
     this.runtime.setIsRunning(true);
@@ -128,8 +236,8 @@ export class App {
       this.runtime.run();
       this.runState = "running";
     } catch (e) {
-      this.runError = e;
       this.runState = "error";
+      this.pushConsole("error", "[run] " + (e?.message || String(e)));
     }
   }
 
@@ -137,15 +245,13 @@ export class App {
     if (!this.runtime) return this.initRuntime();
     this.runtime.setIsRunning(true);
     try {
-      this.runError = null;
       this.runtime.setCode(this.buffer.text);
       this.runtime.run();
       this.runState = "running";
       this.flash("Running…", 800);
     } catch (e) {
-      this.runError = e;
       this.runState = "error";
-      this.flash("Run failed: " + (e?.message || e), 4000);
+      this.pushConsole("error", "[run] " + (e?.message || String(e)));
     }
     this.dirty = true;
   }
@@ -212,6 +318,7 @@ export class App {
     if (ctrl && name === "e") return this.openExamples();
     if (ctrl && name === "o") return this.openFilePrompt();
     if (ctrl && name === "w") return this.savePrompt();
+    if (ctrl && name === "l") return this.openConsole();
     if (ctrl && name === "k") return this.openHelp();
     if (ctrl && name === "a") {
       this.buffer.moveTo(0);
@@ -495,9 +602,12 @@ export class App {
 
     // Hints, in priority order (most useful first). Drop tail items until
     // the whole line fits the terminal width.
+    const unread = this.unseenErrorCount();
+    const journalLabel = unread > 0 ? `Console (${unread})` : `Console`;
     const allHints = [
       [`^S`, `Run`],
       [`^E`, `Examples`],
+      [`^L`, journalLabel],
       [`^O`, `Open`],
       [`^W`, `Save`],
       [`^X`, `Stop`],
@@ -506,15 +616,16 @@ export class App {
       [`^Q`, `Quit`],
     ];
     const renderHints = (items) =>
-      items.map(([k, l]) => `${fg(COLORS.hot)}${k}${reset} ${l}`).join(" · ");
+      items
+        .map(([k, l]) => {
+          const labelColor = l.startsWith("Console") && unread > 0 ? fg(COLORS.error) : "";
+          return `${fg(COLORS.hot)}${k}${reset} ${labelColor}${l}${reset}`;
+        })
+        .join(" · ");
 
     let right;
     if (this.message) {
       right = " " + fg(COLORS.marker) + this.message + reset + "  ";
-    } else if (this.runError) {
-      const m = this.runError?.message || String(this.runError);
-      const truncated = m.length > 60 ? m.slice(0, 57) + "…" : m;
-      right = " " + fg(COLORS.error) + "✗ " + truncated + reset + "  ";
     } else {
       let items = allHints.slice();
       let candidate = " " + renderHints(items) + " ";
@@ -537,6 +648,7 @@ export class App {
     if (this.modal.type === "examples") return this.drawExamplesModal();
     if (this.modal.type === "input") return this.drawInputModal();
     if (this.modal.type === "help") return this.drawHelpModal();
+    if (this.modal.type === "console") return this.drawConsoleModal();
     if (this.modal.type === "confirm") return this.drawConfirmModal();
   }
 
@@ -546,6 +658,7 @@ export class App {
       if (this.modal.type === "examples") this.handleExamplesKey(ev);
       else if (this.modal.type === "input") this.handleInputKey(ev);
       else if (this.modal.type === "help") this.handleHelpKey(ev);
+      else if (this.modal.type === "console") this.handleConsoleKey(ev);
       else if (this.modal.type === "confirm") this.handleConfirmKey(ev);
     }
   }
@@ -826,13 +939,161 @@ export class App {
       `  ${bold}Notebook${reset}`,
       `    ^S  Run         ^X  Stop        ^R  Restart runtime`,
       `    ^E  Examples    ^O  Open file   ^W  Save`,
-      `    ^K  This help   ^Q  Quit`,
+      `    ^L  Console     ^K  This help   ^Q  Quit`,
       "",
       `  ${fg(COLORS.dimText)}Click anywhere to dismiss.${reset}`,
     ];
     for (let i = 0; i < lines.length && i < h - 2; i++) {
       this.grid.writeStyled(top + 1 + i, left + 2, lines[i], "");
     }
+  }
+
+  // ---- console / messages log
+  openConsole() {
+    this.consoleSeen = this.console.length;
+    this.modal = {type: "console", scroll: Math.max(0, this.console.length - 1)};
+    this.dirty = true;
+  }
+
+  handleConsoleKey(ev) {
+    if (ev.type === "key") {
+      const {name, ctrl} = ev;
+      if (name === "escape" || (ctrl && name === "l") || (ctrl && name === "g")) {
+        this.modal = null;
+        this.dirty = true;
+        return;
+      }
+      if (name === "up") {
+        this.modal.scroll = Math.max(0, this.modal.scroll - 1);
+        this.dirty = true;
+        return;
+      }
+      if (name === "down") {
+        this.modal.scroll = Math.min(this.console.length - 1, this.modal.scroll + 1);
+        this.dirty = true;
+        return;
+      }
+      if (name === "pageup") {
+        this.modal.scroll = Math.max(0, this.modal.scroll - 10);
+        this.dirty = true;
+        return;
+      }
+      if (name === "pagedown") {
+        this.modal.scroll = Math.min(this.console.length - 1, this.modal.scroll + 10);
+        this.dirty = true;
+        return;
+      }
+      if (name === "home") {
+        this.modal.scroll = 0;
+        this.dirty = true;
+        return;
+      }
+      if (name === "end") {
+        this.modal.scroll = Math.max(0, this.console.length - 1);
+        this.dirty = true;
+        return;
+      }
+      if (name === "delete" || name === "backspace") {
+        this.console = [];
+        this.consoleSeen = 0;
+        this.modal.scroll = 0;
+        this.flash("Console cleared", 1200);
+        this.dirty = true;
+        return;
+      }
+    } else if (ev.type === "mouse") {
+      if (ev.kind === "wheel-up") {
+        this.modal.scroll = Math.max(0, this.modal.scroll - 3);
+        this.dirty = true;
+      } else if (ev.kind === "wheel-down") {
+        this.modal.scroll = Math.min(this.console.length - 1, this.modal.scroll + 3);
+        this.dirty = true;
+      }
+    }
+  }
+
+  drawConsoleModal() {
+    const w = Math.min(96, this.cols - 6);
+    const h = Math.min(this.rows - 4, 24);
+    const left = Math.max(2, Math.floor((this.cols - w) / 2));
+    const top = Math.max(2, Math.floor((this.rows - h) / 2));
+    const box = {top, left, width: w, height: h};
+    const errors = this.console.filter((m) => m.level === "error").length;
+    const warns = this.console.filter((m) => m.level === "warn").length;
+    const title = ` Console · ${this.console.length} entries · ${errors} errors · ${warns} warnings `;
+    drawBox(this.grid, box, title, COLORS);
+    if (this.console.length === 0) {
+      this.grid.writeStyled(
+        top + Math.floor(h / 2),
+        left + 2,
+        fg(COLORS.dimText) + "(empty — no notebook errors yet)" + reset,
+        "",
+      );
+      this.grid.writeStyled(
+        top + h - 1,
+        left + 2,
+        fg(COLORS.dimText) + "Esc / ^J to close" + reset,
+        "",
+      );
+      return;
+    }
+    // Render messages as wrapped blocks: each entry's first line on its
+    // anchor row, continuation lines indented two columns.
+    const innerW = w - 4;
+    const lines = [];
+    for (let i = 0; i < this.console.length; i++) {
+      const m = this.console[i];
+      const tag =
+        m.level === "error"
+          ? fg(COLORS.error) + bold + "✗" + reset
+          : m.level === "warn"
+            ? fg(COLORS.hot) + "!" + reset
+            : fg(COLORS.marker) + "•" + reset;
+      const ts = new Date(m.ts).toTimeString().slice(0, 8);
+      const counter = m.count > 1 ? ` ${fg(COLORS.hot)}×${m.count}${reset}` : "";
+      const head = `${tag} ${fg(COLORS.dimText)}${ts}${reset}${counter}  `;
+      const headLen = visibleLength(head);
+      // Plain-text wrap (don't try to keep ANSI inside the message body).
+      const body = m.text;
+      const bodyLines = body.split("\n");
+      let first = true;
+      for (const bl of bodyLines) {
+        // word-wrap each source line
+        let buf = bl;
+        while (buf.length > 0) {
+          const slice = buf.slice(0, innerW - (first ? headLen : 2));
+          buf = buf.slice(slice.length);
+          const prefix = first ? head : "  ";
+          const styled = first ? slice : fg(COLORS.dimText) + slice + reset;
+          lines.push({entryIndex: i, level: m.level, text: prefix + styled});
+          first = false;
+        }
+        if (bodyLines.length > 1 && bl !== bodyLines[bodyLines.length - 1]) {
+          // also indented continuation
+        }
+      }
+    }
+    // Ensure scroll keeps the requested entry visible at the bottom.
+    const listH = h - 3;
+    let firstLine = 0;
+    // Find the line index for `this.modal.scroll` entry.
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].entryIndex >= this.modal.scroll) {
+        firstLine = Math.max(0, i - listH + 1);
+        break;
+      }
+    }
+    if (firstLine + listH > lines.length) firstLine = Math.max(0, lines.length - listH);
+    for (let row = 0; row < listH; row++) {
+      const li = firstLine + row;
+      if (li >= lines.length) break;
+      this.grid.writeStyled(top + 1 + row, left + 2, lines[li].text, "");
+    }
+    const help =
+      fg(COLORS.dimText) +
+      "↑/↓ scroll · Home/End jump · ⌫ clear · Esc / ^L close" +
+      reset;
+    this.grid.writeStyled(top + h - 1, left + 2, help, "");
   }
 
   // ---- confirm
