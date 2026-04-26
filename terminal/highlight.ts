@@ -81,61 +81,135 @@ const KEYWORDS = new Set([
   "await",
 ]);
 
-const TOKEN_RE = new RegExp(
-  [
-    String.raw`\/\/.*$`, // line comment (until end)
-    String.raw`\/\*[\s\S]*?\*\/`, // block comment
-    String.raw`"(?:\\.|[^"\\])*"`, // double-quoted string
-    String.raw`'(?:\\.|[^'\\])*'`, // single-quoted string
-    String.raw`\`(?:\\.|[^\\\`])*\``, // template literal (no expressions support)
-    String.raw`\b\d[\d_]*(?:\.\d+)?(?:e[+-]?\d+)?\b`, // number
-    String.raw`\b[A-Za-z_$][\w$]*\b`, // identifier
-    String.raw`[{}()[\];,.<>:?!+\-*/%=&|^~]`,
-  ].join("|"),
-  "g",
-);
+export type HighlightState = {inBlockComment: boolean};
+
+const INITIAL_STATE: HighlightState = {inBlockComment: false};
+const STRING_RE = /^(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^\\`])*`)/;
+const NUMBER_RE = /^\b\d[\d_]*(?:\.\d+)?(?:e[+-]?\d+)?\b/i;
+const IDENT_RE = /^[A-Za-z_$][\w$]*/;
+const PUNCT_RE = /^[{}()[\];,.<>:?!+\-*/%=&|^~]/;
+
+function styleComment(text: string): string {
+  return fg(C.comment) + italic + text + reset + fg(C.fg);
+}
+
+function styleToken(tok: string, line: string, index: number): string {
+  let style: string;
+  if (tok[0] === '"' || tok[0] === "'" || tok[0] === "`") style = fg(C.string);
+  else if (/^\d/.test(tok)) style = fg(C.number);
+  else if (/^[A-Za-z_$]/.test(tok) && KEYWORDS.has(tok)) style = fg(C.keyword) + bold;
+  else if (/^[A-Za-z_$]/.test(tok)) {
+    const next = line[index + tok.length];
+    if (next === "(") style = fg(C.fn);
+    else style = fg(C.fg);
+  } else style = fg(C.punct);
+
+  return style + tok + reset + fg(C.fg);
+}
+
+export function nextHighlightState(line: string, state: HighlightState = INITIAL_STATE): HighlightState {
+  let inBlockComment = state.inBlockComment;
+  let quote: string | null = null;
+  let escaped = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    const next = line[i + 1];
+
+    if (inBlockComment) {
+      if (ch === "*" && next === "/") {
+        inBlockComment = false;
+        i++;
+      }
+      continue;
+    }
+
+    if (quote) {
+      if (escaped) {
+        escaped = false;
+      } else if (ch === "\\") {
+        escaped = true;
+      } else if (ch === quote) {
+        quote = null;
+      }
+      continue;
+    }
+
+    if (ch === "/" && next === "/") break;
+    if (ch === "/" && next === "*") {
+      inBlockComment = true;
+      i++;
+      continue;
+    }
+    if (ch === '"' || ch === "'" || ch === "`") quote = ch;
+  }
+
+  return {inBlockComment};
+}
 
 // Highlight a single line of source (without the runtime output prefix).
 // Returns a styled string (length = visible chars equal to `line`).
-export function highlightLine(line: string): string {
+export function highlightLine(line: string, state: HighlightState = INITIAL_STATE): string {
   // Comment? Whole-line color.
   const trimmed = line.trimStart();
   if (trimmed.startsWith(OUTPUT_PREFIX) || trimmed.startsWith("//➜")) {
-    return fg(C.output) + italic + line + reset;
+    return fg(C.output) + line + reset;
   }
   if (trimmed.startsWith(ERROR_PREFIX) || trimmed.startsWith("//✗")) {
-    return fg(C.error) + italic + line + reset;
+    return fg(C.error) + line + reset;
   }
   if (trimmed.startsWith("//")) {
     return fg(C.comment) + italic + line + reset;
   }
 
   let out = fg(C.fg);
-  let last = 0;
-  TOKEN_RE.lastIndex = 0;
-  let m: RegExpExecArray | null;
-  while ((m = TOKEN_RE.exec(line)) !== null) {
-    if (m.index > last) {
-      out += line.slice(last, m.index);
-    }
-    const tok = m[0];
-    let style: string;
-    if (tok.startsWith("//")) style = fg(C.comment) + italic;
-    else if (tok.startsWith("/*")) style = fg(C.comment) + italic;
-    else if (tok[0] === '"' || tok[0] === "'" || tok[0] === "`") style = fg(C.string);
-    else if (/^\d/.test(tok)) style = fg(C.number);
-    else if (/^[A-Za-z_$]/.test(tok) && KEYWORDS.has(tok)) style = fg(C.keyword) + bold;
-    else if (/^[A-Za-z_$]/.test(tok)) {
-      // Function-call heuristic: identifier followed by '('.
-      const next = line[m.index + tok.length];
-      if (next === "(") style = fg(C.fn);
-      else style = fg(C.fg);
-    } else style = fg(C.punct);
+  let i = 0;
+  let inBlockComment = state.inBlockComment;
 
-    out += style + tok + reset + fg(C.fg);
-    last = m.index + tok.length;
+  while (i < line.length) {
+    if (inBlockComment) {
+      const end = line.indexOf("*/", i);
+      if (end === -1) {
+        out += styleComment(line.slice(i));
+        break;
+      }
+      out += styleComment(line.slice(i, end + 2));
+      i = end + 2;
+      inBlockComment = false;
+      continue;
+    }
+
+    if (line.startsWith("//", i)) {
+      out += styleComment(line.slice(i));
+      break;
+    }
+    if (line.startsWith("/*", i)) {
+      const end = line.indexOf("*/", i + 2);
+      if (end === -1) {
+        out += styleComment(line.slice(i));
+        break;
+      }
+      out += styleComment(line.slice(i, end + 2));
+      i = end + 2;
+      continue;
+    }
+
+    const rest = line.slice(i);
+    const token =
+      rest.match(STRING_RE)?.[0] ??
+      rest.match(NUMBER_RE)?.[0] ??
+      rest.match(IDENT_RE)?.[0] ??
+      rest.match(PUNCT_RE)?.[0];
+
+    if (token) {
+      out += styleToken(token, line, i);
+      i += token.length;
+    } else {
+      out += line[i];
+      i++;
+    }
   }
-  if (last < line.length) out += line.slice(last);
+
   out += reset;
   return out;
 }

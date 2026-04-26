@@ -8,7 +8,9 @@ import {Buffer as NodeBuffer} from "node:buffer";
 import {createWorkerRuntime} from "./workerRuntime.ts";
 import type {WorkerRuntime} from "./workerRuntime.ts";
 import {Buffer as DocumentBuffer} from "./buffer.ts";
-import {highlightLine, COLORS} from "./highlight.ts";
+import {highlightLine, nextHighlightState, COLORS} from "./highlight.ts";
+import {loadHelpDocs} from "./docs.ts";
+import type {HelpDocs} from "./docs.ts";
 import * as scr from "./screen.ts";
 import {fg, bg, reset, bold, padToWidth, visibleLength} from "./screen.ts";
 
@@ -25,7 +27,12 @@ type ConsoleSavedHandlers = {
   info: typeof console.info;
   stderrWrite: typeof process.stderr.write;
 };
-type AppOptions = {initialPath: string | null; initialCode: string; examplesDir: string | null};
+type AppOptions = {
+  initialPath: string | null;
+  initialCode: string;
+  examplesDir: string | null;
+  docsDir?: string | null;
+};
 type Box = {top: number; left: number; width: number; height: number; bottom?: number; right?: number};
 type EditorBox = {top: number; bottom: number; left: number; right: number; width: number; height: number};
 type ScrollbarState = {
@@ -47,6 +54,11 @@ type ModalBag = {
   title: string;
   value: string;
   onSubmit: (value: string) => void;
+  help: HelpDocs;
+  helpIndex: number;
+  helpSlug: string;
+  helpScroll: number;
+  helpOutlineScroll: number;
 };
 type ModalState = (Partial<ModalBag> & {type: string}) | null;
 
@@ -61,6 +73,8 @@ function errorStackOrMessage(error: unknown): string {
 export class App {
   path: string | null;
   examplesDir: string | null;
+  docsDir: string | null;
+  helpDocs: HelpDocs | null;
   buffer: DocumentBuffer;
   scrollY: number;
   scrollX: number;
@@ -94,9 +108,11 @@ export class App {
   cursorBlinkOn?: boolean;
   lastBlinkTs?: number;
 
-  constructor({initialPath, initialCode, examplesDir}: AppOptions) {
+  constructor({initialPath, initialCode, examplesDir, docsDir = null}: AppOptions) {
     this.path = initialPath;
     this.examplesDir = examplesDir;
+    this.docsDir = docsDir;
+    this.helpDocs = null;
     this.buffer = new DocumentBuffer(initialCode);
     this.scrollY = 0;
     this.scrollX = 0;
@@ -493,8 +509,10 @@ export class App {
       return;
     }
     if (ctrl && name === "e") return this.openExamples();
+    if (ctrl && name === "n") return this.newFile();
     if (ctrl && name === "o") return this.openFilePrompt();
     if (ctrl && name === "w") return this.savePrompt();
+    if (ctrl && name === "t") return this.renamePrompt();
     if (ctrl && name === "l") return this.openConsole();
     if (ctrl && name === "k") return this.openHelp();
     if (ctrl && name === "a") {
@@ -801,6 +819,10 @@ export class App {
     const box = this.editorBox();
     const {row: cRow} = this.buffer.posToRowCol(this.buffer.cursor);
     const sel = this.buffer.selection();
+    let highlightState = {inBlockComment: false};
+    for (let line = 0; line < this.scrollY; line++) {
+      highlightState = nextHighlightState(this.buffer.lineText(line), highlightState);
+    }
 
     for (let i = 0; i < box.height; i++) {
       const screenRow = box.top + i;
@@ -812,6 +834,7 @@ export class App {
       }
       this.editorRowMap.set(screenRow, {line, pos: this.buffer.lineStarts[line]});
       const isCursorLine = line === cRow;
+      const text = this.buffer.lineText(line);
 
       // Gutter: line number, right-aligned in (GUTTER-1) chars + 1 space padding.
       const lnText = String(line + 1);
@@ -821,11 +844,9 @@ export class App {
       this.grid.writeStyled(screenRow, 0, gutter, "");
 
       // Source line content (with horizontal scroll).
-      const text = this.buffer.lineText(line);
-      const visible = text.slice(this.scrollX, this.scrollX + (box.width - GUTTER));
-      const styled = highlightLine(visible);
-
-      this.grid.writeStyled(screenRow, GUTTER, styled, "");
+      const styled = highlightLine(text, highlightState);
+      writeStyledClipped(this.grid, screenRow, GUTTER - this.scrollX, styled, GUTTER, box.right);
+      highlightState = nextHighlightState(text, highlightState);
 
       // Cursor-line subtle background overlay — appended to each cell's
       // style so the bg wins even when the highlighted token's style
@@ -898,8 +919,10 @@ export class App {
       [`^S`, `Run`],
       [`^E`, `Examples`],
       [`^L`, journalLabel],
+      [`^N`, `New`],
       [`^O`, `Open`],
       [`^W`, `Save`],
+      [`^T`, `Rename`],
       [`^X`, `Stop`],
       [`^R`, `Reset`],
       [`^K`, `Help`],
@@ -1157,6 +1180,18 @@ export class App {
     this.grid.writeStyled(top + h - 1, left + 2, fg(COLORS.dimText) + "Enter to confirm · Esc to cancel" + reset, "");
   }
 
+  newFile() {
+    this.runtime?.setIsRunning(false);
+    this.path = null;
+    this.buffer = new DocumentBuffer("");
+    this.scrollY = 0;
+    this.scrollX = 0;
+    this.runState = "idle";
+    this.initRuntime();
+    this.flash("New empty file", 1800);
+    this.dirty = true;
+  }
+
   openFilePrompt() {
     this.inputPrompt("Open file", this.path || "", (p) => {
       if (!p) return;
@@ -1175,12 +1210,16 @@ export class App {
     });
   }
 
+  saveToPath(filePath: string) {
+    fs.writeFileSync(filePath, this.buffer.text, "utf8");
+    this.path = path.resolve(filePath);
+  }
+
   savePrompt() {
     this.inputPrompt("Save to", this.path || "untitled.recho.js", (p) => {
       if (!p) return;
       try {
-        fs.writeFileSync(p, this.buffer.text, "utf8");
-        this.path = path.resolve(p);
+        this.saveToPath(p);
         this.flash("Saved " + p, 2000);
       } catch (e) {
         this.flash("Save failed: " + errorMessage(e), 3000);
@@ -1189,49 +1228,264 @@ export class App {
     });
   }
 
-  // ---- help
-  openHelp() {
-    this.modal = {type: "help"};
-    this.dirty = true;
+  renamePrompt() {
+    this.inputPrompt("Rename file", this.path || "untitled.recho.js", (p) => {
+      if (!p) return;
+      const target = path.resolve(p);
+      const current = this.path ? path.resolve(this.path) : null;
+      try {
+        if (current === target) {
+          this.flash("Already named " + path.basename(target), 1600);
+          return;
+        }
+        if (fs.existsSync(target)) {
+          this.flash("Rename failed: target already exists", 3000);
+          return;
+        }
+        if (current && fs.existsSync(current)) fs.renameSync(current, target);
+        this.saveToPath(target);
+        this.flash("Renamed to " + path.basename(target), 2200);
+      } catch (e) {
+        this.flash("Rename failed: " + errorMessage(e), 3000);
+      }
+      this.dirty = true;
+    });
   }
-  handleHelpKey(ev: scr.InputEvent) {
-    if (ev.type === "key" && (ev.name === "escape" || (ev.ctrl && ev.name === "k"))) {
-      this.modal = null;
-      this.dirty = true;
-    } else if (ev.type === "mouse" && ev.kind === "press") {
-      this.modal = null;
-      this.dirty = true;
+
+  // ---- help
+  ensureHelpDocs(): HelpDocs | null {
+    if (this.helpDocs) return this.helpDocs;
+    if (!this.docsDir) return null;
+    try {
+      this.helpDocs = loadHelpDocs(this.docsDir);
+      return this.helpDocs;
+    } catch (e) {
+      this.flash("Cannot read tutorials: " + errorMessage(e), 3000);
+      return null;
     }
   }
+
+  openHelp() {
+    const help = this.ensureHelpDocs();
+    if (!help || help.entries.length === 0) {
+      this.flash("No tutorials available", 2000);
+      return;
+    }
+    const helpIndex = this.firstSelectableHelpIndex(help);
+    const entry = help.entries[helpIndex];
+    if (!entry?.slug) {
+      this.flash("No tutorials available", 2000);
+      return;
+    }
+    this.modal = {
+      type: "help",
+      help,
+      helpIndex,
+      helpSlug: entry.slug,
+      helpScroll: 0,
+      helpOutlineScroll: 0,
+    };
+    this.dirty = true;
+  }
+
+  firstSelectableHelpIndex(help: HelpDocs): number {
+    return Math.max(
+      0,
+      help.entries.findIndex((entry) => entry.selectable && entry.slug),
+    );
+  }
+
+  moveHelpSelection(delta: number) {
+    const help = this.activeModal.help;
+    let next = this.activeModal.helpIndex;
+    while (next + delta >= 0 && next + delta < help.entries.length) {
+      next += delta;
+      const entry = help.entries[next];
+      if (entry.selectable && entry.slug) {
+        this.setHelpSelection(next);
+        return;
+      }
+    }
+  }
+
+  setHelpSelection(index: number) {
+    const entry = this.activeModal.help.entries[index];
+    if (!entry?.selectable || !entry.slug) return;
+    this.activeModal.helpIndex = index;
+    this.activeModal.helpSlug = entry.slug;
+    this.activeModal.helpScroll = 0;
+    this.dirty = true;
+  }
+
+  scrollHelpContent(delta: number) {
+    this.activeModal.helpScroll = Math.max(0, Math.min(this.maxHelpScroll(), this.activeModal.helpScroll + delta));
+    this.dirty = true;
+  }
+
+  maxHelpScroll(): number {
+    const doc = this.activeModal.help.docsBySlug.get(this.activeModal.helpSlug);
+    if (!doc) return 0;
+    const layout = this.helpLayout();
+    return Math.max(0, doc.lines.length - layout.contentHeight);
+  }
+
+  closeHelp() {
+    this.modal = null;
+    this.dirty = true;
+  }
+
+  handleHelpKey(ev: scr.InputEvent) {
+    if (ev.type === "key") {
+      const {name, ctrl} = ev;
+      if (name === "escape" || (ctrl && name === "k") || (ctrl && name === "g")) return this.closeHelp();
+      if (name === "down") return this.moveHelpSelection(1);
+      if (name === "up") return this.moveHelpSelection(-1);
+      if (name === "pagedown") return this.scrollHelpContent(this.helpLayout().contentHeight);
+      if (name === "pageup") return this.scrollHelpContent(-this.helpLayout().contentHeight);
+      if (name === "home") {
+        this.setHelpSelection(this.firstSelectableHelpIndex(this.activeModal.help));
+        return;
+      }
+      if (name === "end") {
+        for (let i = this.activeModal.help.entries.length - 1; i >= 0; i--) {
+          const entry = this.activeModal.help.entries[i];
+          if (entry.selectable && entry.slug) {
+            this.setHelpSelection(i);
+            return;
+          }
+        }
+      }
+      return;
+    }
+
+    if (ev.type !== "mouse") return;
+    const layout = this.helpLayout();
+    const back = this.helpBackButtonBounds();
+    if (ev.kind === "press" && ev.button === 0 && ev.row === back.row && ev.col >= back.left && ev.col < back.right) {
+      return this.closeHelp();
+    }
+    if (ev.kind === "wheel-up") {
+      if (ev.col <= layout.outlineRight) this.moveHelpSelection(-3);
+      else this.scrollHelpContent(-3);
+      return;
+    }
+    if (ev.kind === "wheel-down") {
+      if (ev.col <= layout.outlineRight) this.moveHelpSelection(3);
+      else this.scrollHelpContent(3);
+      return;
+    }
+    if (
+      ev.kind === "press" &&
+      ev.button === 0 &&
+      ev.row >= layout.bodyTop &&
+      ev.row < layout.bodyBottom &&
+      ev.col >= 0 &&
+      ev.col < layout.outlineRight
+    ) {
+      const index = this.activeModal.helpOutlineScroll + (ev.row - layout.bodyTop);
+      this.setHelpSelection(index);
+    }
+  }
+
+  helpLayout() {
+    const bodyTop = 2;
+    const footer = Math.max(bodyTop, this.rows - 1);
+    const bodyBottom = footer;
+    const bodyHeight = Math.max(0, bodyBottom - bodyTop);
+    const outlineWidth = Math.min(Math.max(18, Math.floor(this.cols * 0.32)), 36, Math.max(18, this.cols - 24));
+    const outlineRight = Math.max(12, outlineWidth);
+    const contentLeft = Math.min(this.cols - 1, outlineRight + 2);
+    const contentWidth = Math.max(0, this.cols - contentLeft - 1);
+    const contentTop = bodyTop + 2;
+    const contentHeight = Math.max(0, bodyBottom - contentTop);
+    return {bodyTop, bodyBottom, bodyHeight, outlineRight, contentLeft, contentWidth, contentTop, contentHeight};
+  }
+
+  helpBackButtonBounds() {
+    const text = "[ Editor Esc ]";
+    const width = text.length + 2;
+    const left = Math.max(0, this.cols - width - 1);
+    return {row: 0, left, right: Math.min(this.cols, left + width), text};
+  }
+
   drawHelpModal() {
-    const w = Math.min(72, this.cols - 8);
-    const h = Math.min(this.rows - 4, 22);
-    const left = Math.max(2, Math.floor((this.cols - w) / 2));
-    const top = Math.max(2, Math.floor((this.rows - h) / 2));
-    const box = {top, left, width: w, height: h};
-    drawBox(this.grid, box, " Recho · Quick help ", COLORS);
-    const lines = [
+    const layout = this.helpLayout();
+    const frameStyle = bg(233) + fg(COLORS.fg);
+    this.grid.fillRect(0, 0, this.rows, this.cols, " ", frameStyle);
+
+    const headerStyle = bg(234) + fg(COLORS.title);
+    this.grid.fillRect(0, 0, 1, this.cols, " ", headerStyle);
+    this.grid.writeStyled(0, 0, headerStyle + bold + " Recho · Tutorials " + reset, headerStyle);
+    const back = this.helpBackButtonBounds();
+    this.grid.writeStyled(0, back.left, headerStyle + fg(COLORS.hot) + " " + back.text + " " + reset, headerStyle);
+
+    const divStyle = fg(COLORS.border);
+    this.grid.fillRect(1, 0, 2, this.cols, "─", divStyle);
+    for (let row = layout.bodyTop; row < layout.bodyBottom; row++) {
+      this.grid.setCell(row, layout.outlineRight, "│", divStyle + frameStyle);
+    }
+
+    this.drawHelpOutline(layout);
+    this.drawHelpContent(layout);
+
+    const footerStyle = bg(234) + fg(COLORS.status);
+    this.grid.fillRect(this.rows - 1, 0, this.rows, this.cols, " ", footerStyle);
+    const helpLine =
+      ` ${fg(COLORS.hot)}↑/↓${reset} outline · ${fg(COLORS.hot)}PgUp/PgDn${reset} scroll · ` +
+      `${fg(COLORS.hot)}click${reset} open · ${fg(COLORS.hot)}Esc/^K${reset} editor `;
+    this.grid.writeStyled(this.rows - 1, 0, footerStyle + helpLine + reset, footerStyle);
+  }
+
+  drawHelpOutline(layout: ReturnType<App["helpLayout"]>) {
+    const help = this.activeModal.help;
+    const listH = layout.bodyHeight;
+    let scroll = this.activeModal.helpOutlineScroll || 0;
+    if (this.activeModal.helpIndex < scroll) scroll = this.activeModal.helpIndex;
+    if (this.activeModal.helpIndex >= scroll + listH) scroll = this.activeModal.helpIndex - listH + 1;
+    this.activeModal.helpOutlineScroll = Math.max(0, scroll);
+
+    for (let i = 0; i < listH; i++) {
+      const index = this.activeModal.helpOutlineScroll + i;
+      const entry = help.entries[index];
+      if (!entry) break;
+      const row = layout.bodyTop + i;
+      const selected = index === this.activeModal.helpIndex;
+      if (selected) this.grid.fillRect(row, 0, row + 1, layout.outlineRight, " ", bg(COLORS.selBg));
+      const baseStyle =
+        entry.kind === "group"
+          ? fg(entry.selectable ? COLORS.title : COLORS.dimText) + bold
+          : fg(entry.selectable ? COLORS.fg : COLORS.dimText);
+      const selectedStyle = selected ? bg(COLORS.selBg) + fg(255) + bold : baseStyle;
+      const prefix = selected ? fg(COLORS.hot) + "▸ " + reset : "  ";
+      const indent = "  ".repeat(entry.depth);
+      const width = Math.max(1, layout.outlineRight - 4);
+      const label = padToWidth(indent + entry.title, width).slice(0, width);
+      this.grid.writeStyled(row, 1, prefix + selectedStyle + label + reset, "");
+    }
+  }
+
+  drawHelpContent(layout: ReturnType<App["helpLayout"]>) {
+    const doc = this.activeModal.help.docsBySlug.get(this.activeModal.helpSlug);
+    if (!doc) return;
+    this.activeModal.helpScroll = Math.max(0, Math.min(this.maxHelpScroll(), this.activeModal.helpScroll));
+
+    this.grid.writeStyled(layout.bodyTop, layout.contentLeft, fg(COLORS.title) + bold + doc.title + reset, "");
+    this.grid.writeStyled(
+      layout.bodyTop + 1,
+      layout.contentLeft,
+      fg(COLORS.dimText) + doc.slug + ".recho.js" + reset,
       "",
-      `  ${fg(COLORS.fn)}A reactive notebook in your terminal.${reset}`,
-      "",
-      `  Write JavaScript and call ${fg(COLORS.keyword)}echo${reset}(value).`,
-      `  Outputs render as ${fg(COLORS.output)}//➜ comments${reset} above each cell.`,
-      "",
-      `  ${bold}Editing${reset}`,
-      `    arrows / home / end / pageup / pagedown   move`,
-      `    shift + movement                          select`,
-      `    alt  + ←/→                                word jumps`,
-      `    mouse click / drag / wheel                navigate`,
-      "",
-      `  ${bold}Notebook${reset}`,
-      `    ^S  Run         ^X  Stop        ^R  Restart runtime`,
-      `    ^E  Examples    ^O  Open file   ^W  Save`,
-      `    ^L  Console     ^K  This help   ^Q  Quit`,
-      "",
-      `  ${fg(COLORS.dimText)}Click anywhere to dismiss.${reset}`,
-    ];
-    for (let i = 0; i < lines.length && i < h - 2; i++) {
-      this.grid.writeStyled(top + 1 + i, left + 2, lines[i], "");
+    );
+
+    let state = {inBlockComment: false};
+    for (let i = 0; i < this.activeModal.helpScroll; i++) state = nextHighlightState(doc.lines[i] ?? "", state);
+
+    for (let i = 0; i < layout.contentHeight; i++) {
+      const index = this.activeModal.helpScroll + i;
+      const line = doc.lines[index];
+      if (line == null) break;
+      this.grid.writeStyled(layout.contentTop + i, layout.contentLeft, highlightLine(line, state), "");
+      state = nextHighlightState(line, state);
     }
   }
 
@@ -1389,6 +1643,34 @@ function cloneGrid(g: scr.Grid): scr.Grid {
     c.cells[i].style = g.cells[i].style;
   }
   return c;
+}
+
+function writeStyledClipped(
+  grid: scr.Grid,
+  row: number,
+  col: number,
+  s: string,
+  clipLeft: number,
+  clipRight: number,
+  baseStyle = "",
+) {
+  if (row < 0 || row >= grid.rows) return;
+  let style = baseStyle;
+  let i = 0;
+  let c = col;
+  while (i < s.length && c < clipRight) {
+    if (s[i] === "\x1b" && s[i + 1] === "[") {
+      const end = s.indexOf("m", i);
+      if (end === -1) break;
+      style += s.slice(i, end + 1);
+      i = end + 1;
+      continue;
+    }
+    const ch = s[i];
+    if (ch !== "\n" && ch !== "\r" && c >= clipLeft) grid.setCell(row, c, ch, style);
+    c++;
+    i++;
+  }
 }
 
 function drawBox(grid: scr.Grid, box: Box, title: string, palette: typeof COLORS) {

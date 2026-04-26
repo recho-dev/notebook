@@ -16,6 +16,7 @@ import {App} from "./app.ts";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
 const examplesDir = path.join(repoRoot, "app", "examples");
+const docsDir = path.join(repoRoot, "app", "docs");
 
 const DEFAULT_CODE = `// Welcome to Recho · the reactive notebook for your terminal.
 // Edit code below and press ^S to run. Output appears as //➜ comments.
@@ -30,6 +31,7 @@ for (let i = 1; i <= 5; i++) {
 }
 
 // Press ^E to browse examples (sorting, mazes, ASCII art, …)
+// Press ^N for a new empty file, ^T to rename the current file.
 `;
 
 function main() {
@@ -59,7 +61,7 @@ function main() {
     process.exit(1);
   }
 
-  const app = new App({initialPath, initialCode, examplesDir});
+  const app = new App({initialPath, initialCode, examplesDir, docsDir});
   app.start();
 }
 
@@ -74,7 +76,8 @@ function printHelp() {
       "",
       "Inside the editor:",
       "  ^S  run        ^X  stop          ^R  restart runtime",
-      "  ^E  examples   ^O  open file     ^W  save",
+      "  ^E  examples   ^N  new file      ^O  open file",
+      "  ^W  save       ^T  rename file   ^L  console",
       "  ^K  help       ^Q  quit",
       "",
     ].join("\n"),
