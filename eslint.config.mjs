@@ -10,6 +10,7 @@ export default defineConfig([
     files: [
       "editor/**/*.{js,ts,tsx}",
       "runtime/**/*.{js,ts}",
+      "terminal/**/*.ts",
       "test/**/*.{js,ts,tsx}",
       "app/**/*.{js,jsx,ts,tsx}",
       "lib/**/*.{js,ts}",
@@ -44,7 +45,14 @@ export default defineConfig([
   // TypeScript-specific configuration
   ...tseslint.configs.recommended.map((config) => ({
     ...config,
-    files: ["editor/**/*.{ts,tsx}", "runtime/**/*.ts", "test/**/*.{ts,tsx}", "app/**/*.{ts,tsx}", "lib/**/*.ts"],
+    files: [
+      "editor/**/*.{ts,tsx}",
+      "runtime/**/*.ts",
+      "terminal/**/*.ts",
+      "test/**/*.{ts,tsx}",
+      "app/**/*.{ts,tsx}",
+      "lib/**/*.ts",
+    ],
   })),
   {
     ignores: ["**/*.recho.js", "test/output/**/*"],

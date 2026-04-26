@@ -1,5 +1,5 @@
 import {describe, expect, it} from "vitest";
-import {App} from "../terminal/app.js";
+import {App} from "../terminal/app.ts";
 
 function makeApp(lineCount = 30) {
   const initialCode = Array.from({length: lineCount}, (_, i) => `echo(${i});`).join("\n");

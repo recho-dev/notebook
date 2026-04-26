@@ -20,20 +20,47 @@ export const disableMouse = CSI + "?1006l" + CSI + "?1002l" + CSI + "?1000l";
 
 export const reset = CSI + "0m";
 
-export function moveTo(row, col) {
+export type KeyEvent = {
+  type: "key";
+  name: string;
+  ch: string;
+  ctrl: boolean;
+  alt: boolean;
+  shift: boolean;
+};
+
+export type MouseKind = "press" | "release" | "drag" | "wheel-up" | "wheel-down";
+
+export type MouseEvent = {
+  type: "mouse";
+  kind: MouseKind;
+  button: number;
+  row: number;
+  col: number;
+  shift?: boolean;
+  meta?: boolean;
+  ctrl?: boolean;
+};
+
+export type TextEvent = {type: "text"; text: string};
+export type InputEvent = KeyEvent | MouseEvent | TextEvent;
+
+type GridCell = {ch: string; style: string};
+
+export function moveTo(row: number, col: number): string {
   return CSI + (row + 1) + ";" + (col + 1) + "H";
 }
 
-export function fg(n) {
+export function fg(n: number): string {
   return CSI + "38;5;" + n + "m";
 }
-export function bg(n) {
+export function bg(n: number): string {
   return CSI + "48;5;" + n + "m";
 }
-export function rgbFg(r, g, b) {
+export function rgbFg(r: number, g: number, b: number): string {
   return CSI + "38;2;" + r + ";" + g + ";" + b + "m";
 }
-export function rgbBg(r, g, b) {
+export function rgbBg(r: number, g: number, b: number): string {
   return CSI + "48;2;" + r + ";" + g + ";" + b + "m";
 }
 export const bold = CSI + "1m";
@@ -48,15 +75,15 @@ export const noInverse = CSI + "27m";
 
 // Strip SGR codes for length measurement.
 const ANSI_RE = /\x1b\[[0-9;]*[A-Za-z]/g;
-export function stripAnsi(s) {
+export function stripAnsi(s: string): string {
   return s.replace(ANSI_RE, "");
 }
-export function visibleLength(s) {
+export function visibleLength(s: string): number {
   return stripAnsi(s).length;
 }
 
 // Pad a styled string to width n using spaces (preserving ANSI).
-export function padToWidth(s, n) {
+export function padToWidth(s: string, n: number): string {
   const v = visibleLength(s);
   if (v >= n) return s;
   return s + " ".repeat(n - v);
@@ -64,7 +91,7 @@ export function padToWidth(s, n) {
 
 // Truncate styled string to visible width n (drops trailing chars; ignores
 // the rare case of mid-escape splitting which is not produced by us).
-export function truncateToWidth(s, n) {
+export function truncateToWidth(s: string, n: number): string {
   if (visibleLength(s) <= n) return s;
   let out = "";
   let used = 0;
@@ -95,7 +122,7 @@ export function truncateToWidth(s, n) {
 // Control bytes with a friendly name. Both CR (13) and LF (10) map to
 // `enter` so multi-line paste and Enter both work across terminals — that
 // means we can't bind ^J / ^M, which is fine.
-const NAMED = new Map([
+const NAMED = new Map<number, string>([
   [13, "enter"],
   [10, "enter"],
   [9, "tab"],
@@ -105,11 +132,11 @@ const NAMED = new Map([
   [32, "space"],
 ]);
 
-export function parseInput(buf) {
+export function parseInput(buf: string): InputEvent[] {
   // Returns array of events and the number of bytes consumed (some bytes
   // may remain if a sequence is partial; for simplicity we always consume
   // everything we recognized).
-  const events = [];
+  const events: InputEvent[] = [];
   let i = 0;
   const s = buf;
   while (i < s.length) {
@@ -118,15 +145,18 @@ export function parseInput(buf) {
       // Escape sequences
       if (s[i + 1] === "[") {
         // CSI
-        let j = i + 2;
+        const j = i + 2;
         // SGR mouse: ESC[<n;n;n[Mm]
         if (s[j] === "<") {
           let k = j + 1;
           while (k < s.length && s[k] !== "M" && s[k] !== "m") k++;
           if (k >= s.length) break;
-          const params = s.slice(j + 1, k).split(";").map(Number);
+          const params = s
+            .slice(j + 1, k)
+            .split(";")
+            .map(Number);
           const action = s[k] === "M" ? "press" : "release";
-          const [code, col, row] = params;
+          const [code = 0, col = 1, row = 1] = params;
           // code bits: low 2 = button (0=left,1=mid,2=right,3=release-old)
           // bit 5 (32) = motion, bit 6 (64) = wheel
           const button = code & 3;
@@ -135,7 +165,7 @@ export function parseInput(buf) {
           const shift = (code & 4) !== 0;
           const meta = (code & 8) !== 0;
           const ctrl = (code & 16) !== 0;
-          let kind = "press";
+          let kind: MouseKind = "press";
           if (action === "release") kind = "release";
           else if (motion) kind = "drag";
           if (wheel) kind = button === 0 ? "wheel-up" : "wheel-down";
@@ -166,7 +196,7 @@ export function parseInput(buf) {
       if (s[i + 1] === "O") {
         // SS3 (function keys, sometimes home/end)
         const code = s[i + 2];
-        let name = null;
+        let name: string | null = null;
         if (code === "P") name = "f1";
         else if (code === "Q") name = "f2";
         else if (code === "R") name = "f3";
@@ -224,10 +254,10 @@ export function parseInput(buf) {
   return events;
 }
 
-function csiToEvent(seq) {
+function csiToEvent(seq: string): KeyEvent | null {
   // seq is everything after the leading ESC, e.g. "[A" or "[1;5C"
   // Common sequences
-  const map = {
+  const map: Record<string, string> = {
     "[A": "up",
     "[B": "down",
     "[C": "right",
@@ -250,13 +280,12 @@ function csiToEvent(seq) {
   // Modifier sequences like "[1;5C" (Ctrl+Right). Strip "1;<m>" prefix.
   const m = seq.match(/^\[(\d+);(\d+)([A-Za-z~])$/);
   if (m) {
-    const code = parseInt(m[2], 10) - 1;
+    const code = parseInt(m[2] ?? "0", 10) - 1;
     const shift = (code & 1) !== 0;
     const alt = (code & 2) !== 0;
     const ctrl = (code & 4) !== 0;
-    const tail = m[1] + m[3];
     const sub = "[" + (m[3] === "~" ? m[1] + "~" : m[3]);
-    const baseMap = {
+    const baseMap: Record<string, string> = {
       "[A": "up",
       "[B": "down",
       "[C": "right",
@@ -280,14 +309,18 @@ function csiToEvent(seq) {
 // previously emitted grid and only repaint cells that changed.
 
 export class Grid {
-  constructor(rows, cols) {
+  rows: number;
+  cols: number;
+  cells: GridCell[];
+
+  constructor(rows: number, cols: number) {
     this.rows = rows;
     this.cols = cols;
     this.cells = new Array(rows * cols);
     for (let i = 0; i < this.cells.length; i++) this.cells[i] = {ch: " ", style: ""};
   }
 
-  resize(rows, cols) {
+  resize(rows: number, cols: number) {
     this.rows = rows;
     this.cols = cols;
     this.cells = new Array(rows * cols);
@@ -301,7 +334,7 @@ export class Grid {
     }
   }
 
-  setCell(row, col, ch, style) {
+  setCell(row: number, col: number, ch: string, style: string) {
     if (row < 0 || row >= this.rows || col < 0 || col >= this.cols) return;
     const cell = this.cells[row * this.cols + col];
     cell.ch = ch;
@@ -311,7 +344,7 @@ export class Grid {
   // Write a styled string (already containing SGR codes) starting at (row,
   // col), clipping at the right edge. The provided `style` is the style at
   // entry; SGR escapes inside `s` may modify the live style.
-  writeStyled(row, col, s, baseStyle = "") {
+  writeStyled(row: number, col: number, s: string, baseStyle = ""): number {
     if (row < 0 || row >= this.rows) return col;
     let style = baseStyle;
     let i = 0;
@@ -338,7 +371,7 @@ export class Grid {
   }
 
   // Fill a row range with the given (plain) char and style.
-  fillRect(row0, col0, row1, col1, ch, style) {
+  fillRect(row0: number, col0: number, row1: number, col1: number, ch: string, style: string) {
     for (let r = row0; r < row1; r++) {
       for (let c = col0; c < col1; c++) {
         this.setCell(r, c, ch, style);
@@ -348,7 +381,7 @@ export class Grid {
 }
 
 // Render `next` to stdout, computing a minimal diff from `prev`.
-export function renderDiff(prev, next, write) {
+export function renderDiff(prev: Grid | null, next: Grid, write: (output: string) => void) {
   let out = "";
   let curStyle = "";
   let curRow = -1;

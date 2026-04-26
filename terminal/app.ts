@@ -4,27 +4,100 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import {createWorkerRuntime} from "./workerRuntime.js";
-import {OUTPUT_PREFIX, ERROR_PREFIX} from "../runtime/output.js";
-import {Buffer} from "./buffer.js";
-import {highlightLine, COLORS} from "./highlight.js";
-import * as scr from "./screen.js";
-import {fg, bg, rgbBg, rgbFg, dim, italic, reset, bold, inverse, moveTo, padToWidth, truncateToWidth, visibleLength} from "./screen.js";
+import {Buffer as NodeBuffer} from "node:buffer";
+import {createWorkerRuntime} from "./workerRuntime.ts";
+import type {WorkerRuntime} from "./workerRuntime.ts";
+import {Buffer as DocumentBuffer} from "./buffer.ts";
+import {highlightLine, COLORS} from "./highlight.ts";
+import * as scr from "./screen.ts";
+import {fg, bg, reset, bold, padToWidth, visibleLength} from "./screen.ts";
 
 const HEADER_ROWS = 2;
 const FOOTER_ROWS = 2;
 const GUTTER = 5; // " 123 "
 
-const HELP_LINES = [
-  "Welcome to Recho · the reactive notebook in your terminal.",
-  "Type code; press ^S to run it. Output appears inline as //➜ comments.",
-];
+type RunState = "idle" | "running" | "success" | "error" | "timeout";
+type ConsoleEntry = {ts: number; level: string; text: string; count: number};
+type ConsoleSavedHandlers = {
+  error: typeof console.error;
+  warn: typeof console.warn;
+  log: typeof console.log;
+  info: typeof console.info;
+  stderrWrite: typeof process.stderr.write;
+};
+type AppOptions = {initialPath: string | null; initialCode: string; examplesDir: string | null};
+type Box = {top: number; left: number; width: number; height: number; bottom?: number; right?: number};
+type EditorBox = {top: number; bottom: number; left: number; right: number; width: number; height: number};
+type ScrollbarState = {
+  trackTop: number;
+  trackBottom: number;
+  trackHeight: number;
+  thumbTop: number;
+  thumbBottom: number;
+  thumbHeight: number;
+  travel: number;
+  maxScroll: number;
+};
+type ModalBag = {
+  type: string;
+  entries: string[];
+  index: number;
+  query: string;
+  scroll: number;
+  title: string;
+  value: string;
+  onSubmit: (value: string) => void;
+};
+type ModalState = (Partial<ModalBag> & {type: string}) | null;
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+function errorStackOrMessage(error: unknown): string {
+  return error instanceof Error ? error.stack || error.message : String(error);
+}
 
 export class App {
-  constructor({initialPath, initialCode, examplesDir}) {
+  path: string | null;
+  examplesDir: string | null;
+  buffer: DocumentBuffer;
+  scrollY: number;
+  scrollX: number;
+  cols: number;
+  rows: number;
+  runtime: WorkerRuntime | null;
+  runError: Error | null;
+  message: string | null;
+  messageUntil: number;
+  dirty: boolean;
+  prevGrid: scr.Grid | null;
+  grid: scr.Grid;
+  cursorVisible: boolean;
+  mouseSelecting: boolean;
+  scrollbarDragging: boolean;
+  scrollbarDragOffset: number;
+  modal: ModalState;
+  runState: RunState;
+  runStartTs: number;
+  runErrorCountAtStart: number;
+  lastChangeTs: number;
+  runFinishTs: number;
+  spinnerFrame: number;
+  editorRowMap: Map<number, {pos: number; line: number}>;
+  statusFlash: string | null;
+  console: ConsoleEntry[];
+  consoleSeen: number;
+  consoleSavedHandlers: ConsoleSavedHandlers | null;
+  cellTimeoutMs: number;
+  tickInterval?: NodeJS.Timeout;
+  cursorBlinkOn?: boolean;
+  lastBlinkTs?: number;
+
+  constructor({initialPath, initialCode, examplesDir}: AppOptions) {
     this.path = initialPath;
     this.examplesDir = examplesDir;
-    this.buffer = new Buffer(initialCode);
+    this.buffer = new DocumentBuffer(initialCode);
     this.scrollY = 0;
     this.scrollX = 0;
     this.cols = process.stdout.columns || 100;
@@ -65,6 +138,10 @@ export class App {
     this.cellTimeoutMs = 1000;
   }
 
+  get activeModal(): ModalBag {
+    return this.modal as ModalBag;
+  }
+
   start() {
     process.stdout.write(scr.enterAlt + scr.hideCursor + scr.enableMouse + scr.clearScreen + scr.home);
     process.stdin.setRawMode?.(true);
@@ -79,7 +156,7 @@ export class App {
 
     this.initRuntime();
 
-    process.stdin.on("data", (chunk) => this.onInput(chunk));
+    process.stdin.on("data", (chunk) => this.onInput(String(chunk)));
     process.stdout.on("resize", () => this.onResize());
 
     this.flash("Press ^S to run · ^E for examples · ^Q to quit", 4000);
@@ -106,7 +183,7 @@ export class App {
       info: console.info,
       stderrWrite: process.stderr.write.bind(process.stderr),
     };
-    const push = (level, args) => {
+    const push = (level: string, args: unknown[]) => {
       const text = args
         .map((a) => {
           if (a instanceof Error) return a.message + (a.stack ? "\n" + a.stack : "");
@@ -126,11 +203,12 @@ export class App {
     console.info = (...args) => push("log", args);
     // Some libraries write directly to stderr; swallow those too while the
     // alt-screen is up so they don't tear the layout.
-    process.stderr.write = (chunk) => {
-      const text = typeof chunk === "string" ? chunk : Buffer.isBuffer(chunk) ? chunk.toString("utf8") : String(chunk);
+    process.stderr.write = ((chunk: string | Uint8Array) => {
+      const text =
+        typeof chunk === "string" ? chunk : NodeBuffer.isBuffer(chunk) ? chunk.toString("utf8") : String(chunk);
       if (text.trim()) this.pushConsole("error", text.replace(/\n+$/, ""));
       return true;
-    };
+    }) as typeof process.stderr.write;
   }
 
   restoreConsole() {
@@ -143,7 +221,7 @@ export class App {
     this.consoleSavedHandlers = null;
   }
 
-  pushConsole(level, text) {
+  pushConsole(level: string, text: string) {
     // De-duplicate consecutive identical messages — the runtime can fire the
     // same rejection many times while a generator re-runs. We bump a count on
     // the previous entry instead of flooding the log.
@@ -162,7 +240,7 @@ export class App {
     this.dirty = true;
   }
 
-  unseenErrorCount() {
+  unseenErrorCount(): number {
     let n = 0;
     for (let i = this.consoleSeen; i < this.console.length; i++) {
       if (this.console[i].level === "error") n++;
@@ -170,8 +248,8 @@ export class App {
     return n;
   }
 
-  onAsyncError(error, source) {
-    const msg = error?.stack || error?.message || String(error);
+  onAsyncError(error: unknown, source: string) {
+    const msg = errorStackOrMessage(error);
     this.pushConsole("error", `[${source}] ${msg}`);
   }
 
@@ -199,11 +277,7 @@ export class App {
         const sinceError = lastErr ? now - lastErr.ts : Infinity;
         if (sinceStart > SETTLE_MS && sinceChange > SETTLE_MS && sinceError > SETTLE_MS) {
           const seenErrors = this.console.length - this.runErrorCountAtStart > 0;
-          this.runState = seenErrors
-            ? this.lastErrorIsTimeout()
-              ? "timeout"
-              : "error"
-            : "success";
+          this.runState = seenErrors ? (this.lastErrorIsTimeout() ? "timeout" : "error") : "success";
           this.runFinishTs = now;
           this.dirty = true;
         }
@@ -213,7 +287,7 @@ export class App {
     this.tickInterval = setInterval(tick, 80);
   }
 
-  lastErrorAfter(fromIndex) {
+  lastErrorAfter(fromIndex: number): ConsoleEntry | null {
     for (let i = this.console.length - 1; i >= fromIndex; i--) {
       const m = this.console[i];
       if (m.level === "error") return m;
@@ -221,21 +295,19 @@ export class App {
     return null;
   }
 
-  lastErrorIsTimeout() {
+  lastErrorIsTimeout(): boolean {
     const m = this.lastErrorAfter(this.runErrorCountAtStart);
     if (!m) return false;
-    return /TimeoutError|exceeded \d+ms|infinite loop|ERR_RECHO_CELL_TIMEOUT|Script execution timed out/i.test(
-      m.text,
-    );
+    return /TimeoutError|exceeded \d+ms|infinite loop|ERR_RECHO_CELL_TIMEOUT|Script execution timed out/i.test(m.text);
   }
 
-  flash(msg, ms = 2500) {
+  flash(msg: string, ms = 2500) {
     this.message = msg;
     this.messageUntil = Date.now() + ms;
     this.dirty = true;
   }
 
-  onFatal(e) {
+  onFatal(e: unknown) {
     this.cleanup();
     console.error("Fatal:", e);
     process.exit(1);
@@ -273,57 +345,55 @@ export class App {
   // unresponsive for `heartbeatGraceMs` (default 3s).
   initRuntime() {
     this.runtime?.destroy?.();
-    this.runtime = createWorkerRuntime(this.buffer.text, {
+    const runtime = createWorkerRuntime(this.buffer.text, {
       cellTimeoutMs: this.cellTimeoutMs,
       heartbeatGraceMs: 3000,
     });
-    this.runtime.onChanges(({changes}) => {
+    this.runtime = runtime;
+    runtime.onChanges(({changes}) => {
       if (!changes || !changes.length) return;
       this.buffer.applyChanges(changes);
-      this.runtime.setCode(this.buffer.text);
+      runtime.setCode(this.buffer.text);
       this.lastChangeTs = Date.now();
       this.dirty = true;
     });
-    this.runtime.onError(({error, source}) => {
+    runtime.onError(({error, source}) => {
       // Parse / split errors. They also land in the buffer as `//✗` lines;
       // we still want a status-bar nudge.
       this.runState = "error";
-      this.pushConsole("error", `[${source || "runtime"}] ${error?.message || String(error)}`);
+      this.pushConsole("error", `[${source || "runtime"}] ${errorMessage(error)}`);
       this.dirty = true;
     });
-    this.runtime.onConsole(({level, text}) => {
+    runtime.onConsole(({level, text}) => {
       // Forwarded console output from the worker thread (notebook code,
       // d3-require failures, observer.rejected, …).
       this.pushConsole(level, text);
     });
-    this.runtime.onHung(({sinceHeartbeatMs}) => {
+    runtime.onHung(({sinceHeartbeatMs}) => {
       // The worker has been silent past the grace window. Most likely an
       // async tight loop that vm.timeout couldn't catch. Terminate it,
       // mark the state, and respawn fresh against the current buffer.
-      this.pushConsole(
-        "error",
-        `[watchdog] runtime unresponsive for ${sinceHeartbeatMs}ms — restarting worker thread`,
-      );
+      this.pushConsole("error", `[watchdog] runtime unresponsive for ${sinceHeartbeatMs}ms — restarting worker thread`);
       this.runState = "timeout";
       this.dirty = true;
       try {
-        this.runtime.restart(this.buffer.text);
+        runtime.restart(this.buffer.text);
       } catch (e) {
-        this.pushConsole("error", "[watchdog] restart failed: " + (e?.message || String(e)));
+        this.pushConsole("error", "[watchdog] restart failed: " + errorMessage(e));
       }
     });
-    this.runtime.onExit?.(({code}) => {
+    runtime.onExit?.(({code}) => {
       if (code !== 0 && code != null) {
         this.pushConsole("error", `[worker] exited with code ${code}`);
       }
     });
     this.markRunStart();
-    this.runtime.setIsRunning(true);
+    runtime.setIsRunning(true);
     try {
-      this.runtime.run();
+      runtime.run();
     } catch (e) {
       this.runState = "error";
-      this.pushConsole("error", "[run] " + (e?.message || String(e)));
+      this.pushConsole("error", "[run] " + errorMessage(e));
     }
   }
 
@@ -335,7 +405,7 @@ export class App {
     this.dirty = true;
   }
 
-  runNow(force = false) {
+  runNow() {
     if (!this.runtime) return this.initRuntime();
     this.markRunStart();
     this.runtime.setIsRunning(true);
@@ -350,7 +420,7 @@ export class App {
       this.flash("Running…", 800);
     } catch (e) {
       this.runState = "error";
-      this.pushConsole("error", "[run] " + (e?.message || String(e)));
+      this.pushConsole("error", "[run] " + errorMessage(e));
     }
     this.dirty = true;
   }
@@ -372,7 +442,7 @@ export class App {
 
   // -------------------------------------------------------------------------
   // Layout
-  editorBox() {
+  editorBox(): EditorBox {
     const top = HEADER_ROWS;
     const bottom = this.rows - FOOTER_ROWS;
     const left = 0;
@@ -380,20 +450,20 @@ export class App {
     return {top, bottom, left, right, width: right - left, height: bottom - top};
   }
 
-  visibleEditorRows() {
+  visibleEditorRows(): number {
     const box = this.editorBox();
     return box.height;
   }
 
   // -------------------------------------------------------------------------
   // Input
-  onInput(chunk) {
+  onInput(chunk: string) {
     if (this.modal) return this.onModalInput(chunk);
     const events = scr.parseInput(chunk);
     for (const ev of events) this.handleEvent(ev);
   }
 
-  handleEvent(ev) {
+  handleEvent(ev: scr.InputEvent) {
     if (ev.type === "text") {
       this.userEdit(() => this.buffer.insertAtCursor(ev.text));
       return;
@@ -402,7 +472,7 @@ export class App {
     if (ev.type === "mouse") return this.handleMouse(ev);
   }
 
-  userEdit(fn) {
+  userEdit(fn: () => void) {
     this.runtime?.setIsRunning(false);
     this.runState = "idle";
     fn();
@@ -411,11 +481,11 @@ export class App {
     this.dirty = true;
   }
 
-  handleKey(ev) {
+  handleKey(ev: scr.KeyEvent) {
     const {name, ctrl, alt, shift} = ev;
     // Quit / save / run shortcuts.
     if (ctrl && (name === "q" || name === "c")) return this.quit();
-    if (ctrl && name === "s") return this.runNow(true);
+    if (ctrl && name === "s") return this.runNow();
     if (ctrl && name === "x") return this.stopNow();
     if (ctrl && name === "r") {
       this.initRuntime();
@@ -483,7 +553,7 @@ export class App {
         // Auto-indent: copy leading whitespace of current line.
         const {row} = this.buffer.posToRowCol(this.buffer.cursor);
         const line = this.buffer.lineText(row);
-        const indent = line.match(/^[\t ]*/)[0];
+        const indent = line.match(/^[\t ]*/)?.[0] ?? "";
         const trimmed = line.slice(0, this.buffer.cursor - this.buffer.lineStarts[row]).trimEnd();
         const extra = /[{[(]\s*$/.test(trimmed) ? "  " : "";
         this.userEdit(() => this.buffer.insertAtCursor("\n" + indent + extra));
@@ -503,7 +573,7 @@ export class App {
     this.dirty = true;
   }
 
-  handleMouse(ev) {
+  handleMouse(ev: scr.MouseEvent) {
     const box = this.editorBox();
     const {row, col, kind, button, shift} = ev;
     if (this.handleScrollbarMouse(ev, box)) return;
@@ -539,11 +609,11 @@ export class App {
     // Click on title bar's "Run" hot zone
     if (row === 0 && kind === "press" && button === 0) {
       const hotStart = this.cols - 12;
-      if (col >= hotStart) this.runNow(true);
+      if (col >= hotStart) this.runNow();
     }
   }
 
-  handleScrollbarMouse(ev, box = this.editorBox()) {
+  handleScrollbarMouse(ev: scr.MouseEvent, box = this.editorBox()): boolean {
     const scrollbarCol = this.scrollbarCol();
     if (scrollbarCol < 0) return false;
     const {row, col, kind, button} = ev;
@@ -575,30 +645,31 @@ export class App {
     return kind === "drag" && col === scrollbarCol;
   }
 
-  scrollBy(dy) {
+  scrollBy(dy: number) {
     this.scrollY = this.clampScrollY(this.scrollY + dy);
     this.dirty = true;
   }
 
-  maxScrollY() {
+  maxScrollY(): number {
     return Math.max(0, this.buffer.lineCount - this.visibleEditorRows());
   }
 
-  clampScrollY(value) {
+  clampScrollY(value: number): number {
     return Math.max(0, Math.min(this.maxScrollY(), value));
   }
 
-  scrollbarCol() {
+  scrollbarCol(): number {
     return this.cols > 0 ? this.cols - 1 : -1;
   }
 
-  scrollbarState(box = this.editorBox()) {
+  scrollbarState(box = this.editorBox()): ScrollbarState | null {
     const trackHeight = box.height;
     const totalLines = this.buffer.lineCount;
     if (trackHeight <= 0 || totalLines <= 0) return null;
     const visibleLines = Math.min(trackHeight, totalLines);
     const maxScroll = this.maxScrollY();
-    const thumbHeight = maxScroll === 0 ? trackHeight : Math.max(1, Math.floor((visibleLines / totalLines) * trackHeight));
+    const thumbHeight =
+      maxScroll === 0 ? trackHeight : Math.max(1, Math.floor((visibleLines / totalLines) * trackHeight));
     const travel = trackHeight - thumbHeight;
     const thumbOffset = maxScroll === 0 ? 0 : Math.round((this.clampScrollY(this.scrollY) / maxScroll) * travel);
     const thumbTop = box.top + thumbOffset;
@@ -614,7 +685,7 @@ export class App {
     };
   }
 
-  scrollToScrollbarRow(thumbTopRow, box = this.editorBox()) {
+  scrollToScrollbarRow(thumbTopRow: number, box = this.editorBox()) {
     const state = this.scrollbarState(box);
     if (!state || state.maxScroll === 0) {
       this.scrollY = 0;
@@ -671,12 +742,7 @@ export class App {
       const screenRow = HEADER_ROWS + (row - this.scrollY);
       const screenCol = GUTTER + (col - this.scrollX);
       const box = this.editorBox();
-      if (
-        screenRow >= box.top &&
-        screenRow < box.bottom &&
-        screenCol >= GUTTER &&
-        screenCol < box.right
-      ) {
+      if (screenRow >= box.top && screenRow < box.bottom && screenCol >= GUTTER && screenCol < box.right) {
         process.stdout.write(scr.moveTo(screenRow, screenCol) + scr.showCursor);
       } else {
         process.stdout.write(scr.hideCursor);
@@ -828,7 +894,7 @@ export class App {
     // the whole line fits the terminal width.
     const unread = this.unseenErrorCount();
     const journalLabel = unread > 0 ? `Console (${unread})` : `Console`;
-    const allHints = [
+    const allHints: [string, string][] = [
       [`^S`, `Run`],
       [`^E`, `Examples`],
       [`^L`, journalLabel],
@@ -839,7 +905,7 @@ export class App {
       [`^K`, `Help`],
       [`^Q`, `Quit`],
     ];
-    const renderHints = (items) =>
+    const renderHints = (items: [string, string][]) =>
       items
         .map(([k, l]) => {
           const labelColor = l.startsWith("Console") && unread > 0 ? fg(COLORS.error) : "";
@@ -851,7 +917,7 @@ export class App {
     if (this.message) {
       right = " " + fg(COLORS.marker) + this.message + reset + "  ";
     } else {
-      let items = allHints.slice();
+      const items = allHints.slice();
       let candidate = " " + renderHints(items) + " ";
       const leftLen = visibleLength(left);
       while (items.length > 2 && leftLen + visibleLength(candidate) > this.cols) {
@@ -869,21 +935,21 @@ export class App {
   // -------------------------------------------------------------------------
   // Modals
   drawModal() {
-    if (this.modal.type === "examples") return this.drawExamplesModal();
-    if (this.modal.type === "input") return this.drawInputModal();
-    if (this.modal.type === "help") return this.drawHelpModal();
-    if (this.modal.type === "console") return this.drawConsoleModal();
-    if (this.modal.type === "confirm") return this.drawConfirmModal();
+    if (this.activeModal.type === "examples") return this.drawExamplesModal();
+    if (this.activeModal.type === "input") return this.drawInputModal();
+    if (this.activeModal.type === "help") return this.drawHelpModal();
+    if (this.activeModal.type === "console") return this.drawConsoleModal();
+    if (this.activeModal.type === "confirm") return this.drawConfirmModal();
   }
 
-  onModalInput(chunk) {
+  onModalInput(chunk: string) {
     const events = scr.parseInput(chunk);
     for (const ev of events) {
-      if (this.modal.type === "examples") this.handleExamplesKey(ev);
-      else if (this.modal.type === "input") this.handleInputKey(ev);
-      else if (this.modal.type === "help") this.handleHelpKey(ev);
-      else if (this.modal.type === "console") this.handleConsoleKey(ev);
-      else if (this.modal.type === "confirm") this.handleConfirmKey(ev);
+      if (this.activeModal.type === "examples") this.handleExamplesKey(ev);
+      else if (this.activeModal.type === "input") this.handleInputKey(ev);
+      else if (this.activeModal.type === "help") this.handleHelpKey(ev);
+      else if (this.activeModal.type === "console") this.handleConsoleKey(ev);
+      else if (this.activeModal.type === "confirm") this.handleConfirmKey(ev);
     }
   }
 
@@ -893,28 +959,28 @@ export class App {
       this.flash("No examples directory available", 2000);
       return;
     }
-    let entries = [];
+    let entries: string[] = [];
     try {
       entries = fs
         .readdirSync(this.examplesDir)
         .filter((f) => f.endsWith(".recho.js"))
         .sort();
     } catch (e) {
-      this.flash("Cannot read examples: " + e.message, 3000);
+      this.flash("Cannot read examples: " + errorMessage(e), 3000);
       return;
     }
     this.modal = {type: "examples", entries, index: 0, query: "", scroll: 0};
     this.dirty = true;
   }
 
-  filteredExamples() {
-    const {entries, query} = this.modal;
+  filteredExamples(): string[] {
+    const {entries, query} = this.activeModal;
     if (!query) return entries;
     const q = query.toLowerCase();
-    return entries.filter((e) => e.toLowerCase().includes(q));
+    return entries.filter((e: string) => e.toLowerCase().includes(q));
   }
 
-  handleExamplesKey(ev) {
+  handleExamplesKey(ev: scr.InputEvent) {
     if (ev.type === "key") {
       const {name, ctrl} = ev;
       if (name === "escape" || (ctrl && name === "g")) {
@@ -924,41 +990,41 @@ export class App {
       }
       if (name === "enter") return this.confirmExample();
       if (name === "down") {
-        this.modal.index = Math.min(this.filteredExamples().length - 1, this.modal.index + 1);
+        this.activeModal.index = Math.min(this.filteredExamples().length - 1, this.activeModal.index + 1);
         this.dirty = true;
         return;
       }
       if (name === "up") {
-        this.modal.index = Math.max(0, this.modal.index - 1);
+        this.activeModal.index = Math.max(0, this.activeModal.index - 1);
         this.dirty = true;
         return;
       }
       if (name === "backspace") {
-        this.modal.query = this.modal.query.slice(0, -1);
-        this.modal.index = 0;
+        this.activeModal.query = this.activeModal.query.slice(0, -1);
+        this.activeModal.index = 0;
         this.dirty = true;
         return;
       }
       if (name === "pagedown") {
-        this.modal.index = Math.min(this.filteredExamples().length - 1, this.modal.index + 10);
+        this.activeModal.index = Math.min(this.filteredExamples().length - 1, this.activeModal.index + 10);
         this.dirty = true;
         return;
       }
       if (name === "pageup") {
-        this.modal.index = Math.max(0, this.modal.index - 10);
+        this.activeModal.index = Math.max(0, this.activeModal.index - 10);
         this.dirty = true;
         return;
       }
     } else if (ev.type === "text") {
-      this.modal.query += ev.text;
-      this.modal.index = 0;
+      this.activeModal.query += ev.text;
+      this.activeModal.index = 0;
       this.dirty = true;
     } else if (ev.type === "mouse") {
       if (ev.kind === "wheel-up") {
-        this.modal.index = Math.max(0, this.modal.index - 3);
+        this.activeModal.index = Math.max(0, this.activeModal.index - 3);
         this.dirty = true;
       } else if (ev.kind === "wheel-down") {
-        this.modal.index = Math.min(this.filteredExamples().length - 1, this.modal.index + 3);
+        this.activeModal.index = Math.min(this.filteredExamples().length - 1, this.activeModal.index + 3);
         this.dirty = true;
       } else if (ev.kind === "press" && ev.button === 0) {
         // Click in list to select; click outside to dismiss.
@@ -966,7 +1032,7 @@ export class App {
         const listTop = box.top + 4;
         const listLeft = box.left + 1;
         const listRight = box.left + box.width - 1;
-        const i = ev.row - listTop + (this.modal.scroll || 0);
+        const i = ev.row - listTop + (this.activeModal.scroll || 0);
         if (
           ev.row >= listTop &&
           ev.row < box.top + box.height - 1 &&
@@ -975,7 +1041,7 @@ export class App {
           i >= 0 &&
           i < this.filteredExamples().length
         ) {
-          this.modal.index = i;
+          this.activeModal.index = i;
           this.confirmExample();
         }
       }
@@ -983,26 +1049,27 @@ export class App {
   }
 
   confirmExample() {
+    if (!this.examplesDir) return;
     const list = this.filteredExamples();
-    const name = list[this.modal.index];
+    const name = list[this.activeModal.index];
     if (!name) return;
     const file = path.join(this.examplesDir, name);
     try {
       const code = fs.readFileSync(file, "utf8");
       this.path = file;
-      this.buffer = new Buffer(code);
+      this.buffer = new DocumentBuffer(code);
       this.scrollY = 0;
       this.scrollX = 0;
       this.modal = null;
       this.initRuntime();
       this.flash("Loaded " + name, 2000);
     } catch (e) {
-      this.flash("Failed to load: " + e.message, 3000);
+      this.flash("Failed to load: " + errorMessage(e), 3000);
     }
     this.dirty = true;
   }
 
-  modalBox() {
+  modalBox(): Box {
     const w = Math.min(80, this.cols - 8);
     const h = Math.min(this.rows - 6, 22);
     const left = Math.max(2, Math.floor((this.cols - w) / 2));
@@ -1017,28 +1084,29 @@ export class App {
     this.grid.writeStyled(
       queryLine,
       box.left + 2,
-      fg(COLORS.dimText) + "filter: " + reset + this.modal.query + fg(COLORS.dimText) + "▏" + reset,
+      fg(COLORS.dimText) + "filter: " + reset + this.activeModal.query + fg(COLORS.dimText) + "▏" + reset,
       "",
     );
     const items = this.filteredExamples();
     const listTop = box.top + 4;
     const listH = box.height - 5;
     // Keep selected in view.
-    let scroll = this.modal.scroll || 0;
-    if (this.modal.index < scroll) scroll = this.modal.index;
-    if (this.modal.index >= scroll + listH) scroll = this.modal.index - listH + 1;
-    this.modal.scroll = scroll;
+    let scroll = this.activeModal.scroll || 0;
+    if (this.activeModal.index < scroll) scroll = this.activeModal.index;
+    if (this.activeModal.index >= scroll + listH) scroll = this.activeModal.index - listH + 1;
+    this.activeModal.scroll = scroll;
     for (let i = 0; i < listH; i++) {
       const idx = scroll + i;
       if (idx >= items.length) break;
       const name = items[idx];
       const display = formatExampleName(name);
-      const selected = idx === this.modal.index;
+      const selected = idx === this.activeModal.index;
       const style = selected ? bg(COLORS.selBg) + fg(255) + bold : fg(COLORS.fg);
       const arrow = selected ? fg(COLORS.hot) + "▸ " + reset : "  ";
       const line = arrow + style + " " + padToWidth(display, box.width - 6) + " " + reset;
       // Fill row bg first
-      if (selected) this.grid.fillRect(listTop + i, box.left + 1, listTop + i + 1, box.left + box.width - 1, " ", bg(COLORS.selBg));
+      if (selected)
+        this.grid.fillRect(listTop + i, box.left + 1, listTop + i + 1, box.left + box.width - 1, " ", bg(COLORS.selBg));
       this.grid.writeStyled(listTop + i, box.left + 2, line, "");
     }
     const help = fg(COLORS.dimText) + "↑/↓ select · type to filter · Enter to load · Esc to cancel" + reset;
@@ -1046,12 +1114,12 @@ export class App {
   }
 
   // ---- input prompt
-  inputPrompt(title, initial, onSubmit) {
+  inputPrompt(title: string, initial: string, onSubmit: (value: string) => void) {
     this.modal = {type: "input", title, value: initial, onSubmit};
     this.dirty = true;
   }
 
-  handleInputKey(ev) {
+  handleInputKey(ev: scr.InputEvent) {
     if (ev.type === "key") {
       if (ev.name === "escape") {
         this.modal = null;
@@ -1059,20 +1127,20 @@ export class App {
         return;
       }
       if (ev.name === "enter") {
-        const v = this.modal.value;
-        const cb = this.modal.onSubmit;
+        const v = this.activeModal.value;
+        const cb = this.activeModal.onSubmit;
         this.modal = null;
         this.dirty = true;
         cb(v);
         return;
       }
       if (ev.name === "backspace") {
-        this.modal.value = this.modal.value.slice(0, -1);
+        this.activeModal.value = this.activeModal.value.slice(0, -1);
         this.dirty = true;
         return;
       }
     } else if (ev.type === "text") {
-      this.modal.value += ev.text;
+      this.activeModal.value += ev.text;
       this.dirty = true;
     }
   }
@@ -1083,15 +1151,10 @@ export class App {
     const left = Math.max(2, Math.floor((this.cols - w) / 2));
     const top = Math.max(2, Math.floor((this.rows - h) / 2));
     const box = {top, left, width: w, height: h};
-    drawBox(this.grid, box, " " + this.modal.title + " ", COLORS);
+    drawBox(this.grid, box, " " + this.activeModal.title + " ", COLORS);
     this.grid.writeStyled(top + 2, left + 2, fg(COLORS.dimText) + "value: " + reset, "");
-    this.grid.writeStyled(top + 3, left + 2, this.modal.value + fg(COLORS.hot) + "▏" + reset, "");
-    this.grid.writeStyled(
-      top + h - 1,
-      left + 2,
-      fg(COLORS.dimText) + "Enter to confirm · Esc to cancel" + reset,
-      "",
-    );
+    this.grid.writeStyled(top + 3, left + 2, this.activeModal.value + fg(COLORS.hot) + "▏" + reset, "");
+    this.grid.writeStyled(top + h - 1, left + 2, fg(COLORS.dimText) + "Enter to confirm · Esc to cancel" + reset, "");
   }
 
   openFilePrompt() {
@@ -1100,13 +1163,13 @@ export class App {
       try {
         const code = fs.readFileSync(p, "utf8");
         this.path = path.resolve(p);
-        this.buffer = new Buffer(code);
+        this.buffer = new DocumentBuffer(code);
         this.scrollY = 0;
         this.scrollX = 0;
         this.initRuntime();
         this.flash("Opened " + p, 2000);
       } catch (e) {
-        this.flash("Open failed: " + e.message, 3000);
+        this.flash("Open failed: " + errorMessage(e), 3000);
       }
       this.dirty = true;
     });
@@ -1120,7 +1183,7 @@ export class App {
         this.path = path.resolve(p);
         this.flash("Saved " + p, 2000);
       } catch (e) {
-        this.flash("Save failed: " + e.message, 3000);
+        this.flash("Save failed: " + errorMessage(e), 3000);
       }
       this.dirty = true;
     });
@@ -1131,7 +1194,7 @@ export class App {
     this.modal = {type: "help"};
     this.dirty = true;
   }
-  handleHelpKey(ev) {
+  handleHelpKey(ev: scr.InputEvent) {
     if (ev.type === "key" && (ev.name === "escape" || (ev.ctrl && ev.name === "k"))) {
       this.modal = null;
       this.dirty = true;
@@ -1179,7 +1242,7 @@ export class App {
     this.dirty = true;
   }
 
-  handleConsoleKey(ev) {
+  handleConsoleKey(ev: scr.InputEvent) {
     if (ev.type === "key") {
       const {name, ctrl} = ev;
       if (name === "escape" || (ctrl && name === "l") || (ctrl && name === "g")) {
@@ -1188,49 +1251,49 @@ export class App {
         return;
       }
       if (name === "up") {
-        this.modal.scroll = Math.max(0, this.modal.scroll - 1);
+        this.activeModal.scroll = Math.max(0, this.activeModal.scroll - 1);
         this.dirty = true;
         return;
       }
       if (name === "down") {
-        this.modal.scroll = Math.min(this.console.length - 1, this.modal.scroll + 1);
+        this.activeModal.scroll = Math.min(this.console.length - 1, this.activeModal.scroll + 1);
         this.dirty = true;
         return;
       }
       if (name === "pageup") {
-        this.modal.scroll = Math.max(0, this.modal.scroll - 10);
+        this.activeModal.scroll = Math.max(0, this.activeModal.scroll - 10);
         this.dirty = true;
         return;
       }
       if (name === "pagedown") {
-        this.modal.scroll = Math.min(this.console.length - 1, this.modal.scroll + 10);
+        this.activeModal.scroll = Math.min(this.console.length - 1, this.activeModal.scroll + 10);
         this.dirty = true;
         return;
       }
       if (name === "home") {
-        this.modal.scroll = 0;
+        this.activeModal.scroll = 0;
         this.dirty = true;
         return;
       }
       if (name === "end") {
-        this.modal.scroll = Math.max(0, this.console.length - 1);
+        this.activeModal.scroll = Math.max(0, this.console.length - 1);
         this.dirty = true;
         return;
       }
       if (name === "delete" || name === "backspace") {
         this.console = [];
         this.consoleSeen = 0;
-        this.modal.scroll = 0;
+        this.activeModal.scroll = 0;
         this.flash("Console cleared", 1200);
         this.dirty = true;
         return;
       }
     } else if (ev.type === "mouse") {
       if (ev.kind === "wheel-up") {
-        this.modal.scroll = Math.max(0, this.modal.scroll - 3);
+        this.activeModal.scroll = Math.max(0, this.activeModal.scroll - 3);
         this.dirty = true;
       } else if (ev.kind === "wheel-down") {
-        this.modal.scroll = Math.min(this.console.length - 1, this.modal.scroll + 3);
+        this.activeModal.scroll = Math.min(this.console.length - 1, this.activeModal.scroll + 3);
         this.dirty = true;
       }
     }
@@ -1253,18 +1316,13 @@ export class App {
         fg(COLORS.dimText) + "(empty — no notebook errors yet)" + reset,
         "",
       );
-      this.grid.writeStyled(
-        top + h - 1,
-        left + 2,
-        fg(COLORS.dimText) + "Esc / ^J to close" + reset,
-        "",
-      );
+      this.grid.writeStyled(top + h - 1, left + 2, fg(COLORS.dimText) + "Esc / ^J to close" + reset, "");
       return;
     }
     // Render messages as wrapped blocks: each entry's first line on its
     // anchor row, continuation lines indented two columns.
     const innerW = w - 4;
-    const lines = [];
+    const lines: {entryIndex: number; level: string; text: string}[] = [];
     for (let i = 0; i < this.console.length; i++) {
       const m = this.console[i];
       const tag =
@@ -1300,9 +1358,9 @@ export class App {
     // Ensure scroll keeps the requested entry visible at the bottom.
     const listH = h - 3;
     let firstLine = 0;
-    // Find the line index for `this.modal.scroll` entry.
+    // Find the line index for `this.activeModal.scroll` entry.
     for (let i = 0; i < lines.length; i++) {
-      if (lines[i].entryIndex >= this.modal.scroll) {
+      if (lines[i].entryIndex >= this.activeModal.scroll) {
         firstLine = Math.max(0, i - listH + 1);
         break;
       }
@@ -1313,19 +1371,18 @@ export class App {
       if (li >= lines.length) break;
       this.grid.writeStyled(top + 1 + row, left + 2, lines[li].text, "");
     }
-    const help =
-      fg(COLORS.dimText) +
-      "↑/↓ scroll · Home/End jump · ⌫ clear · Esc / ^L close" +
-      reset;
+    const help = fg(COLORS.dimText) + "↑/↓ scroll · Home/End jump · ⌫ clear · Esc / ^L close" + reset;
     this.grid.writeStyled(top + h - 1, left + 2, help, "");
   }
 
   // ---- confirm
   drawConfirmModal() {}
-  handleConfirmKey() {}
+  handleConfirmKey(ev?: scr.InputEvent) {
+    void ev;
+  }
 }
 
-function cloneGrid(g) {
+function cloneGrid(g: scr.Grid): scr.Grid {
   const c = new scr.Grid(g.rows, g.cols);
   for (let i = 0; i < g.cells.length; i++) {
     c.cells[i].ch = g.cells[i].ch;
@@ -1334,11 +1391,11 @@ function cloneGrid(g) {
   return c;
 }
 
-function drawBox(grid, box, title, COLORS) {
+function drawBox(grid: scr.Grid, box: Box, title: string, palette: typeof COLORS) {
   const {top, left, width, height} = box;
   const right = left + width - 1;
   const bottom = top + height - 1;
-  const border = fg(COLORS.borderHi);
+  const border = fg(palette.borderHi);
   const inside = bg(233);
   // Fill background
   grid.fillRect(top, left, top + height, left + width, " ", inside);
@@ -1359,10 +1416,10 @@ function drawBox(grid, box, title, COLORS) {
   if (title) {
     const t = " " + title + " ";
     const tcol = left + 2;
-    grid.writeStyled(top, tcol, bg(233) + fg(COLORS.title) + bold + t + reset, "");
+    grid.writeStyled(top, tcol, bg(233) + fg(palette.title) + bold + t + reset, "");
   }
 }
 
-function formatExampleName(name) {
+function formatExampleName(name: string): string {
   return name.replace(/\.recho\.js$/, "").replace(/-/g, " ");
 }

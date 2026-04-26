@@ -11,7 +11,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import {fileURLToPath} from "node:url";
-import {App} from "./app.js";
+import {App} from "./app.ts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
@@ -47,7 +47,7 @@ function main() {
       try {
         initialCode = fs.readFileSync(initialPath, "utf8");
       } catch (e) {
-        console.error("Cannot read", initialPath + ":", e.message);
+        console.error("Cannot read", initialPath + ":", e instanceof Error ? e.message : String(e));
         process.exit(1);
       }
       break;

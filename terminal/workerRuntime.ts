@@ -13,15 +13,35 @@ import {Worker} from "node:worker_threads";
 import {fileURLToPath} from "node:url";
 import path from "node:path";
 import {dispatch as d3Dispatch} from "d3-dispatch";
+import type {ChangeSpec} from "./buffer.ts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const WORKER_PATH = path.resolve(__dirname, "..", "runtime", "worker.js");
+const WORKER_PATH = path.resolve(__dirname, "..", "runtime", "worker.ts");
 
-function workerExecArgv() {
+function workerExecArgv(): string[] {
   return process.execArgv.filter((arg) => !arg.startsWith("--input-type"));
 }
 
-export function createWorkerRuntime(initialCode, options = {}) {
+export type WorkerRuntimeOptions = {
+  cellTimeoutMs?: number;
+  heartbeatGraceMs?: number;
+};
+
+export type RuntimeErrorEvent = {error: Error & {code?: unknown}; source?: string};
+export type RuntimeConsoleEvent = {level: string; text: string};
+export type RuntimeChangesEvent = {changes: ChangeSpec[]; effects: []};
+export type RuntimeHungEvent = {sinceHeartbeatMs: number};
+export type RuntimeExitEvent = {code: number | null};
+
+type WorkerMessage =
+  | {type: "heartbeat"}
+  | {type: "online"}
+  | {type: "ready"}
+  | {type: "changes"; changes: ChangeSpec[]}
+  | {type: "error"; error?: {message?: string; name?: string; stack?: string; code?: unknown}; source?: string}
+  | {type: "console"; level: string; text: string};
+
+export function createWorkerRuntime(initialCode: string, options: WorkerRuntimeOptions = {}) {
   const dispatcher = d3Dispatch("changes", "error", "console", "ready", "online", "hung", "exit");
 
   // Watchdog: if the worker stops sending heartbeats for this long, we
@@ -32,16 +52,16 @@ export function createWorkerRuntime(initialCode, options = {}) {
   const heartbeatGraceMs = options.heartbeatGraceMs ?? 3000;
   const cellTimeoutMs = options.cellTimeoutMs ?? 1000;
 
-  let worker = null;
+  let worker: Worker | null = null;
   let alive = false;
   let hung = false;
   let isRunning = false;
   let booting = false;
   let lastHeartbeat = Date.now();
   let lastCode = initialCode;
-  let watchdog = null;
+  let watchdog: NodeJS.Timeout | null = null;
 
-  function spawn(code) {
+  function spawn(code: string) {
     teardownWorker();
     hung = false;
     alive = true;
@@ -81,7 +101,7 @@ export function createWorkerRuntime(initialCode, options = {}) {
     booting = false;
   }
 
-  function onMessage(msg) {
+  function onMessage(msg: WorkerMessage) {
     if (!msg || typeof msg !== "object") return;
     switch (msg.type) {
       case "heartbeat":
@@ -101,7 +121,7 @@ export function createWorkerRuntime(initialCode, options = {}) {
         dispatcher.call("changes", null, {changes: msg.changes, effects: []});
         break;
       case "error": {
-        const err = new Error(msg.error?.message || "runtime error");
+        const err: Error & {code?: unknown} = new Error(msg.error?.message || "runtime error");
         if (msg.error?.name) err.name = msg.error.name;
         if (msg.error?.stack) err.stack = msg.error.stack;
         if (msg.error?.code) err.code = msg.error.code;
@@ -129,11 +149,11 @@ export function createWorkerRuntime(initialCode, options = {}) {
   spawn(initialCode);
 
   return {
-    setCode(code) {
+    setCode(code: string) {
       lastCode = code;
       worker?.postMessage({type: "setCode", code});
     },
-    setIsRunning(value) {
+    setIsRunning(value: boolean) {
       isRunning = !!value;
       worker?.postMessage({type: "setIsRunning", value: !!value});
     },
@@ -153,7 +173,7 @@ export function createWorkerRuntime(initialCode, options = {}) {
       teardownWorker();
       isRunning = false;
     },
-    restart(code) {
+    restart(code?: string) {
       spawn(code ?? lastCode);
       isRunning = true;
     },
@@ -162,13 +182,22 @@ export function createWorkerRuntime(initialCode, options = {}) {
       teardownWorker();
       isRunning = false;
     },
-    onChanges: (cb) => dispatcher.on("changes", cb),
-    onError: (cb) => dispatcher.on("error", cb),
-    onConsole: (cb) => dispatcher.on("console", cb),
-    onReady: (cb) => dispatcher.on("ready", cb),
-    onOnline: (cb) => dispatcher.on("online", cb),
-    onHung: (cb) => dispatcher.on("hung", cb),
-    onExit: (cb) => dispatcher.on("exit", cb),
+    onChanges: (cb: ((event: RuntimeChangesEvent) => void) | null) =>
+      dispatcher.on("changes", cb as unknown as ((...args: unknown[]) => void) | null),
+    onError: (cb: ((event: RuntimeErrorEvent) => void) | null) =>
+      dispatcher.on("error", cb as unknown as ((...args: unknown[]) => void) | null),
+    onConsole: (cb: ((event: RuntimeConsoleEvent) => void) | null) =>
+      dispatcher.on("console", cb as unknown as ((...args: unknown[]) => void) | null),
+    onReady: (cb: (() => void) | null) =>
+      dispatcher.on("ready", cb as unknown as ((...args: unknown[]) => void) | null),
+    onOnline: (cb: (() => void) | null) =>
+      dispatcher.on("online", cb as unknown as ((...args: unknown[]) => void) | null),
+    onHung: (cb: ((event: RuntimeHungEvent) => void) | null) =>
+      dispatcher.on("hung", cb as unknown as ((...args: unknown[]) => void) | null),
+    onExit: (cb: ((event: RuntimeExitEvent) => void) | null) =>
+      dispatcher.on("exit", cb as unknown as ((...args: unknown[]) => void) | null),
     isBooting: () => booting,
   };
 }
+
+export type WorkerRuntime = ReturnType<typeof createWorkerRuntime>;

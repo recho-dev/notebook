@@ -3,7 +3,7 @@
 // runtime's output or error prefix it's colored as such. Everything else
 // gets a single regex-based pass over keyword/number/string/comment.
 
-import {fg, dim, italic, reset, bold} from "./screen.js";
+import {fg, italic, reset, bold} from "./screen.ts";
 import {OUTPUT_PREFIX, ERROR_PREFIX} from "../runtime/output.js";
 
 // Theme palette (256-color indices).
@@ -33,6 +33,7 @@ const C = {
 };
 
 export const COLORS = C;
+export type ColorName = keyof typeof C;
 
 const KEYWORDS = new Set([
   "break",
@@ -96,7 +97,7 @@ const TOKEN_RE = new RegExp(
 
 // Highlight a single line of source (without the runtime output prefix).
 // Returns a styled string (length = visible chars equal to `line`).
-export function highlightLine(line) {
+export function highlightLine(line: string): string {
   // Comment? Whole-line color.
   const trimmed = line.trimStart();
   if (trimmed.startsWith(OUTPUT_PREFIX) || trimmed.startsWith("//➜")) {
@@ -112,13 +113,13 @@ export function highlightLine(line) {
   let out = fg(C.fg);
   let last = 0;
   TOKEN_RE.lastIndex = 0;
-  let m;
+  let m: RegExpExecArray | null;
   while ((m = TOKEN_RE.exec(line)) !== null) {
     if (m.index > last) {
       out += line.slice(last, m.index);
     }
     const tok = m[0];
-    let style;
+    let style: string;
     if (tok.startsWith("//")) style = fg(C.comment) + italic;
     else if (tok.startsWith("/*")) style = fg(C.comment) + italic;
     else if (tok[0] === '"' || tok[0] === "'" || tok[0] === "`") style = fg(C.string);

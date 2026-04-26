@@ -1,6 +1,6 @@
 import {describe, expect, it} from "vitest";
 import {OUTPUT_PREFIX} from "../runtime/output.js";
-import {createWorkerRuntime} from "../terminal/workerRuntime.js";
+import {createWorkerRuntime} from "../terminal/workerRuntime.ts";
 
 function waitForChanges(runtime, predicate = () => true) {
   return new Promise((resolve, reject) => {

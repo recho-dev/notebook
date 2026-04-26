@@ -26,18 +26,19 @@
   ],
   "type": "module",
   "bin": {
-    "recho": "./terminal/cli.js"
+    "recho": "./terminal/cli.ts"
   },
   "scripts": {
     "dev": "vite",
-    "tui": "node terminal/cli.js",
+    "tui": "node terminal/cli.ts",
     "app:dev": "next dev",
     "app:build": "next build",
     "app:start": "next start",
-    "test": "npm run test:lint && npm run test:format && npm run test:js",
+    "test": "npm run test:lint && npm run test:format && npm run test:typecheck && npm run test:js",
     "test:js": "TZ=America/New_York vitest",
-    "test:format": "prettier --check editor runtime test app",
-    "test:lint": "eslint"
+    "test:format": "prettier --check editor runtime terminal test app",
+    "test:lint": "eslint",
+    "test:typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",

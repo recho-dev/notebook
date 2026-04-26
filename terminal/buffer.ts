@@ -5,7 +5,18 @@
 // A `change` is `{from: number, to?: number, insert: string}` matching the
 // CodeMirror change-spec used by the runtime.
 
+export type ChangeSpec = {from: number; to?: number; insert?: string};
+export type LineRange = {start: number; end: number};
+export type RowCol = {row: number; col: number};
+export type Selection = {from: number; to: number};
+
 export class Buffer {
+  text: string;
+  lineStarts: number[];
+  cursor: number;
+  anchor: number | null;
+  preferredCol: number;
+
   constructor(initial = "") {
     this.text = initial;
     this.lineStarts = computeLineStarts(this.text);
@@ -25,18 +36,18 @@ export class Buffer {
     return this.lineStarts.length;
   }
 
-  lineRange(line) {
+  lineRange(line: number): LineRange {
     const start = this.lineStarts[line];
     const end = line + 1 < this.lineStarts.length ? this.lineStarts[line + 1] - 1 : this.text.length;
     return {start, end};
   }
 
-  lineText(line) {
+  lineText(line: number): string {
     const {start, end} = this.lineRange(line);
     return this.text.slice(start, end);
   }
 
-  posToRowCol(pos) {
+  posToRowCol(pos: number): RowCol {
     pos = Math.max(0, Math.min(pos, this.text.length));
     // Binary search in lineStarts.
     let lo = 0;
@@ -49,7 +60,7 @@ export class Buffer {
     return {row: lo, col: pos - this.lineStarts[lo]};
   }
 
-  rowColToPos(row, col) {
+  rowColToPos(row: number, col: number): number {
     row = Math.max(0, Math.min(row, this.lineStarts.length - 1));
     const start = this.lineStarts[row];
     const end = row + 1 < this.lineStarts.length ? this.lineStarts[row + 1] - 1 : this.text.length;
@@ -58,7 +69,7 @@ export class Buffer {
 
   // Apply an array of CodeMirror-style change specs in document order. The
   // cursor is mapped through the changes (associativity = right).
-  applyChanges(changes) {
+  applyChanges(changes: ChangeSpec[]) {
     // Sort by `from` ascending, with delete-only first to keep ordering
     // deterministic. Runtime emits non-overlapping changes.
     const sorted = changes
@@ -84,7 +95,7 @@ export class Buffer {
     this.preferredCol = this.posToRowCol(this.cursor).col;
   }
 
-  insertAtCursor(s) {
+  insertAtCursor(s: string) {
     if (this.anchor !== null) this.deleteSelection();
     const at = this.cursor;
     this.text = this.text.slice(0, at) + s + this.text.slice(at);
@@ -93,7 +104,7 @@ export class Buffer {
     this.preferredCol = this.posToRowCol(this.cursor).col;
   }
 
-  deleteSelection() {
+  deleteSelection(): boolean {
     if (this.anchor === null) return false;
     const from = Math.min(this.anchor, this.cursor);
     const to = Math.max(this.anchor, this.cursor);
@@ -127,7 +138,7 @@ export class Buffer {
   }
 
   // Cursor movement. `extend` keeps the selection anchor (creates one if none).
-  moveTo(pos, extend = false) {
+  moveTo(pos: number, extend = false) {
     pos = Math.max(0, Math.min(pos, this.text.length));
     if (extend) {
       if (this.anchor === null) this.anchor = this.cursor;
@@ -173,7 +184,7 @@ export class Buffer {
     const {start, end} = this.lineRange(row);
     // Smart-home: jump to first non-whitespace char first.
     const line = this.text.slice(start, end);
-    const indent = line.match(/^\s*/)[0].length;
+    const indent = line.match(/^\s*/)?.[0].length ?? 0;
     const target = this.cursor === start + indent ? start : start + indent;
     this.moveTo(target, extend);
   }
@@ -200,13 +211,13 @@ export class Buffer {
     this.moveTo(p, extend);
   }
 
-  selection() {
+  selection(): Selection | null {
     if (this.anchor === null) return null;
     return {from: Math.min(this.anchor, this.cursor), to: Math.max(this.anchor, this.cursor)};
   }
 }
 
-function computeLineStarts(text) {
+function computeLineStarts(text: string): number[] {
   const starts = [0];
   for (let i = 0; i < text.length; i++) {
     if (text.charCodeAt(i) === 10) starts.push(i + 1);
@@ -214,7 +225,7 @@ function computeLineStarts(text) {
   return starts;
 }
 
-function mapPos(pos, from, to, insLen, delta) {
+function mapPos(pos: number, from: number, to: number, insLen: number, delta: number): number {
   // Right-associative mapping (matches CodeMirror default for forward map).
   if (pos <= from) return pos;
   if (pos >= to) return pos + delta;

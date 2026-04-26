@@ -24,20 +24,49 @@
 import {parentPort} from "node:worker_threads";
 
 if (!parentPort) {
-  throw new Error("runtime/worker.js must be loaded as a worker_thread.");
+  throw new Error("runtime/worker.ts must be loaded as a worker_thread.");
 }
+
+const port = parentPort;
+
+type WorkerPostMessage =
+  | {type: "ready"}
+  | {type: "changes"; changes: unknown[]}
+  | {type: "error"; error: SerializedError; source: string}
+  | {type: "console"; level: ConsoleLevel; text: string}
+  | {type: "heartbeat"; t: number}
+  | {type: "online"};
+
+type WorkerCommand =
+  | {type: "init"; code: string; options?: RuntimeOptions}
+  | {type: "setCode"; code: string}
+  | {type: "setIsRunning"; value: boolean}
+  | {type: "run"}
+  | {type: "destroy"};
+
+type ConsoleLevel = "log" | "info" | "warn" | "error" | "debug";
+type RuntimeOptions = {cellTimeoutMs?: number};
+type SerializedError = {message: string; name: string; stack: string | null; code: unknown};
+type RuntimeInstance = {
+  destroy?: () => void;
+  onChanges: (callback: (event: {changes: unknown[]}) => void) => void;
+  onError: (callback: (event: {error: unknown; source?: string}) => void) => void;
+  setIsRunning: (value: boolean) => void;
+  setCode: (code: string) => void;
+  run: () => void;
+};
 
 // -- Capture console & stderr BEFORE loading the runtime, so anything the
 // stdlib (or its observer.rejected path) writes during boot is forwarded.
-function safePost(msg) {
+function safePost(msg: WorkerPostMessage) {
   try {
-    parentPort.postMessage(msg);
+    port.postMessage(msg);
   } catch {
     /* parent gone */
   }
 }
 
-function stringifyArgs(args) {
+function stringifyArgs(args: unknown[]): string {
   return args
     .map((a) => {
       if (a instanceof Error) return (a.stack ? a.stack : a.message) || String(a);
@@ -51,28 +80,33 @@ function stringifyArgs(args) {
     .join(" ");
 }
 
-function serializeError(e) {
-  if (!e) return {message: "(unknown error)"};
+function serializeError(e: unknown): SerializedError {
+  if (!e) return {message: "(unknown error)", name: "Error", stack: null, code: null};
+  const error = e as {message?: string; name?: string; stack?: string; code?: unknown};
   return {
-    message: e.message || String(e),
-    name: e.name || "Error",
-    stack: e.stack || null,
-    code: e.code || null,
+    message: error.message || String(e),
+    name: error.name || "Error",
+    stack: error.stack || null,
+    code: error.code || null,
   };
 }
 
-for (const level of ["log", "info", "warn", "error", "debug"]) {
+for (const level of ["log", "info", "warn", "error", "debug"] satisfies ConsoleLevel[]) {
   console[level] = (...args) => safePost({type: "console", level, text: stringifyArgs(args)});
 }
 
 const origStderrWrite = process.stderr.write.bind(process.stderr);
-process.stderr.write = (chunk, encoding, callback) => {
+process.stderr.write = ((
+  chunk: string | Uint8Array,
+  encoding?: BufferEncoding | ((err?: Error | null) => void),
+  callback?: (err?: Error | null) => void,
+) => {
   const text = typeof chunk === "string" ? chunk : (chunk?.toString?.() ?? String(chunk));
   if (text.trim()) safePost({type: "console", level: "error", text: text.replace(/\n+$/, "")});
   if (typeof encoding === "function") encoding();
   else if (typeof callback === "function") callback();
   return true;
-};
+}) as typeof process.stderr.write;
 
 // Process-level catch-alls — async failures in notebook code shouldn't kill
 // the worker (and even if they do, the main thread will just respawn).
@@ -90,16 +124,16 @@ process.on("uncaughtException", (e) => {
 const HEARTBEAT_MS = 200;
 setInterval(() => safePost({type: "heartbeat", t: Date.now()}), HEARTBEAT_MS).unref();
 
-let rt = null;
+let rt: RuntimeInstance | null = null;
 
-function bootRuntime(code, options) {
+function bootRuntime(code: string, options?: RuntimeOptions) {
   rt?.destroy?.();
   rt = null;
 
   // Lazy import so the heartbeat above is already running when the runtime
   // (and its dependencies) get evaluated.
   return import("./index.js").then(({createRuntime}) => {
-    rt = createRuntime(code, options || {});
+    rt = createRuntime(code, options || {}) as RuntimeInstance;
     rt.onChanges((evt) => safePost({type: "changes", changes: evt.changes}));
     rt.onError((evt) => safePost({type: "error", error: serializeError(evt.error), source: evt.source || "runtime"}));
     rt.setIsRunning(true);
@@ -112,7 +146,7 @@ function bootRuntime(code, options) {
   });
 }
 
-parentPort.on("message", (msg) => {
+port.on("message", (msg: WorkerCommand) => {
   switch (msg?.type) {
     case "init":
       bootRuntime(msg.code, msg.options).catch((e) =>
@@ -151,7 +185,7 @@ parentPort.on("message", (msg) => {
     default:
       // Unknown message — log to original stderr (which we replaced above).
       try {
-        origStderrWrite(`recho-worker: unknown message type ${JSON.stringify(msg?.type)}\n`);
+        origStderrWrite(`recho-worker: unknown message type ${JSON.stringify((msg as {type?: unknown}).type)}\n`);
       } catch {
         /* ignore */
       }
