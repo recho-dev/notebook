@@ -39,16 +39,28 @@ export class App {
     this.cursorVisible = true;
     this.mouseSelecting = false;
     this.modal = null; // null | {type, ...}
-    this.runState = "idle"; // idle | running | error
-    this.lastBlinkTs = 0;
-    this.cursorBlinkOn = true;
+    // Run-state machine — drives the title-bar dot and the status text.
+    //   idle    : ready, no run in flight (initial / after edits)
+    //   running : a run is in progress (sync execution may be blocking)
+    //   success : last run finished without errors
+    //   error   : last run produced one or more errors (echoed as //✗)
+    //   timeout : last run hit the cell timeout (likely an infinite loop)
+    this.runState = "idle";
+    this.runStartTs = 0;
+    this.runErrorCountAtStart = 0;
+    this.lastChangeTs = 0;
+    this.runFinishTs = 0;
+    this.spinnerFrame = 0;
     this.editorRowMap = new Map(); // screen row -> {pos, line}
     this.statusFlash = null;
     // Captured stderr/console output (notebook code, the runtime, or async
     // rejections — all things that would otherwise scribble over the screen).
-    this.console = []; // {ts, level, text}
+    this.console = []; // {ts, level, text, count}
     this.consoleSeen = 0; // index up to which the user has dismissed
     this.consoleSavedHandlers = null;
+    // Cell timeout for vm.Script — long-running synchronous loops are
+    // aborted after this many ms instead of freezing the TUI forever.
+    this.cellTimeoutMs = 1000;
   }
 
   start() {
@@ -168,9 +180,51 @@ export class App {
         this.message = null;
         this.dirty = true;
       }
+      // While running, keep advancing the spinner so the user sees motion.
+      if (this.runState === "running") {
+        this.spinnerFrame = (this.spinnerFrame + 1) % 10;
+        this.dirty = true;
+      }
+      // Settle "running" → "success" / "error" / "timeout" once the runtime
+      // has been quiet for a moment. The Observable runtime doesn't emit a
+      // "done" event, so we wait for a short window with no new changes
+      // and no new errors.
+      if (this.runState === "running") {
+        const SETTLE_MS = 500;
+        const sinceStart = now - this.runStartTs;
+        const sinceChange = now - (this.lastChangeTs || this.runStartTs);
+        const lastErr = this.lastErrorAfter(this.runErrorCountAtStart);
+        const sinceError = lastErr ? now - lastErr.ts : Infinity;
+        if (sinceStart > SETTLE_MS && sinceChange > SETTLE_MS && sinceError > SETTLE_MS) {
+          const seenErrors = this.console.length - this.runErrorCountAtStart > 0;
+          this.runState = seenErrors
+            ? this.lastErrorIsTimeout()
+              ? "timeout"
+              : "error"
+            : "success";
+          this.runFinishTs = now;
+          this.dirty = true;
+        }
+      }
       if (this.dirty) this.render();
     };
     this.tickInterval = setInterval(tick, 80);
+  }
+
+  lastErrorAfter(fromIndex) {
+    for (let i = this.console.length - 1; i >= fromIndex; i--) {
+      const m = this.console[i];
+      if (m.level === "error") return m;
+    }
+    return null;
+  }
+
+  lastErrorIsTimeout() {
+    const m = this.lastErrorAfter(this.runErrorCountAtStart);
+    if (!m) return false;
+    return /TimeoutError|exceeded \d+ms|infinite loop|ERR_RECHO_CELL_TIMEOUT|Script execution timed out/i.test(
+      m.text,
+    );
   }
 
   flash(msg, ms = 2500) {
@@ -215,13 +269,14 @@ export class App {
   // Runtime
   initRuntime() {
     this.runtime?.destroy?.();
-    this.runtime = createRuntime(this.buffer.text);
+    this.runtime = createRuntime(this.buffer.text, {cellTimeoutMs: this.cellTimeoutMs});
     this.runtime.onChanges(({changes}) => {
       if (!changes || !changes.length) return;
       this.buffer.applyChanges(changes);
       // Keep the runtime's internal view of `code` in sync with the buffer
       // — the web editor does the same in its EditorView change handler.
       this.runtime.setCode(this.buffer.text);
+      this.lastChangeTs = Date.now();
       this.dirty = true;
     });
     this.runtime.onError(({error, source}) => {
@@ -231,23 +286,31 @@ export class App {
       this.pushConsole("error", `[${source || "runtime"}] ${error?.message || String(error)}`);
       this.dirty = true;
     });
+    this.markRunStart();
     this.runtime.setIsRunning(true);
     try {
       this.runtime.run();
-      this.runState = "running";
     } catch (e) {
       this.runState = "error";
       this.pushConsole("error", "[run] " + (e?.message || String(e)));
     }
   }
 
+  markRunStart() {
+    this.runState = "running";
+    this.runStartTs = Date.now();
+    this.runErrorCountAtStart = this.console.length;
+    this.spinnerFrame = 0;
+    this.dirty = true;
+  }
+
   runNow(force = false) {
     if (!this.runtime) return this.initRuntime();
+    this.markRunStart();
     this.runtime.setIsRunning(true);
     try {
       this.runtime.setCode(this.buffer.text);
       this.runtime.run();
-      this.runState = "running";
       this.flash("Running…", 800);
     } catch (e) {
       this.runState = "error";
@@ -498,20 +561,41 @@ export class App {
 
   drawHeader() {
     const title = " Recho · " + (this.path ? path.basename(this.path) : "untitled.recho.js");
-    const stateColor = this.runState === "error" ? COLORS.error : this.runState === "running" ? COLORS.output : COLORS.dimText;
-    const stateDot = fg(stateColor) + "●" + reset;
-    const stateText =
-      this.runState === "error"
-        ? "error"
-        : this.runState === "running"
-          ? "running"
-          : "idle";
-
     const headerStyle = bg(234) + fg(COLORS.title);
     this.grid.fillRect(0, 0, 1, this.cols, " ", headerStyle);
     this.grid.writeStyled(0, 0, headerStyle + bold + title + reset, headerStyle);
 
-    const rightInfo = `${stateDot} ${dim}${stateText}${reset}  ${fg(COLORS.fg)}[ Run ^S ]${reset}`;
+    // Status indicator: spinner + colored dot + label.
+    const SPINNER = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+    const state = this.runState;
+    let dot, label, indicatorColor;
+    if (state === "running") {
+      indicatorColor = COLORS.hot;
+      dot = fg(indicatorColor) + bold + SPINNER[this.spinnerFrame % SPINNER.length] + reset;
+      const elapsedMs = Date.now() - this.runStartTs;
+      label = `running ${(elapsedMs / 1000).toFixed(1)}s`;
+    } else if (state === "success") {
+      indicatorColor = COLORS.output;
+      dot = fg(indicatorColor) + "●" + reset;
+      label = "success";
+    } else if (state === "error") {
+      indicatorColor = COLORS.error;
+      dot = fg(indicatorColor) + bold + "●" + reset;
+      const errs = this.console.filter((m) => m.level === "error").length;
+      label = errs > 1 ? `error · ${errs} issues` : "error";
+    } else if (state === "timeout") {
+      indicatorColor = COLORS.error;
+      dot = fg(indicatorColor) + bold + "⏱" + reset;
+      label = `timed out (${this.cellTimeoutMs}ms)`;
+    } else {
+      indicatorColor = COLORS.dimText;
+      dot = fg(indicatorColor) + "○" + reset;
+      label = "idle";
+    }
+
+    const labelStyled = fg(indicatorColor) + label + reset;
+    const runBtn = ` ${fg(COLORS.fg)}[ Run ^S ]${reset}`;
+    const rightInfo = `${dot} ${labelStyled} ${runBtn}`;
     const rightLen = visibleLength(rightInfo);
     this.grid.writeStyled(0, this.cols - rightLen - 1, rightInfo, headerStyle);
 
