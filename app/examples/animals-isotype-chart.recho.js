@@ -68,17 +68,18 @@ const data = [
 
 /**
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *                            Importing D3
+ *                          Importing D3 Array
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * Then we import D3 to help us with the data processing. In Recho, you can
- * typically use `recho.require(name)` to import an external library.
+ * Then we import D3's array helpers to help us with the data processing. In
+ * Recho, you can typically use `recho.require(name)` to import an external
+ * library.
  *
  * > Ref. https://recho.dev/docs/libraries-imports
  * > Ref. https://d3js.org/
  */
 
-const d3 = recho.require("d3");
+const d3 = recho.require("d3-array");
 
 /**
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

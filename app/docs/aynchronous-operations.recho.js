@@ -55,7 +55,7 @@ echo(string2);
  * Refer to https://recho.dev/docs/libraries-imports for more details.
  */
 
-const d3 = recho.require("d3");
+const d3 = recho.require("d3-array");
 
 //➜ [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
 echo(d3.range(10));

@@ -84,7 +84,7 @@ const frame = recho.interval(1000 / 15);
   echo(output);
 }
 
-const d3 = recho.require("d3");
+const d3 = recho.require("d3-array", "d3-random", "d3-scale");
 
 /**
  * I like this example also because I found one importable noise library:

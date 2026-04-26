@@ -238,10 +238,10 @@ const sum = echo(numbers.reduce((a, b) => a + scale * b, 0));
  * the `recho.require` function. The import specifiers must be valid npm
  * package names with optional version specifiers.
  *
- * For example, let's import the `d3` package:
+ * For example, let's import the `d3-array` package:
  */
 
-const d3 = recho.require("d3");
+const d3 = recho.require("d3-array");
 
 //➜ [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
 echo(d3.range(10));

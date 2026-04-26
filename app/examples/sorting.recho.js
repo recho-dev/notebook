@@ -166,4 +166,4 @@ function* sortQuick(array, left = 0, right = array.length - 1) {
   yield* sortQuick(array, i + 1, right);
 }
 
-const d3 = recho.require("d3");
+const d3 = recho.require("d3-array", "d3-random", "d3-scale");
