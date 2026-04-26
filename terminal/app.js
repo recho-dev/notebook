@@ -4,7 +4,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import {createRuntime} from "../runtime/index.js";
+import {createWorkerRuntime} from "./workerRuntime.js";
 import {OUTPUT_PREFIX, ERROR_PREFIX} from "../runtime/output.js";
 import {Buffer} from "./buffer.js";
 import {highlightLine, COLORS} from "./highlight.js";
@@ -266,25 +266,54 @@ export class App {
   }
 
   // -------------------------------------------------------------------------
-  // Runtime
+  // Runtime — runs in a worker_thread so an async hang in notebook code
+  // can't freeze the TUI. The watchdog will respawn a worker that's been
+  // unresponsive for `heartbeatGraceMs` (default 3s).
   initRuntime() {
     this.runtime?.destroy?.();
-    this.runtime = createRuntime(this.buffer.text, {cellTimeoutMs: this.cellTimeoutMs});
+    this.runtime = createWorkerRuntime(this.buffer.text, {
+      cellTimeoutMs: this.cellTimeoutMs,
+      heartbeatGraceMs: 3000,
+    });
     this.runtime.onChanges(({changes}) => {
       if (!changes || !changes.length) return;
       this.buffer.applyChanges(changes);
-      // Keep the runtime's internal view of `code` in sync with the buffer
-      // — the web editor does the same in its EditorView change handler.
       this.runtime.setCode(this.buffer.text);
       this.lastChangeTs = Date.now();
       this.dirty = true;
     });
     this.runtime.onError(({error, source}) => {
-      // Parse / split errors are reported here. They end up as `//✗` lines
-      // in the buffer too, but we want a status-bar nudge as well.
+      // Parse / split errors. They also land in the buffer as `//✗` lines;
+      // we still want a status-bar nudge.
       this.runState = "error";
       this.pushConsole("error", `[${source || "runtime"}] ${error?.message || String(error)}`);
       this.dirty = true;
+    });
+    this.runtime.onConsole(({level, text}) => {
+      // Forwarded console output from the worker thread (notebook code,
+      // d3-require failures, observer.rejected, …).
+      this.pushConsole(level, text);
+    });
+    this.runtime.onHung(({sinceHeartbeatMs}) => {
+      // The worker has been silent past the grace window. Most likely an
+      // async tight loop that vm.timeout couldn't catch. Terminate it,
+      // mark the state, and respawn fresh against the current buffer.
+      this.pushConsole(
+        "error",
+        `[watchdog] runtime unresponsive for ${sinceHeartbeatMs}ms — restarting worker thread`,
+      );
+      this.runState = "timeout";
+      this.dirty = true;
+      try {
+        this.runtime.restart(this.buffer.text);
+      } catch (e) {
+        this.pushConsole("error", "[watchdog] restart failed: " + (e?.message || String(e)));
+      }
+    });
+    this.runtime.onExit?.(({code}) => {
+      if (code !== 0 && code != null) {
+        this.pushConsole("error", `[worker] exited with code ${code}`);
+      }
     });
     this.markRunStart();
     this.runtime.setIsRunning(true);
@@ -310,6 +339,11 @@ export class App {
     this.runtime.setIsRunning(true);
     try {
       this.runtime.setCode(this.buffer.text);
+      if (this.runtime.isAlive && !this.runtime.isAlive()) {
+        this.runtime.restart(this.buffer.text);
+        this.flash("Runtime restarted", 1200);
+        return;
+      }
       this.runtime.run();
       this.flash("Running…", 800);
     } catch (e) {
@@ -320,9 +354,17 @@ export class App {
   }
 
   stopNow() {
-    this.runtime?.setIsRunning(false);
+    // Hard stop: terminate the worker. ^R / next ^S spawns a fresh one.
+    // (Soft pause via setIsRunning(false) doesn't help when notebook code
+    // has already wedged itself.)
+    if (this.runtime?.terminate) {
+      this.runtime.terminate();
+      this.flash("Stopped — worker terminated; ^S to run", 2500);
+    } else {
+      this.runtime?.setIsRunning(false);
+      this.flash("Stopped", 1500);
+    }
     this.runState = "idle";
-    this.flash("Stopped", 1500);
     this.dirty = true;
   }
 

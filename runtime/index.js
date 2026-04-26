@@ -37,17 +37,14 @@ const DEFAULT_CELL_TIMEOUT_MS = 1000;
 const CELL_FN_SLOT = "__rechoCellFn$$";
 const CELL_ARGS_SLOT = "__rechoCellArgs$$";
 const CALL_SCRIPT = HAS_VM
-  ? new vm.Script(
-      `globalThis.${CELL_FN_SLOT}.apply(undefined, globalThis.${CELL_ARGS_SLOT})`,
-      {filename: "recho:call.js"},
-    )
+  ? new vm.Script(`globalThis.${CELL_FN_SLOT}.apply(undefined, globalThis.${CELL_ARGS_SLOT})`, {
+      filename: "recho:call.js",
+    })
   : null;
 
 function isTimeoutError(error) {
   return (
-    error &&
-    (error.code === "ERR_SCRIPT_EXECUTION_TIMEOUT" ||
-      /Script execution timed out/i.test(error?.message || ""))
+    error && (error.code === "ERR_SCRIPT_EXECUTION_TIMEOUT" || /Script execution timed out/i.test(error?.message || ""))
   );
 }
 
@@ -82,7 +79,6 @@ function safeEval(code, inputs, __setEcho__, timeoutMs) {
     if (HAS_VM) {
       fn = vm.runInThisContext(body, {filename: "recho:cell.js"});
     } else {
-      // eslint-disable-next-line no-new-func
       fn = new Function("__return__", `return ${body};`)(null);
     }
 
@@ -456,9 +452,7 @@ export function createRuntime(initialCode, options = {}) {
       );
       v._shadow.set("echo", vd);
       const newInputs = [...inputs, "echo"];
-      state.variables.push(
-        v.define(vid, newInputs, safeEval(body, newInputs, __setEcho__, cellTimeoutMs)),
-      );
+      state.variables.push(v.define(vid, newInputs, safeEval(body, newInputs, __setEcho__, cellTimeoutMs)));
 
       // Export cell-level variables for external access.
       for (const o of outputs) {
