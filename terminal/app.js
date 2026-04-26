@@ -38,6 +38,8 @@ export class App {
     this.grid = new scr.Grid(this.rows, this.cols);
     this.cursorVisible = true;
     this.mouseSelecting = false;
+    this.scrollbarDragging = false;
+    this.scrollbarDragOffset = 0;
     this.modal = null; // null | {type, ...}
     // Run-state machine — drives the title-bar dot and the status text.
     //   idle    : ready, no run in flight (initial / after edits)
@@ -374,7 +376,7 @@ export class App {
     const top = HEADER_ROWS;
     const bottom = this.rows - FOOTER_ROWS;
     const left = 0;
-    const right = this.cols;
+    const right = Math.max(left, this.cols - 1);
     return {top, bottom, left, right, width: right - left, height: bottom - top};
   }
 
@@ -504,6 +506,7 @@ export class App {
   handleMouse(ev) {
     const box = this.editorBox();
     const {row, col, kind, button, shift} = ev;
+    if (this.handleScrollbarMouse(ev, box)) return;
     if (kind === "wheel-up") {
       this.scrollBy(-3);
       return;
@@ -540,9 +543,86 @@ export class App {
     }
   }
 
+  handleScrollbarMouse(ev, box = this.editorBox()) {
+    const scrollbarCol = this.scrollbarCol();
+    if (scrollbarCol < 0) return false;
+    const {row, col, kind, button} = ev;
+    if (kind === "release") {
+      if (!this.scrollbarDragging) return false;
+      this.scrollbarDragging = false;
+      this.dirty = true;
+      return true;
+    }
+    if (this.scrollbarDragging && kind === "drag") {
+      this.scrollToScrollbarRow(row - this.scrollbarDragOffset);
+      return true;
+    }
+    if (col !== scrollbarCol || row < box.top || row >= box.bottom) return false;
+    if (kind === "press" && button === 0) {
+      const state = this.scrollbarState(box);
+      if (!state) return true;
+      if (row >= state.thumbTop && row < state.thumbBottom) {
+        this.scrollbarDragOffset = row - state.thumbTop;
+      } else {
+        this.scrollbarDragOffset = Math.floor(state.thumbHeight / 2);
+        this.scrollToScrollbarRow(row - this.scrollbarDragOffset, box);
+      }
+      this.scrollbarDragging = true;
+      this.mouseSelecting = false;
+      this.dirty = true;
+      return true;
+    }
+    return kind === "drag" && col === scrollbarCol;
+  }
+
   scrollBy(dy) {
-    const max = Math.max(0, this.buffer.lineCount - this.visibleEditorRows());
-    this.scrollY = Math.max(0, Math.min(max, this.scrollY + dy));
+    this.scrollY = this.clampScrollY(this.scrollY + dy);
+    this.dirty = true;
+  }
+
+  maxScrollY() {
+    return Math.max(0, this.buffer.lineCount - this.visibleEditorRows());
+  }
+
+  clampScrollY(value) {
+    return Math.max(0, Math.min(this.maxScrollY(), value));
+  }
+
+  scrollbarCol() {
+    return this.cols > 0 ? this.cols - 1 : -1;
+  }
+
+  scrollbarState(box = this.editorBox()) {
+    const trackHeight = box.height;
+    const totalLines = this.buffer.lineCount;
+    if (trackHeight <= 0 || totalLines <= 0) return null;
+    const visibleLines = Math.min(trackHeight, totalLines);
+    const maxScroll = this.maxScrollY();
+    const thumbHeight = maxScroll === 0 ? trackHeight : Math.max(1, Math.floor((visibleLines / totalLines) * trackHeight));
+    const travel = trackHeight - thumbHeight;
+    const thumbOffset = maxScroll === 0 ? 0 : Math.round((this.clampScrollY(this.scrollY) / maxScroll) * travel);
+    const thumbTop = box.top + thumbOffset;
+    return {
+      trackTop: box.top,
+      trackBottom: box.bottom,
+      trackHeight,
+      thumbTop,
+      thumbBottom: thumbTop + thumbHeight,
+      thumbHeight,
+      travel,
+      maxScroll,
+    };
+  }
+
+  scrollToScrollbarRow(thumbTopRow, box = this.editorBox()) {
+    const state = this.scrollbarState(box);
+    if (!state || state.maxScroll === 0) {
+      this.scrollY = 0;
+      this.dirty = true;
+      return;
+    }
+    const offset = Math.max(0, Math.min(state.travel, thumbTopRow - box.top));
+    this.scrollY = Math.round((offset / state.travel) * state.maxScroll);
     this.dirty = true;
   }
 
@@ -551,6 +631,7 @@ export class App {
     const h = this.visibleEditorRows();
     if (row < this.scrollY) this.scrollY = row;
     else if (row >= this.scrollY + h) this.scrollY = row - h + 1;
+    this.scrollY = this.clampScrollY(this.scrollY);
     // Horizontal scroll
     const {col} = this.buffer.posToRowCol(this.buffer.cursor);
     const w = this.editorBox().width - GUTTER;
@@ -561,6 +642,8 @@ export class App {
   onResize() {
     this.cols = process.stdout.columns || this.cols;
     this.rows = process.stdout.rows || this.rows;
+    this.scrollY = this.clampScrollY(this.scrollY);
+    this.scrollbarDragging = false;
     this.grid = new scr.Grid(this.rows, this.cols);
     this.prevGrid = null;
     process.stdout.write(scr.clearScreen);
@@ -571,10 +654,12 @@ export class App {
   // Render
   render() {
     this.dirty = false;
+    this.scrollY = this.clampScrollY(this.scrollY);
     this.grid.clear();
     this.editorRowMap.clear();
     this.drawHeader();
     this.drawEditor();
+    this.drawScrollbar();
     this.drawFooter();
     if (this.modal) this.drawModal();
     scr.renderDiff(this.prevGrid, this.grid, (s) => process.stdout.write(s));
@@ -590,7 +675,7 @@ export class App {
         screenRow >= box.top &&
         screenRow < box.bottom &&
         screenCol >= GUTTER &&
-        screenCol < this.cols
+        screenCol < box.right
       ) {
         process.stdout.write(scr.moveTo(screenRow, screenCol) + scr.showCursor);
       } else {
@@ -681,7 +766,7 @@ export class App {
       // contains an inline `reset`.
       if (isCursorLine) {
         const lnBg = bg(COLORS.cursorLineBg);
-        for (let c = GUTTER; c < this.cols; c++) {
+        for (let c = GUTTER; c < box.right; c++) {
           const cell = this.grid.cells[screenRow * this.cols + c];
           if (cell) cell.style = cell.style + lnBg;
         }
@@ -701,7 +786,7 @@ export class App {
           if (x1 > x0) {
             const overlayStyle = bg(COLORS.selBg) + fg(255);
             // Keep the existing characters, just override style.
-            const cols = Math.min(this.cols, x1) - x0;
+            const cols = Math.min(box.right, x1) - x0;
             for (let c = 0; c < cols; c++) {
               const cell = this.grid.cells[screenRow * this.cols + x0 + c];
               if (cell) cell.style = overlayStyle;
@@ -709,6 +794,19 @@ export class App {
           }
         }
       }
+    }
+  }
+
+  drawScrollbar() {
+    const col = this.scrollbarCol();
+    const box = this.editorBox();
+    const state = this.scrollbarState(box);
+    if (col < 0 || !state) return;
+    const trackStyle = fg(COLORS.border);
+    const thumbStyle = fg(this.scrollbarDragging ? COLORS.hot : COLORS.dimText);
+    for (let row = state.trackTop; row < state.trackBottom; row++) {
+      const inThumb = row >= state.thumbTop && row < state.thumbBottom;
+      this.grid.setCell(row, col, inThumb ? "█" : "│", inThumb ? thumbStyle : trackStyle);
     }
   }
 
