@@ -18,8 +18,9 @@ function uid() {
 
 function safeEval(code, inputs, __setEcho__) {
   const create = (code) => {
+    const resultVar = `__recho_v_${uid()}`;
     // Ensure the current echo function is bound for the executing cell.
-    const body = `__setEcho__(echo); const __foo__ = ${code}; const v = __foo__(${inputs.join(",")}); __setEcho__(null); return v;`;
+    const body = `__setEcho__(echo); const __foo__ = ${code}; const ${resultVar} = __foo__(${inputs.join(",")}); __setEcho__(null); return ${resultVar};`;
     const fn = new Function("__setEcho__", ...inputs, body);
     return (...args) => fn(__setEcho__, ...args);
   };
