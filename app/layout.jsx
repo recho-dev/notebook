@@ -1,7 +1,7 @@
 import "./global.css";
 import {Nav} from "./Nav.jsx";
 import {cn} from "./cn.js";
-import {Analytics} from "@vercel/analytics/next";
+import {NotebookAnalytics} from "./NotebookAnalytics.jsx";
 
 export const metadata = {
   title: "Recho Notebook",
@@ -14,7 +14,7 @@ export default function Layout({children}) {
       <body className={cn("text-sm")}>
         <Nav />
         <main>{children}</main>
-        <Analytics />
+        <NotebookAnalytics />
       </body>
     </html>
   );
