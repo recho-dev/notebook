@@ -14,7 +14,10 @@ export default function Layout({children}) {
       <body className={cn("text-sm")}>
         <Nav />
         <main>{children}</main>
-        <Analytics />
+        <Analytics
+          scriptSrc="https://recho-notebook.vercel.app/_vercel/insights/script.js"
+          endpoint="https://recho-notebook.vercel.app/_vercel/insights"
+        />
       </body>
     </html>
   );
