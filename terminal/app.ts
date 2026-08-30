@@ -12,7 +12,7 @@ import {highlightLine, nextHighlightState, COLORS} from "./highlight.ts";
 import {loadHelpDocs} from "./docs.ts";
 import type {HelpDocs} from "./docs.ts";
 import * as scr from "./screen.ts";
-import {fg, bg, reset, bold, padToWidth, visibleLength} from "./screen.ts";
+import {fg, bg, reset, bold, padToWidth, truncateToWidth, visibleLength} from "./screen.ts";
 
 const HEADER_ROWS = 2;
 const FOOTER_ROWS = 2;
@@ -1103,16 +1103,24 @@ export class App {
   drawExamplesModal() {
     const box = this.modalBox();
     drawBox(this.grid, box, " Examples · " + this.filteredExamples().length + " ", COLORS);
+    // Interior columns run left+1 .. left+width-2; everything drawn inside
+    // the box must stay within them or it eats the frame.
+    const innerW = box.width - 2;
+    const inside = bg(233);
     const queryLine = box.top + 2;
     this.grid.writeStyled(
       queryLine,
       box.left + 2,
-      fg(COLORS.dimText) + "filter: " + reset + this.activeModal.query + fg(COLORS.dimText) + "▏" + reset,
+      truncateToWidth(
+        inside + fg(COLORS.dimText) + "filter: " + reset + inside + this.activeModal.query + fg(COLORS.dimText) + "▏",
+        innerW - 2,
+      ) + reset,
       "",
     );
     const items = this.filteredExamples();
     const listTop = box.top + 4;
-    const listH = box.height - 5;
+    // Reserve the last interior row for the help line.
+    const listH = box.height - 6;
     // Keep selected in view.
     let scroll = this.activeModal.scroll || 0;
     if (this.activeModal.index < scroll) scroll = this.activeModal.index;
@@ -1124,16 +1132,21 @@ export class App {
       const name = items[idx];
       const display = formatExampleName(name);
       const selected = idx === this.activeModal.index;
-      const style = selected ? bg(COLORS.selBg) + fg(255) + bold : fg(COLORS.fg);
-      const arrow = selected ? fg(COLORS.hot) + "▸ " + reset : "  ";
-      const line = arrow + style + " " + padToWidth(display, box.width - 6) + " " + reset;
-      // Fill row bg first
-      if (selected)
-        this.grid.fillRect(listTop + i, box.left + 1, listTop + i + 1, box.left + box.width - 1, " ", bg(COLORS.selBg));
-      this.grid.writeStyled(listTop + i, box.left + 2, line, "");
+      const rowBg = selected ? bg(COLORS.selBg) : inside;
+      const style = selected ? rowBg + fg(255) + bold : rowBg + fg(COLORS.fg);
+      const arrow = selected ? rowBg + fg(COLORS.hot) + "▸ " : rowBg + "  ";
+      // Exactly innerW visible cells starting at the first interior column,
+      // so the row fills the box without touching either border.
+      const line = arrow + style + " " + padToWidth(truncateToWidth(display, innerW - 5), innerW - 5) + " " + reset;
+      this.grid.writeStyled(listTop + i, box.left + 1, line, "");
     }
-    const help = fg(COLORS.dimText) + "↑/↓ select · type to filter · Enter to load · Esc to cancel" + reset;
-    this.grid.writeStyled(box.top + box.height - 1, box.left + 2, help, "");
+    const help = "↑/↓ select · type to filter · Enter to load · Esc to cancel";
+    this.grid.writeStyled(
+      box.top + box.height - 2,
+      box.left + 2,
+      inside + fg(COLORS.dimText) + truncateToWidth(help, innerW - 2) + reset,
+      "",
+    );
   }
 
   // ---- input prompt
@@ -1175,9 +1188,21 @@ export class App {
     const top = Math.max(2, Math.floor((this.rows - h) / 2));
     const box = {top, left, width: w, height: h};
     drawBox(this.grid, box, " " + this.activeModal.title + " ", COLORS);
-    this.grid.writeStyled(top + 2, left + 2, fg(COLORS.dimText) + "value: " + reset, "");
-    this.grid.writeStyled(top + 3, left + 2, this.activeModal.value + fg(COLORS.hot) + "▏" + reset, "");
-    this.grid.writeStyled(top + h - 1, left + 2, fg(COLORS.dimText) + "Enter to confirm · Esc to cancel" + reset, "");
+    const inside = bg(233);
+    this.grid.writeStyled(top + 2, left + 2, inside + fg(COLORS.dimText) + "value: " + reset, "");
+    this.grid.writeStyled(
+      top + 3,
+      left + 2,
+      truncateToWidth(inside + this.activeModal.value + fg(COLORS.hot) + "▏", w - 4) + reset,
+      "",
+    );
+    // Last interior row — writing at top+h-1 would overwrite the bottom border.
+    this.grid.writeStyled(
+      top + h - 2,
+      left + 2,
+      inside + fg(COLORS.dimText) + truncateToWidth("Enter to confirm · Esc to cancel", w - 4) + reset,
+      "",
+    );
   }
 
   newFile() {
