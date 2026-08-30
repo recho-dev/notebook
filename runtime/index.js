@@ -3,7 +3,6 @@ import {Runtime} from "@observablehq/runtime";
 import {parse} from "acorn";
 import {group} from "d3-array";
 import {dispatch as d3Dispatch} from "d3-dispatch";
-import vm from "node:vm";
 import * as stdlib from "./stdlib/index.js";
 import {Inspector} from "./stdlib/inspect.js";
 import {BlockMetadata} from "../editor/blocks/BlockMetadata.ts";
@@ -17,6 +16,12 @@ function uid() {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
+// This module is shared between the Node runtime (TUI worker) and the
+// browser editor bundle, so `node:vm` must not appear as a static import —
+// webpack cannot bundle `node:` builtins. `process.getBuiltinModule`
+// (Node 22.3+) loads it synchronously in Node and is simply absent in the
+// browser, where safeEval falls back to `new Function`.
+const vm = typeof process !== "undefined" ? process.getBuiltinModule?.("node:vm") : undefined;
 const HAS_VM = typeof vm?.runInThisContext === "function";
 // Default cell timeout. vm's timeout option aborts synchronous loops longer
 // than this — the most common "accidentally hung the app" bug. It does NOT
