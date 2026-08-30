@@ -104,7 +104,7 @@ export class App {
   consoleSeen: number;
   consoleSavedHandlers: ConsoleSavedHandlers | null;
   cellTimeoutMs: number;
-  tickInterval?: NodeJS.Timeout;
+  tickTimer?: NodeJS.Timeout;
   cursorBlinkOn?: boolean;
   lastBlinkTs?: number;
 
@@ -270,14 +270,25 @@ export class App {
   }
 
   loop() {
+    // Adaptive cadence: while runtime changes are streaming in (animated
+    // notebooks), tick near 60fps so motion is smooth; once the stream goes
+    // quiet, fall back to the lazy idle tick. Keystrokes don't wait for the
+    // tick at all — onInput renders immediately after handling them.
+    const IDLE_TICK_MS = 80;
+    const ACTIVE_TICK_MS = 16;
+    const ACTIVE_WINDOW_MS = 250;
+    const SPINNER_MS = 80;
+    let spinnerTs = 0;
     const tick = () => {
       const now = Date.now();
       if (this.message && now > this.messageUntil) {
         this.message = null;
         this.dirty = true;
       }
-      // While running, keep advancing the spinner so the user sees motion.
-      if (this.runState === "running") {
+      // While running, keep advancing the spinner so the user sees motion —
+      // time-gated so the fast cadence doesn't spin it faster.
+      if (this.runState === "running" && now - spinnerTs >= SPINNER_MS) {
+        spinnerTs = now;
         this.spinnerFrame = (this.spinnerFrame + 1) % 10;
         this.dirty = true;
       }
@@ -299,8 +310,13 @@ export class App {
         }
       }
       if (this.dirty) this.render();
+      schedule();
     };
-    this.tickInterval = setInterval(tick, 80);
+    const schedule = () => {
+      const active = Date.now() - this.lastChangeTs < ACTIVE_WINDOW_MS;
+      this.tickTimer = setTimeout(tick, active ? ACTIVE_TICK_MS : IDLE_TICK_MS);
+    };
+    schedule();
   }
 
   lastErrorAfter(fromIndex: number): ConsoleEntry | null {
@@ -336,7 +352,7 @@ export class App {
 
   cleanup() {
     try {
-      if (this.tickInterval) clearInterval(this.tickInterval);
+      if (this.tickTimer) clearTimeout(this.tickTimer);
       this.runtime?.destroy?.();
       process.stdin.setRawMode?.(false);
       process.stdout.write(scr.disableMouse + scr.showCursor + scr.leaveAlt + reset);
@@ -474,9 +490,15 @@ export class App {
   // -------------------------------------------------------------------------
   // Input
   onInput(chunk: string) {
-    if (this.modal) return this.onModalInput(chunk);
-    const events = scr.parseInput(chunk);
-    for (const ev of events) this.handleEvent(ev);
+    if (this.modal) {
+      this.onModalInput(chunk);
+    } else {
+      const events = scr.parseInput(chunk);
+      for (const ev of events) this.handleEvent(ev);
+    }
+    // Render right away instead of waiting for the next tick — keeps typing
+    // latency independent of the tick cadence.
+    if (this.dirty) this.render();
   }
 
   handleEvent(ev: scr.InputEvent) {
