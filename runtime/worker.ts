@@ -132,18 +132,22 @@ function bootRuntime(code: string, options?: RuntimeOptions) {
 
   // Lazy import so the heartbeat above is already running when the runtime
   // (and its dependencies) get evaluated.
-  return import("./index.js").then(({createRuntime}) => {
-    rt = createRuntime(code, options || {}) as RuntimeInstance;
-    rt.onChanges((evt) => safePost({type: "changes", changes: evt.changes}));
-    rt.onError((evt) => safePost({type: "error", error: serializeError(evt.error), source: evt.source || "runtime"}));
-    rt.setIsRunning(true);
-    try {
-      rt.run();
-    } catch (e) {
-      safePost({type: "console", level: "error", text: `[run] ${stringifyArgs([e])}`});
-    }
-    safePost({type: "ready"});
-  });
+  return Promise.all([import("./index.js"), import("./vmEval.js")]).then(
+    ([{createRuntime}, {createVmCellCompiler}]) => {
+      rt = createRuntime(code, {
+        compileCell: createVmCellCompiler({cellTimeoutMs: options?.cellTimeoutMs}),
+      }) as RuntimeInstance;
+      rt.onChanges((evt) => safePost({type: "changes", changes: evt.changes}));
+      rt.onError((evt) => safePost({type: "error", error: serializeError(evt.error), source: evt.source || "runtime"}));
+      rt.setIsRunning(true);
+      try {
+        rt.run();
+      } catch (e) {
+        safePost({type: "console", level: "error", text: `[run] ${stringifyArgs([e])}`});
+      }
+      safePost({type: "ready"});
+    },
+  );
 }
 
 port.on("message", (msg: WorkerCommand) => {
