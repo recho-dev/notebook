@@ -32,3 +32,4 @@ export {echoInBlock} from "./echo-in-block.js";
 export {echoInAsyncCallback} from "./echo-in-async-callback.js";
 export {echoInBracket} from "./echo-in-bracket.js";
 export {echoAsParams} from "./echo-as-params.js";
+export {vCollision} from "./v-collision.js";

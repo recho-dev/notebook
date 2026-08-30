@@ -67,12 +67,13 @@ class CellTimeoutError extends Error {
 function safeEval(code, inputs, __setEcho__, timeoutMs) {
   const create = (codeStr) => {
     const argList = ["__setEcho__", ...inputs].join(",");
+    const resultVar = `__recho_v_${uid()}`;
     const body = `(function(${argList}){
       __setEcho__(echo);
       const __foo__ = ${codeStr};
-      const v = __foo__(${inputs.join(",")});
+      const ${resultVar} = __foo__(${inputs.join(",")});
       __setEcho__(null);
-      return v;
+      return ${resultVar};
     })`;
 
     let fn;
