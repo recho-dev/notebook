@@ -117,6 +117,11 @@ export function topLevelCoverage(tree: Tree, from: number, to: number): Range | 
 /**
  * Detect blocks in a given range by traversing the syntax tree.
  * Similar to how runtime/index.js uses acorn to parse blocks, but adapted for CodeMirror.
+ *
+ * Only the direct children of `Script` are visited — blocks are top-level
+ * statements by definition, so there is no reason to descend into statement
+ * bodies. This keeps the traversal proportional to the number of top-level
+ * nodes in the range instead of the total number of syntax nodes.
  */
 export function detectBlocksWithinRange(tree: Tree, doc: Text, from: number, to: number): BlockMetadata[] {
   const blocks: BlockMetadata[] = [];
@@ -125,12 +130,18 @@ export function detectBlocksWithinRange(tree: Tree, doc: Text, from: number, to:
     from,
     to,
     enter: (node) => {
-      // Detect top-level statements (direct children of Script)
-      if (node.node.parent?.name === "Script" && isBlockNode(node.name)) {
+      // Descend only from the root node into its direct children.
+      if (node.name === "Script") return true;
+
+      // Check if this is a statement (not a comment)
+      if (isBlockNode(node.name)) {
         const statement = node.node;
         const outputRange = extendOutputForward(doc, statement);
         blocks.push(new BlockMetadata(nanoid(), node.name, outputRange, {from: node.from, to: node.to}));
       }
+
+      // Never descend below the top level.
+      return false;
     },
   });
 

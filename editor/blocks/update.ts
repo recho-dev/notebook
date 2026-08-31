@@ -6,6 +6,14 @@ import {MaxHeap} from "../../lib/containers/heap.ts";
 import {BlockMetadata} from "./BlockMetadata.ts";
 
 /**
+ * Verbose per-transaction logging is only enabled in the test environment
+ * (the playground defines `process.env.NODE_ENV` as "test", see
+ * `vite.config.js` and `editor/blocks/index.ts`). Invariant violations are
+ * reported with `console.error` unconditionally.
+ */
+const DEBUG = process.env.NODE_ENV === "test";
+
+/**
  * Give each detected block the identity (id and attributes) of the old block
  * whose mapped source range it overlaps the most — so identity survives
  * ordinary typing as well as splits, merges, and swallows. A donor donates at
@@ -47,7 +55,7 @@ function reconcileDetectedBlocks(
 
     if (bestIndex === -1) {
       // No old block overlaps this detected block; it is genuinely new.
-      console.log("Keeping detected block as-is:", block);
+      if (DEBUG) console.log("Keeping detected block as-is:", block);
       reconciledBlocks.push(block);
     } else {
       donated.add(bestIndex);
@@ -68,7 +76,7 @@ function reconcileDetectedBlocks(
         donor.attributes,
         untouched ? donor.error : false,
       );
-      console.log("Detected block inherits identity:", reconciled, "from old block:", donor);
+      if (DEBUG) console.log("Detected block inherits identity:", reconciled, "from old block:", donor);
       reconciledBlocks.push(reconciled);
     }
   }
@@ -95,15 +103,19 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
   if (!tr.docChanged) return oldBlocks;
 
   const userEvent = tr.annotation(Transaction.userEvent);
-  if (userEvent) {
-    console.group(`updateBlocks (${userEvent})`);
-  } else {
-    console.groupCollapsed(`updateBlocks`);
+  if (DEBUG) {
+    if (userEvent) {
+      console.group(`updateBlocks (${userEvent})`);
+    } else {
+      console.groupCollapsed(`updateBlocks`);
+    }
   }
 
   if (tr.changes.empty) {
-    console.log("No changes detected");
-    console.groupEnd();
+    if (DEBUG) {
+      console.log("No changes detected");
+      console.groupEnd();
+    }
     return oldBlocks;
   }
 
@@ -136,21 +148,23 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
 
   // Process changed ranges one by one, because ranges are disjoint.
   tr.changes.iterChanges((oldFrom, oldTo, newFrom, newTo) => {
-    if (oldFrom === oldTo) {
-      if (newFrom === oldFrom) {
-        console.groupCollapsed(`Insert ${newTo - newFrom} characters at ${oldFrom}`);
+    if (DEBUG) {
+      if (oldFrom === oldTo) {
+        if (newFrom === oldFrom) {
+          console.groupCollapsed(`Insert ${newTo - newFrom} characters at ${oldFrom}`);
+        } else {
+          console.groupCollapsed(`Insert ${newTo - newFrom} characters: ${oldFrom} -> ${newFrom}-${newTo}`);
+        }
       } else {
-        console.groupCollapsed(`Insert ${newTo - newFrom} characters: ${oldFrom} -> ${newFrom}-${newTo}`);
+        console.groupCollapsed(`Update: ${oldFrom}-${oldTo} -> ${newFrom}-${newTo}`);
       }
-    } else {
-      console.groupCollapsed(`Update: ${oldFrom}-${oldTo} -> ${newFrom}-${newTo}`);
     }
 
     // Step 1: Find the blocks that are affected by the change.
 
     const affectedBlockRange = findAffectedBlockRange(oldBlocks, oldFrom, oldTo);
 
-    console.log(`Affected block range: ${affectedBlockRange[0]} to ${affectedBlockRange[1] ?? "the end"}`);
+    if (DEBUG) console.log(`Affected block range: ${affectedBlockRange[0]} to ${affectedBlockRange[1] ?? "the end"}`);
 
     // Add the affected blocks to the set.
     for (let i = affectedBlockRange[0] ?? 0, n = affectedBlockRange[1] ?? oldBlocks.length; i < n; i++) {
@@ -209,7 +223,7 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
       }
 
       if (extendedFrom === reparseFrom && extendedTo === reparseTo) break;
-      console.log(`Expanding re-parse span: ${reparseFrom}-${reparseTo} -> ${extendedFrom}-${extendedTo}`);
+      if (DEBUG) console.log(`Expanding re-parse span: ${reparseFrom}-${reparseTo} -> ${extendedFrom}-${extendedTo}`);
       reparseFrom = extendedFrom;
       reparseTo = extendedTo;
     }
@@ -218,14 +232,14 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
 
     const newBlocks = detectBlocksWithinRange(syntaxTree(tr.state), tr.state.doc, reparseFrom, reparseTo);
 
-    console.log("New blocks from reparsed range:", newBlocks);
+    if (DEBUG) console.log("New blocks from reparsed range:", newBlocks);
 
     // Add new blocks to the heap, which sorts blocks by their `from` position.
     for (let i = 0, n = newBlocks.length; i < n; i++) {
       newlyCreatedBlocks.insert(newBlocks[i]!);
     }
 
-    console.groupEnd();
+    if (DEBUG) console.groupEnd();
   });
 
   // Step 2: Drain the heap into a sorted array of detected blocks. The same
@@ -256,7 +270,7 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
   // block was affected or merely superseded), so identity survives ordinary
   // typing as well as splits and merges.
 
-  console.group("Reconciling detected blocks with old blocks");
+  if (DEBUG) console.group("Reconciling detected blocks with old blocks");
 
   /** Indices of old blocks that overlap some detected block. */
   const superseded = new Set<number>();
@@ -275,7 +289,7 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
     }
   }
 
-  console.groupEnd();
+  if (DEBUG) console.groupEnd();
 
   // Step 4: Combine the surviving old blocks and the reconciled blocks. Both
   // arrays are sorted, so this is a plain merge. Old blocks survive only if
@@ -308,7 +322,7 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
   // blocks so identity and attributes still survive.
   let finalBlocks = newBlocks;
   if (!blocksMatchTree(syntaxTree(tr.state), newBlocks)) {
-    console.log("Merged blocks do not match the tree; falling back to a full re-detect");
+    if (DEBUG) console.log("Merged blocks do not match the tree; falling back to a full re-detect");
     const fullDetected = detectBlocksWithinRange(syntaxTree(tr.state), tr.state.doc, 0, tr.state.doc.length);
     finalBlocks = reconcileDetectedBlocks(fullDetected, oldBlocks, mappedOldBlocks, tr, new Set());
   }
@@ -320,7 +334,9 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
     }
   }
 
-  console.log("New blocks:", finalBlocks);
-  console.groupEnd();
+  if (DEBUG) {
+    console.log("New blocks:", finalBlocks);
+    console.groupEnd();
+  }
   return finalBlocks;
 }
