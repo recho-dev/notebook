@@ -36,38 +36,36 @@ const width = 60;
 const height = 25;
 const columns = d3.range(width).map(() => createColumn(height));
 
-//➜              w       $  R        |       @      2         !
-//➜        j     M          &        C              m        ,
-//➜         _#   D          9 z      L         ?    Z=
-//➜         !d   `          [        *         g    g     3
-//➜         t|   [      -  BS  E     k e      u<    J :  o6      j
-//➜         I*   !      j  R$ p7     p I&D    k,      j  ?1      M
-//➜      k  j#   W O D  (      ,   > a s#     XY   9' .  XK y    )
-//➜      a  $\  *n [B   W  W   F    6[ w>  R  AOL   p j  _B U    Z
-//➜      X  /1     NX9  K      ~     7  Z /u  b_    o H ,:u=$    6
-//➜    Btb* rE a    yD  i    n ^     ks , S!  |?      &  ?$ l    a
-//➜    $ 3  @  y    ro  9       b    Oh ! I-  ^7      x  =t     X
-//➜    8 n  <  F    8ZG -       +    8i 2 .j  j       bx ,tf     G
-//➜    _ 8  t  3    GH& T u           S K y   M   !   Ln 45Y   K L
-//➜    }    d  ca   @ h   4           T 7 6   T   (   !y_hx7   P r
-//➜    u    i  /    FH0   =      K    v P     `   e   <[ XjD  <6 u
-//➜   M%    V  {    vg    |      V    4 q     7 [ R   ;   [@  =; \
-//➜    R       y    [:    }      ) `v S       [ %     /   g-  u= 3
-//➜    g       $    UH    g      & rD @       b H     =    o  4+ R
-//➜    9       g    96           W c  ~         t          *  mq
-//➜            ;    vI           )    p          \             M
-//➜            )    wc           A                 ~
-//➜                  d           _          =      D
-//➜                  `           ~          q      #
-//➜                  |           m                 e
-//➜                  e           W                 ^
+//➜   B           X   ?l
+//➜    R      D        P
+//➜    ;      &        L     S             E           B
+//➜    s      F  V   ) :0                   ; I       -   Q      ?
+//➜    i         g  e  l    s     Y y    G  I:z       8   U      A
+//➜    S         <  8  L   (        O    D  J )     > n   W      G
+//➜       {    Z t  n  f  ,       w " 2g T  W Y   ,;M      T     4
+//➜            g u We  &     8  I3u n  u u   nJ   #z<    2   @   {
+//➜       S)   7 @7p-  r  \  f  K E.J    e'  /Oo  Su        u+   ^
+//➜       1 |  c c~NM  '  ~E  CyE   5    '   )5   Ui }  .    t   d
+//➜       . J  ( `q?   ^ 3ci    7   *   'W   h#  (@> Z  >    !   t
+//➜         Y     }to  O -@i    B   S   [8   uw  };  }  b    r  4*
+//➜               ~)B    3&^    ?b  l9  +    58  U"  v  h    N  BL
+//➜               5D"    J      ve  Nr  4    }>  f-     '    ,  vJ
+//➜               :u*    A      {   Fw  $     K  <u     H    2/ ic
+//➜        r       h     3      v   [s  N     d  -[     sX   '   n
+//➜      W b       B     H      k   .`  {  B     %S     /_ j -
+//➜      + "    O        *  '       Eh  6  f     [.     La / G
+//➜      L v    v       \'  p  8    7i  '  {     Pa     l' G *
+//➜      Y p    T       2K  <  |     _  ! I\     %       9 ] ^
+//➜      + B    !       )p  v  E     S  ^ km     D       y %
+//➜     bt      Q       A5  T  j   H U  F Z/     X       n ]
+//➜     #@              .J  N  H   ? o    ]      l         8
+//➜     m               to  X  |   ] _    <      S         Y
+//➜                     *~  q  K   `      n      ~         3
 {
   frame;
 
-  // Create a new buffer.
   const buffer = d3.range(width * height).map(() => " ");
 
-  // Update all columns.
   for (let i = columns.length - 1; i >= 0; --i) {
     const column = columns[i];
     const {lifespan, length, chars} = column;
@@ -81,7 +79,10 @@ const columns = d3.range(width).map(() => createColumn(height));
     column.lifespan -= 1;
   }
 
-  // Update the buffer.
+  echo(write(buffer, columns));
+}
+
+function write(buffer, columns) {
   for (let i = 0; i < columns.length; ++i) {
     const column = columns[i];
     const {y, chars} = column;
@@ -94,12 +95,13 @@ const columns = d3.range(width).map(() => createColumn(height));
     for (let j = 0; j < width; ++j) output += buffer[i * width + j];
     output += i === height - 1 ? "" : "\n";
   }
+
   output = output
     .split("\n")
     .map((d) => "  " + d)
     .join("\n");
 
-  echo(output);
+  return output;
 }
 
 function createColumn(height) {
@@ -107,7 +109,7 @@ function createColumn(height) {
   const length = d3.randomInt(lifespan)();
   const chars = d3.range(length).map(randomChar);
   const y = d3.randomInt(0, 10)();
-  return {lifespan, chars, y};
+  return {lifespan, chars, length, y};
 }
 
 function randomChar() {
