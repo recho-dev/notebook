@@ -308,8 +308,7 @@ export class App {
         const lastErr = this.lastErrorAfter(this.runErrorCountAtStart);
         const sinceError = lastErr ? now - lastErr.ts : Infinity;
         if (sinceStart > SETTLE_MS && sinceChange > SETTLE_MS && sinceError > SETTLE_MS) {
-          const seenErrors = this.console.length - this.runErrorCountAtStart > 0;
-          this.runState = seenErrors ? (this.lastErrorIsTimeout() ? "timeout" : "error") : "success";
+          this.runState = lastErr ? (this.lastErrorIsTimeout() ? "timeout" : "error") : "success";
           this.runFinishTs = now;
           this.dirty = true;
         }
