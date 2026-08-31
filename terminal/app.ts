@@ -1312,8 +1312,16 @@ export class App {
           this.flash("Rename failed: target already exists", 3000);
           return;
         }
-        if (current && fs.existsSync(current)) fs.renameSync(current, target);
+        // Write the target first, then remove the old file — a failed write
+        // must leave the original path (and this.path) intact. Also survives
+        // cross-device targets, which fs.rename cannot.
         this.saveToPath(target);
+        try {
+          if (current && fs.existsSync(current)) fs.rmSync(current);
+        } catch (e) {
+          this.flash("Renamed, but couldn't remove " + path.basename(current!) + ": " + errorMessage(e), 3000);
+          return;
+        }
         this.flash("Renamed to " + path.basename(target), 2200);
       } catch (e) {
         this.flash("Rename failed: " + errorMessage(e), 3000);
