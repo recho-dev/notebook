@@ -794,7 +794,7 @@ export class App {
 
   drawHeader() {
     const title = " Recho · " + (this.path ? path.basename(this.path) : "untitled.recho.js");
-    const headerStyle = bg(234) + fg(COLORS.title);
+    const headerStyle = bg(COLORS.chromeBg) + fg(COLORS.title);
     this.grid.fillRect(0, 0, 1, this.cols, " ", headerStyle);
     this.grid.writeStyled(0, 0, headerStyle + bold + title + reset, headerStyle);
 
@@ -893,7 +893,7 @@ export class App {
           const x0 = GUTTER + Math.max(0, a);
           const x1 = GUTTER + Math.max(0, b);
           if (x1 > x0) {
-            const overlayStyle = bg(COLORS.selBg) + fg(255);
+            const overlayStyle = bg(COLORS.selBg) + fg(COLORS.selFg);
             // Keep the existing characters, just override style.
             const cols = Math.min(box.right, x1) - x0;
             for (let c = 0; c < cols; c++) {
@@ -923,7 +923,7 @@ export class App {
     const divStyle = fg(COLORS.border);
     this.grid.fillRect(this.rows - FOOTER_ROWS, 0, this.rows - FOOTER_ROWS + 1, this.cols, "─", divStyle);
     const status = this.buildStatusLine();
-    const statusStyle = bg(234) + fg(COLORS.status);
+    const statusStyle = bg(COLORS.chromeBg) + fg(COLORS.status);
     this.grid.fillRect(this.rows - 1, 0, this.rows, this.cols, " ", statusStyle);
     this.grid.writeStyled(this.rows - 1, 0, statusStyle + status + reset, statusStyle);
   }
@@ -1128,7 +1128,7 @@ export class App {
     // Interior columns run left+1 .. left+width-2; everything drawn inside
     // the box must stay within them or it eats the frame.
     const innerW = box.width - 2;
-    const inside = bg(233);
+    const inside = bg(COLORS.modalBg);
     const queryLine = box.top + 2;
     this.grid.writeStyled(
       queryLine,
@@ -1155,7 +1155,7 @@ export class App {
       const display = formatExampleName(name);
       const selected = idx === this.activeModal.index;
       const rowBg = selected ? bg(COLORS.selBg) : inside;
-      const style = selected ? rowBg + fg(255) + bold : rowBg + fg(COLORS.fg);
+      const style = selected ? rowBg + fg(COLORS.selFg) + bold : rowBg + fg(COLORS.fg);
       const arrow = selected ? rowBg + fg(COLORS.hot) + "▸ " : rowBg + "  ";
       // Exactly innerW visible cells starting at the first interior column,
       // so the row fills the box without touching either border.
@@ -1210,7 +1210,7 @@ export class App {
     const top = Math.max(2, Math.floor((this.rows - h) / 2));
     const box = {top, left, width: w, height: h};
     drawBox(this.grid, box, " " + this.activeModal.title + " ", COLORS);
-    const inside = bg(233);
+    const inside = bg(COLORS.modalBg);
     this.grid.writeStyled(top + 2, left + 2, inside + fg(COLORS.dimText) + "value: " + reset, "");
     this.grid.writeStyled(
       top + 3,
@@ -1457,10 +1457,10 @@ export class App {
 
   drawHelpModal() {
     const layout = this.helpLayout();
-    const frameStyle = bg(233) + fg(COLORS.fg);
+    const frameStyle = bg(COLORS.modalBg) + fg(COLORS.fg);
     this.grid.fillRect(0, 0, this.rows, this.cols, " ", frameStyle);
 
-    const headerStyle = bg(234) + fg(COLORS.title);
+    const headerStyle = bg(COLORS.chromeBg) + fg(COLORS.title);
     this.grid.fillRect(0, 0, 1, this.cols, " ", headerStyle);
     this.grid.writeStyled(0, 0, headerStyle + bold + " Recho · Tutorials " + reset, headerStyle);
     const back = this.helpBackButtonBounds();
@@ -1475,7 +1475,7 @@ export class App {
     this.drawHelpOutline(layout);
     this.drawHelpContent(layout);
 
-    const footerStyle = bg(234) + fg(COLORS.status);
+    const footerStyle = bg(COLORS.chromeBg) + fg(COLORS.status);
     this.grid.fillRect(this.rows - 1, 0, this.rows, this.cols, " ", footerStyle);
     const helpLine =
       ` ${fg(COLORS.hot)}↑/↓${reset} outline · ${fg(COLORS.hot)}PgUp/PgDn${reset} scroll · ` +
@@ -1502,7 +1502,7 @@ export class App {
         entry.kind === "group"
           ? fg(entry.selectable ? COLORS.title : COLORS.dimText) + bold
           : fg(entry.selectable ? COLORS.fg : COLORS.dimText);
-      const selectedStyle = selected ? bg(COLORS.selBg) + fg(255) + bold : baseStyle;
+      const selectedStyle = selected ? bg(COLORS.selBg) + fg(COLORS.selFg) + bold : baseStyle;
       const prefix = selected ? fg(COLORS.hot) + "▸ " + reset : "  ";
       const indent = "  ".repeat(entry.depth);
       const width = Math.max(1, layout.outlineRight - 4);
@@ -1725,7 +1725,7 @@ function drawBox(grid: scr.Grid, box: Box, title: string, palette: typeof COLORS
   const right = left + width - 1;
   const bottom = top + height - 1;
   const border = fg(palette.borderHi);
-  const inside = bg(233);
+  const inside = bg(COLORS.modalBg);
   // Fill background
   grid.fillRect(top, left, top + height, left + width, " ", inside);
   // Borders
@@ -1745,7 +1745,7 @@ function drawBox(grid: scr.Grid, box: Box, title: string, palette: typeof COLORS
   if (title) {
     const t = " " + title + " ";
     const tcol = left + 2;
-    grid.writeStyled(top, tcol, bg(233) + fg(palette.title) + bold + t + reset, "");
+    grid.writeStyled(top, tcol, bg(COLORS.modalBg) + fg(palette.title) + bold + t + reset, "");
   }
 }
 

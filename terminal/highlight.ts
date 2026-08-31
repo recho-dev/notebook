@@ -6,8 +6,9 @@
 import {fg, italic, reset, bold} from "./screen.ts";
 import {OUTPUT_PREFIX, ERROR_PREFIX} from "../runtime/output.js";
 
-// Theme palette (256-color indices).
-const C = {
+// Theme palettes (256-color indices). DARK is the default; setTheme swaps
+// the palette in place so every `COLORS.x` reference picks up the change.
+const DARK = {
   fg: 252,
   comment: 244,
   keyword: 175,
@@ -30,7 +31,47 @@ const C = {
   cursorLineBg: 236,
   marker: 110,
   hot: 209,
+  chromeBg: 234,
+  modalBg: 233,
+  selFg: 255,
 };
+
+// Dark-on-light equivalents, tuned for contrast on white-ish backgrounds
+// (the light analogs of the dark values — e.g. number 222 is a pale yellow
+// that vanishes on white, so it becomes a mid-brown).
+const LIGHT: typeof DARK = {
+  fg: 235,
+  comment: 59,
+  keyword: 125,
+  string: 64,
+  number: 130,
+  fn: 25,
+  punct: 240,
+  output: 28, // green
+  error: 160, // red
+  output_dim: 65,
+  ln: 249,
+  lnActive: 238,
+  border: 250,
+  borderHi: 244,
+  title: 235,
+  status: 238,
+  dimText: 102,
+  panelBg: 255,
+  selBg: 153,
+  cursorLineBg: 254,
+  marker: 25,
+  hot: 166,
+  chromeBg: 252,
+  modalBg: 255,
+  selFg: 235,
+};
+
+const C = {...DARK};
+
+export function setTheme(theme: "dark" | "light") {
+  Object.assign(C, theme === "light" ? LIGHT : DARK);
+}
 
 export const COLORS = C;
 export type ColorName = keyof typeof C;

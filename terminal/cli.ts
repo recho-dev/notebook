@@ -12,6 +12,8 @@ import fs from "node:fs";
 import path from "node:path";
 import {fileURLToPath} from "node:url";
 import {App} from "./app.ts";
+import {setTheme} from "./highlight.ts";
+import {detectTerminalTheme} from "./theme.ts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
@@ -34,7 +36,7 @@ for (let i = 1; i <= 5; i++) {
 // Press ^N for a new empty file, ^T to rename the current file.
 `;
 
-function main() {
+async function main() {
   const args = process.argv.slice(2);
   let initialPath = null;
   let initialCode = DEFAULT_CODE;
@@ -61,6 +63,10 @@ function main() {
     process.exit(1);
   }
 
+  // Match the terminal's background before the first paint (set RECHO_THEME
+  // to light/dark to override the detection).
+  setTheme(await detectTerminalTheme());
+
   const app = new App({initialPath, initialCode, examplesDir, docsDir});
   app.start();
 }
@@ -80,8 +86,11 @@ function printHelp() {
       "  ^W  save       ^T  rename file   ^L  console",
       "  ^K  help       ^Q  quit",
       "",
+      "Theme: auto-detected from the terminal background;",
+      "set RECHO_THEME=light or RECHO_THEME=dark to override.",
+      "",
     ].join("\n"),
   );
 }
 
-main();
+await main();
