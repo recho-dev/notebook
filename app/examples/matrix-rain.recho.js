@@ -72,7 +72,7 @@ const columns = d3.range(width).map(() => createColumn(height));
     const n = chars.length;
     if (lifespan < 0) columns[i] = createColumn(height);
     else if (lifespan <= n) chars[n - lifespan] = " ";
-    else if (lifespan) {
+    else {
       for (let j = length - 1; j < n; ++j) chars[j] = randomChar();
       chars.push(randomChar());
     }
