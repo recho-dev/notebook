@@ -67,14 +67,36 @@ export class Buffer {
     return Math.max(start, Math.min(start + col, end));
   }
 
-  // Apply an array of CodeMirror-style change specs in document order. The
-  // cursor is mapped through the changes (associativity = right).
+  // Apply an array of CodeMirror-style change specs in document order.
+  // Positions outside the changed ranges are mapped through (associativity =
+  // right). A cursor/anchor *inside* a replaced range is restored at the
+  // same row/column relative to that range instead of being clamped to its
+  // end — so the cursor can rest inside live runtime output (animated //➜
+  // blocks are rewritten every frame) without being kicked out.
   applyChanges(changes: ChangeSpec[]) {
     // Sort by `from` ascending, with delete-only first to keep ordering
     // deterministic. Runtime emits non-overlapping changes.
     const sorted = changes
-      .map((c) => ({from: c.from, to: c.to ?? c.from, insert: c.insert ?? ""}))
+      .map((c) => ({from: c.from, to: c.to ?? c.from, insert: c.insert ?? "", newFrom: c.from}))
       .sort((a, b) => a.from - b.from);
+
+    // Record where a position sits inside a replaced range (rows down from
+    // the range start, column within its line), in pre-change coordinates.
+    const relocate = (pos: number) => {
+      for (const c of sorted) {
+        if (pos > c.from && pos < c.to) {
+          const seg = this.text.slice(c.from, pos);
+          const lastNl = seg.lastIndexOf("\n");
+          let row = 0;
+          for (let i = 0; i < seg.length; i++) if (seg[i] === "\n") row++;
+          return {change: c, row, col: lastNl === -1 ? seg.length : seg.length - lastNl - 1};
+        }
+      }
+      return null;
+    };
+    const cursorRel = relocate(this.cursor);
+    const anchorRel = this.anchor !== null ? relocate(this.anchor) : null;
+
     let offset = 0;
     let text = this.text;
     let cursor = this.cursor;
@@ -82,12 +104,34 @@ export class Buffer {
     for (const c of sorted) {
       const from = c.from + offset;
       const to = c.to + offset;
+      c.newFrom = from;
       text = text.slice(0, from) + c.insert + text.slice(to);
       const delta = c.insert.length - (to - from);
       cursor = mapPos(cursor, from, to, c.insert.length, delta);
       if (anchor !== null) anchor = mapPos(anchor, from, to, c.insert.length, delta);
       offset += delta;
     }
+
+    // Re-place relocated positions at the same row/col within the inserted
+    // text, clamped to its extent.
+    const restore = (rel: NonNullable<ReturnType<typeof relocate>>): number => {
+      const ins = rel.change.insert;
+      // Exclude a trailing newline so clamping lands inside the insertion's
+      // last real line rather than just past it (on the next line's start).
+      const end = ins.endsWith("\n") ? ins.length - 1 : ins.length;
+      let lineStart = 0;
+      for (let row = 0; row < rel.row; row++) {
+        const nl = ins.indexOf("\n", lineStart);
+        if (nl === -1 || nl >= end) break;
+        lineStart = nl + 1;
+      }
+      const nl = ins.indexOf("\n", lineStart);
+      const lineEnd = nl === -1 || nl > end ? end : nl;
+      return rel.change.newFrom + Math.min(lineStart + rel.col, lineEnd);
+    };
+    if (cursorRel) cursor = restore(cursorRel);
+    if (anchorRel) anchor = restore(anchorRel);
+
     this.text = text;
     this.cursor = cursor;
     this.anchor = anchor;

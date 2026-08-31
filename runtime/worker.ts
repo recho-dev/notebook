@@ -137,7 +137,11 @@ function bootRuntime(code: string, options?: RuntimeOptions) {
       rt = createRuntime(code, {
         compileCell: createVmCellCompiler({cellTimeoutMs: options?.cellTimeoutMs}),
       }) as RuntimeInstance;
-      rt.onChanges((evt) => safePost({type: "changes", changes: evt.changes}));
+      rt.onChanges((evt) => {
+        // Trimmed-away no-op frames dispatch empty change lists (effects
+        // don't survive the thread boundary anyway) — skip the IPC.
+        if (evt.changes.length) safePost({type: "changes", changes: evt.changes});
+      });
       rt.onError((evt) => safePost({type: "error", error: serializeError(evt.error), source: evt.source || "runtime"}));
       rt.setIsRunning(true);
       try {

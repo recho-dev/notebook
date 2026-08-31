@@ -53,6 +53,25 @@ function safeEval(code, inputs, __setEcho__, compileCell) {
   }
 }
 
+// Narrow a change spec to the part that actually differs from the old text:
+// drop the common prefix and suffix of the replaced range and its
+// replacement. Returns null when they are identical (no edit needed).
+// Exported for tests.
+export function trimChange(oldText, change) {
+  const from = change.from;
+  const to = change.to ?? change.from;
+  const insert = change.insert ?? "";
+  const old = oldText.slice(from, to);
+  if (old === insert) return null;
+  const max = Math.min(old.length, insert.length);
+  let p = 0;
+  while (p < max && old[p] === insert[p]) p++;
+  let s = 0;
+  while (s < max - p && old[old.length - 1 - s] === insert[insert.length - 1 - s]) s++;
+  if (p === 0 && s === 0) return change;
+  return {from: from + p, to: to - s, insert: insert.slice(p, insert.length - s)};
+}
+
 function debounce(fn, delay = 0) {
   let timeout;
   return (...args) => {
@@ -143,9 +162,21 @@ export function createRuntime(initialCode, options = {}) {
     blocks.sort((a, b) => a.from - b.from);
 
     // Attach block positions and attributes as effects to the transaction.
+    // Blocks are computed from the untrimmed changes above, so trimming
+    // below cannot disturb their ranges.
     const effects = [blockMetadataEffect.of(blocks)];
 
-    dispatch(changes, effects);
+    // Shrink each replacement to the span that actually differs from the
+    // current text. Re-echoing an unchanged frame then dispatches no change
+    // at all, and animations touch only the region that moved — which keeps
+    // editor churn (and the cursor remapping that comes with it) minimal.
+    const trimmed = [];
+    for (const c of changes) {
+      const t = trimChange(code, c);
+      if (t) trimmed.push(t);
+    }
+
+    dispatch(trimmed, effects);
   }, 0);
 
   function setCode(newCode) {
