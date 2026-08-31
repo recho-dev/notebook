@@ -73,6 +73,9 @@ function errorStackOrMessage(error: unknown): string {
 
 export class App {
   path: string | null;
+  // Filename suggested for the save prompt while the buffer is untitled
+  // (set when browsing bundled examples, which must not be saved in place).
+  suggestedName: string | null;
   examplesDir: string | null;
   docsDir: string | null;
   helpDocs: HelpDocs | null;
@@ -114,6 +117,7 @@ export class App {
 
   constructor({initialPath, initialCode, examplesDir, docsDir = null}: AppOptions) {
     this.path = initialPath;
+    this.suggestedName = null;
     this.examplesDir = examplesDir;
     this.docsDir = docsDir;
     this.helpDocs = null;
@@ -799,7 +803,7 @@ export class App {
   }
 
   drawHeader() {
-    const title = " Recho · " + (this.path ? path.basename(this.path) : "untitled.recho.js");
+    const title = " Recho · " + (this.path ? path.basename(this.path) : (this.suggestedName ?? "untitled.recho.js"));
     const headerStyle = bg(COLORS.chromeBg) + fg(COLORS.title);
     this.grid.fillRect(0, 0, 1, this.cols, " ", headerStyle);
     this.grid.writeStyled(0, 0, headerStyle + bold + title + reset, headerStyle);
@@ -1124,7 +1128,10 @@ export class App {
     const file = path.join(this.examplesDir, name);
     try {
       const code = fs.readFileSync(file, "utf8");
-      this.path = file;
+      // Examples are read-only templates — leave the buffer untitled so ^S
+      // prompts for a location instead of overwriting the bundled file.
+      this.path = null;
+      this.suggestedName = name;
       this.buffer = new DocumentBuffer(code);
       this.scrollY = 0;
       this.scrollX = 0;
@@ -1253,6 +1260,7 @@ export class App {
   newFile() {
     this.runtime?.setIsRunning(false);
     this.path = null;
+    this.suggestedName = null;
     this.buffer = new DocumentBuffer("");
     this.scrollY = 0;
     this.scrollX = 0;
@@ -1268,6 +1276,7 @@ export class App {
       try {
         const code = fs.readFileSync(p, "utf8");
         this.path = path.resolve(p);
+        this.suggestedName = null;
         this.buffer = new DocumentBuffer(code);
         this.scrollY = 0;
         this.scrollX = 0;
@@ -1283,10 +1292,11 @@ export class App {
   saveToPath(filePath: string) {
     fs.writeFileSync(filePath, this.buffer.text, "utf8");
     this.path = path.resolve(filePath);
+    this.suggestedName = null;
   }
 
   savePrompt() {
-    this.inputPrompt("Save to", this.path || "untitled.recho.js", (p) => {
+    this.inputPrompt("Save to", this.path || this.suggestedName || "untitled.recho.js", (p) => {
       if (!p) return;
       try {
         this.saveToPath(p);
@@ -1299,7 +1309,7 @@ export class App {
   }
 
   renamePrompt() {
-    this.inputPrompt("Rename file", this.path || "untitled.recho.js", (p) => {
+    this.inputPrompt("Rename file", this.path || this.suggestedName || "untitled.recho.js", (p) => {
       if (!p) return;
       const target = path.resolve(p);
       const current = this.path ? path.resolve(this.path) : null;
