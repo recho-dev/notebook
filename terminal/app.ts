@@ -97,6 +97,9 @@ export class App {
   runStartTs: number;
   runErrorCountAtStart: number;
   lastChangeTs: number;
+  // Timestamps of recent runtime change batches (pruned to the last second)
+  // — their count is the animation frame rate shown in the header.
+  changeTimes: number[];
   runFinishTs: number;
   spinnerFrame: number;
   editorRowMap: Map<number, {pos: number; line: number}>;
@@ -141,6 +144,7 @@ export class App {
     this.runStartTs = 0;
     this.runErrorCountAtStart = 0;
     this.lastChangeTs = 0;
+    this.changeTimes = [];
     this.runFinishTs = 0;
     this.spinnerFrame = 0;
     this.editorRowMap = new Map(); // screen row -> {pos, line}
@@ -388,6 +392,8 @@ export class App {
       this.buffer.applyChanges(changes);
       runtime.setCode(this.buffer.text);
       this.lastChangeTs = Date.now();
+      this.changeTimes.push(this.lastChangeTs);
+      while (this.changeTimes.length && this.changeTimes[0] < this.lastChangeTs - 1000) this.changeTimes.shift();
       this.dirty = true;
     });
     runtime.onError(({error, source}) => {
@@ -829,7 +835,12 @@ export class App {
 
     const labelStyled = fg(indicatorColor) + label + reset;
     const runBtn = ` ${fg(COLORS.fg)}[ Run ^S ]${reset}`;
-    const rightInfo = `${dot} ${labelStyled} ${runBtn}`;
+    // Animation frame rate: change batches received in the last second.
+    // Shown only while output is actively streaming (entries age out fast).
+    const now = Date.now();
+    while (this.changeTimes.length && this.changeTimes[0] < now - 1000) this.changeTimes.shift();
+    const fps = this.changeTimes.length >= 2 ? `${fg(COLORS.dimText)}${this.changeTimes.length}fps${reset} ` : "";
+    const rightInfo = `${fps}${dot} ${labelStyled} ${runBtn}`;
     const rightLen = visibleLength(rightInfo);
     this.grid.writeStyled(0, this.cols - rightLen - 1, rightInfo, headerStyle);
 
