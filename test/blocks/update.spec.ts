@@ -453,8 +453,16 @@ describe("updateBlocks fuzzing", () => {
     }
   }
 
-  it("matches a full re-detect after every random edit (seed 1)", () => fuzz(1, 150));
-  it("matches a full re-detect after every random edit (seed 2)", () => fuzz(2, 150));
-  it("matches a full re-detect after every random edit (seed 3)", () => fuzz(3, 150));
-  it("matches a full re-detect after every random edit (seed 4)", () => fuzz(4, 150));
+  // Seed count and steps per seed are configurable for deeper sweeps, e.g.
+  // before a release or after touching updateBlocks:
+  //
+  //   FUZZ_SEEDS=60 FUZZ_STEPS=250 pnpm test:fuzz
+  //
+  // The defaults keep the regular test run fast.
+  const SEEDS = Number(process.env.FUZZ_SEEDS ?? 4);
+  const STEPS = Number(process.env.FUZZ_STEPS ?? 150);
+
+  for (let seed = 1; seed <= SEEDS; seed++) {
+    it(`matches a full re-detect after every random edit (seed ${seed}, ${STEPS} steps)`, () => fuzz(seed, STEPS));
+  }
 });
