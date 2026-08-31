@@ -17,7 +17,7 @@ import {fg, bg, reset, bold, padToWidth, truncateToWidth, visibleLength} from ".
 
 const HEADER_ROWS = 2;
 const FOOTER_ROWS = 2;
-const GUTTER = 5; // " 123 "
+const GUTTER = 6; // " 123│ " — line number, gutter border, padding
 
 type RunState = "idle" | "running" | "success" | "error" | "timeout";
 type ConsoleEntry = {ts: number; level: string; text: string; count: number};
@@ -863,18 +863,19 @@ export class App {
       const line = this.scrollY + i;
       if (line >= this.buffer.lineCount) {
         // Empty filler row, render a soft tilde gutter
-        this.grid.writeStyled(screenRow, 0, fg(COLORS.ln) + "    ~ " + reset, "");
+        this.grid.writeStyled(screenRow, 0, fg(COLORS.ln) + "   ~" + fg(COLORS.border) + "│ " + reset, "");
         continue;
       }
       this.editorRowMap.set(screenRow, {line, pos: this.buffer.lineStarts[line]});
       const isCursorLine = line === cRow;
       const text = this.buffer.lineText(line);
 
-      // Gutter: line number, right-aligned in (GUTTER-1) chars + 1 space padding.
+      // Gutter: line number right-aligned in (GUTTER-2) chars, then the
+      // gutter border and one space of padding.
       const lnText = String(line + 1);
-      const lnPad = " ".repeat(Math.max(0, GUTTER - 1 - lnText.length));
+      const lnPad = " ".repeat(Math.max(0, GUTTER - 2 - lnText.length));
       const lnStyle = fg(isCursorLine ? COLORS.lnActive : COLORS.ln);
-      const gutter = lnPad + lnStyle + lnText + reset + " ";
+      const gutter = lnPad + lnStyle + lnText + reset + fg(COLORS.border) + "│" + reset + " ";
       this.grid.writeStyled(screenRow, 0, gutter, "");
 
       // Source line content (with horizontal scroll).

@@ -46,7 +46,7 @@ describe("terminal highlighting", () => {
     app.drawEditor();
 
     const row = 2;
-    const chars = app.grid.cells.slice(row * app.cols, row * app.cols + 6).map((cell) => cell.ch);
-    expect(chars.join("")).toBe("   1 n");
+    const chars = app.grid.cells.slice(row * app.cols, row * app.cols + 7).map((cell) => cell.ch);
+    expect(chars.join("")).toBe("   1│ n");
   });
 });
