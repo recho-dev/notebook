@@ -9,6 +9,7 @@ import {createWorkerRuntime} from "./workerRuntime.ts";
 import type {WorkerRuntime} from "./workerRuntime.ts";
 import {Buffer as DocumentBuffer} from "./buffer.ts";
 import {highlightLine, nextHighlightState, COLORS} from "./highlight.ts";
+import {OUTPUT_PREFIX, ERROR_PREFIX} from "../runtime/output.js";
 import {loadHelpDocs} from "./docs.ts";
 import type {HelpDocs} from "./docs.ts";
 import * as scr from "./screen.ts";
@@ -869,6 +870,17 @@ export class App {
       const styled = highlightLine(text, highlightState);
       writeStyledClipped(this.grid, screenRow, GUTTER - this.scrollX, styled, GUTTER, box.right);
       highlightState = nextHighlightState(text, highlightState);
+
+      // Written-back output lines (//➜ and //✗) get a subtle background so
+      // they read as runtime output rather than source. Applied before the
+      // cursor-line overlay so the cursor line stays distinguishable.
+      if (text.startsWith(OUTPUT_PREFIX) || text.startsWith(ERROR_PREFIX)) {
+        const outBg = bg(COLORS.outputBg);
+        for (let c = GUTTER; c < box.right; c++) {
+          const cell = this.grid.cells[screenRow * this.cols + c];
+          if (cell) cell.style = cell.style + outBg;
+        }
+      }
 
       // Cursor-line subtle background overlay — appended to each cell's
       // style so the bg wins even when the highlighted token's style
