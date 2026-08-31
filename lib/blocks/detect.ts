@@ -12,15 +12,25 @@ type Tree = ReturnType<typeof syntaxTree>;
 type SyntaxNode = Tree["topNode"];
 
 /**
+ * Classify the given line text as a `//➜` output line, a `//✗` error line, or
+ * neither. This is a purely textual check: every real mark line is classified
+ * correctly, but a line matching here is not necessarily a top-level comment
+ * (it could sit inside a template literal, for example).
+ */
+export function markLineType(text: string): "output" | "error" | null {
+  if (!text.startsWith("//")) return null;
+  const codePoint = text.codePointAt(2);
+  if (codePoint === OUTPUT_MARK_CODE_POINT) return "output";
+  if (codePoint === ERROR_MARK_CODE_POINT) return "error";
+  return null;
+}
+
+/**
  * Check whether the given line text looks like a `//➜` output or `//✗` error
- * comment produced by the runtime. This is a purely textual check: every real
- * mark line satisfies it, but a line satisfying it is not necessarily a
- * top-level comment (it could sit inside a template literal, for example).
+ * comment produced by the runtime.
  */
 export function isMarkLineText(text: string): boolean {
-  if (!text.startsWith("//")) return false;
-  const codePoint = text.codePointAt(2);
-  return codePoint === OUTPUT_MARK_CODE_POINT || codePoint === ERROR_MARK_CODE_POINT;
+  return markLineType(text) !== null;
 }
 
 /**

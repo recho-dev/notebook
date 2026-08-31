@@ -2,7 +2,6 @@ import {Transaction} from "@codemirror/state";
 import {blockRangeLength, findAffectedBlockRange} from "../../lib/blocks.ts";
 import {blocksMatchTree, detectBlocksWithinRange, isMarkLineText, topLevelCoverage} from "../../lib/blocks/detect.ts";
 import {syntaxTree} from "@codemirror/language";
-import {MaxHeap} from "../../lib/containers/heap.ts";
 import {BlockMetadata} from "./BlockMetadata.ts";
 
 /**
@@ -141,10 +140,12 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
    */
   const damageRanges: {from: number; to: number}[] = [];
 
-  const newlyCreatedBlocks = new MaxHeap<BlockMetadata>(
-    (block) => block.from,
-    (a, b) => b - a,
-  );
+  /**
+   * Blocks detected in the re-parsed spans. Each re-parse produces blocks in
+   * document order; only a transaction with several changed ranges can make
+   * the collected runs interleave, so a single sort afterwards suffices.
+   */
+  const newlyCreatedBlocks: BlockMetadata[] = [];
 
   // Process changed ranges one by one, because ranges are disjoint.
   tr.changes.iterChanges((oldFrom, oldTo, newFrom, newTo) => {
@@ -234,26 +235,22 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
 
     if (DEBUG) console.log("New blocks from reparsed range:", newBlocks);
 
-    // Add new blocks to the heap, which sorts blocks by their `from` position.
-    for (let i = 0, n = newBlocks.length; i < n; i++) {
-      newlyCreatedBlocks.insert(newBlocks[i]!);
-    }
+    newlyCreatedBlocks.push(...newBlocks);
 
     if (DEBUG) console.groupEnd();
   });
 
-  // Step 2: Drain the heap into a sorted array of detected blocks. The same
-  // statement can be detected twice when the re-parse spans of two changed
-  // ranges overlap, so drop blocks that repeat the previous source range.
-  // Of two detections of the same statement, the one carrying an output range
-  // has the smaller `from` and thus comes out of the heap first — it is the
-  // one we keep.
+  // Step 2: Sort the detected blocks by position. The same statement can be
+  // detected twice when the re-parse spans of two changed ranges overlap, so
+  // drop blocks that repeat the previous source range. Of two detections of
+  // the same statement, the one carrying an output range has the smaller
+  // `from` and thus comes first — it is the one we keep.
+
+  newlyCreatedBlocks.sort((a, b) => a.from - b.from);
 
   const detectedBlocks: BlockMetadata[] = [];
 
-  while (newlyCreatedBlocks.nonEmpty()) {
-    const block = newlyCreatedBlocks.peek;
-    newlyCreatedBlocks.extractMax();
+  for (const block of newlyCreatedBlocks) {
     const last = detectedBlocks[detectedBlocks.length - 1];
     if (last !== undefined && last.source.from === block.source.from && last.source.to === block.source.to) {
       continue;

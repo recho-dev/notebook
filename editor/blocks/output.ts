@@ -1,10 +1,7 @@
 import {Decoration, ViewPlugin, ViewUpdate, EditorView, type DecorationSet} from "@codemirror/view";
 import {syntaxTree} from "@codemirror/language";
 import {StateField, RangeSetBuilder, type EditorState} from "@codemirror/state";
-import {OUTPUT_MARK, ERROR_MARK} from "../../runtime/constant.js";
-
-const OUTPUT_MARK_CODE_POINT = OUTPUT_MARK.codePointAt(0)!;
-const ERROR_MARK_CODE_POINT = ERROR_MARK.codePointAt(0)!;
+import {markLineType} from "../../lib/blocks/detect.ts";
 
 type OutputLine = {
   from: number;
@@ -15,24 +12,20 @@ function computeLineNumbers(state: EditorState): OutputLine[] {
   const lineNumbers: OutputLine[] = [];
   syntaxTree(state).iterate({
     enter: (node) => {
-      // Find top-level single-line comments.
-      if (node.name === "LineComment" && node.node.parent?.name === "Script") {
-        const line = state.doc.lineAt(node.from);
-        // Check if the line comment covers the entire line.
-        if (line.from !== node.from || line.to !== node.to) return;
-        if (line.text.codePointAt(2) === OUTPUT_MARK_CODE_POINT) {
-          lineNumbers.push({from: line.from, type: "output"});
-        }
-      }
+      if (node.name !== "LineComment") return;
 
-      // For error messages, it's Ok if the line is not top-level.
-      if (node.name === "LineComment") {
-        const line = state.doc.lineAt(node.from);
-        if (line.from !== node.from || line.to !== node.to) return;
-        if (line.text.codePointAt(2) === ERROR_MARK_CODE_POINT) {
-          lineNumbers.push({from: line.from, type: "error"});
-        }
-      }
+      // The comment must cover the entire line.
+      const line = state.doc.lineAt(node.from);
+      if (line.from !== node.from || line.to !== node.to) return;
+
+      const type = markLineType(line.text);
+      if (type === null) return;
+
+      // Output lines must be top-level; for error messages, it's Ok if the
+      // line is not top-level.
+      if (type === "output" && node.node.parent?.name !== "Script") return;
+
+      lineNumbers.push({from: line.from, type});
     },
   });
   return lineNumbers;
