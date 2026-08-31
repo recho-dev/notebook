@@ -18,43 +18,37 @@ export function findAdjacentBlocks(
   blocks: {from: number; to: number}[],
   pos: number,
 ): number | [number, number] | null {
-  try {
-    // console.groupCollapsed(`findAdjacentBlocks(${pos})`);
+  // We maintain a binary search range [left, right). Note that the right
+  // boundary is exclusive, i.e., the range is empty when `left === right`.
+  let left = 0;
+  let right = blocks.length;
 
-    // We maintain a binary search range [left, right). Note that the right
-    // boundary is exclusive, i.e., the range is empty when `left === right`.
-    let left = 0;
-    let right = blocks.length;
+  // When the range is non-empty.
+  while (left < right) {
+    const middle = (left + right) >>> 1;
+    const pivot = blocks[middle]!;
 
-    // When the range is non-empty.
-    while (left < right) {
-      const middle = (left + right) >>> 1;
-      const pivot = blocks[middle]!;
-
-      if (pos < pivot.from) {
-        // We should move to the left sub-range [left, middle).
-        if (left === middle) {
-          return [middle - 1, middle];
-        } else {
-          right = middle;
-        }
-      } else if (pivot.to <= pos) {
-        // We should move to the right sub-range [middle, right).
-        if (left === middle) {
-          return [middle, middle + 1];
-        } else {
-          left = middle;
-        }
+    if (pos < pivot.from) {
+      // We should move to the left sub-range [left, middle).
+      if (left === middle) {
+        return [middle - 1, middle];
       } else {
-        // Good news: `pos` is inside `pivot`.
-        return middle;
+        right = middle;
       }
+    } else if (pivot.to <= pos) {
+      // We should move to the right sub-range [middle, right).
+      if (left === middle) {
+        return [middle, middle + 1];
+      } else {
+        left = middle;
+      }
+    } else {
+      // Good news: `pos` is inside `pivot`.
+      return middle;
     }
-
-    return null;
-  } finally {
-    // console.groupEnd();
   }
+
+  return null;
 }
 
 export type BlockRange = [from: number | null, to: number | null];
@@ -71,30 +65,6 @@ export function blockRangeLength(blockCount: number, [from, to]: BlockRange): nu
       return blockCount - from;
     } else {
       return to - from;
-    }
-  }
-}
-
-/**
- * If there is only one block in the range, return its index. Otherwise, return
- * `null`.
- *
- * @param blockCount the number of blocks
- * @param param1 the range of blocks
- * @returns the range of the block
- */
-export function getOnlyOneBlock(blockCount: number, [from, to]: BlockRange): number | null {
-  if (from === null) {
-    if (to === null) {
-      return null;
-    } else {
-      return to === 1 ? 0 : null;
-    }
-  } else {
-    if (to === null) {
-      return blockCount - from === 1 ? from : null;
-    } else {
-      return to - from === 1 ? from : null;
     }
   }
 }

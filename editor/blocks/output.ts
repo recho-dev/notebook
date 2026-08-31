@@ -7,9 +7,7 @@ const OUTPUT_MARK_CODE_POINT = OUTPUT_MARK.codePointAt(0)!;
 const ERROR_MARK_CODE_POINT = ERROR_MARK.codePointAt(0)!;
 
 type OutputLine = {
-  number: number;
   from: number;
-  to: number;
   type: "output" | "error";
 };
 
@@ -23,12 +21,7 @@ function computeLineNumbers(state: EditorState): OutputLine[] {
         // Check if the line comment covers the entire line.
         if (line.from !== node.from || line.to !== node.to) return;
         if (line.text.codePointAt(2) === OUTPUT_MARK_CODE_POINT) {
-          lineNumbers.push({
-            number: line.number,
-            from: line.from,
-            to: line.to,
-            type: "output",
-          });
+          lineNumbers.push({from: line.from, type: "output"});
         }
       }
 
@@ -37,12 +30,7 @@ function computeLineNumbers(state: EditorState): OutputLine[] {
         const line = state.doc.lineAt(node.from);
         if (line.from !== node.from || line.to !== node.to) return;
         if (line.text.codePointAt(2) === ERROR_MARK_CODE_POINT) {
-          lineNumbers.push({
-            number: line.number,
-            from: line.from,
-            to: line.to,
-            type: "error",
-          });
+          lineNumbers.push({from: line.from, type: "error"});
         }
       }
     },

@@ -5,6 +5,7 @@ export type Range = {from: number; to: number};
 export class BlockMetadata {
   /**
    * Create a new `BlockMetadata` instance.
+   * @param id a unique identifier of this block
    * @param name a descriptive name of this block
    * @param output the range of the output region
    * @param source the range of the source region
