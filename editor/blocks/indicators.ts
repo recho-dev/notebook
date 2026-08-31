@@ -99,7 +99,8 @@ function findEnclosingBlock(blocks: BlockMetadata[], pos: number): number | null
     const pivot = blocks[middle];
     if (pos < pivot.from) {
       right = middle - 1;
-    } else if (pos > pivot.to) {
+    } else if (pos >= pivot.to) {
+      // The right boundary `to` is exclusive, matching `findAdjacentBlocks`.
       left = middle + 1;
     } else {
       return middle;
