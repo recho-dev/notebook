@@ -132,17 +132,29 @@ const NAMED = new Map<number, string>([
   [32, "space"],
 ]);
 
-export function parseInput(buf: string): InputEvent[] {
-  // Returns array of events and the number of bytes consumed (some bytes
-  // may remain if a sequence is partial; for simplicity we always consume
-  // everything we recognized).
+export function parseInput(buf: string, {flush = false} = {}): {events: InputEvent[]; rest: string} {
+  // Raw stdin chunks can end in the middle of an escape sequence. When that
+  // happens the unconsumed suffix is returned as `rest` so the caller can
+  // prepend it to the next chunk. With `flush: true` (no continuation ever
+  // arrived) a trailing lone ESC becomes an escape key and a truncated
+  // sequence is dropped instead of leaking bytes as text.
   const events: InputEvent[] = [];
   let i = 0;
   const s = buf;
+  const partial = () => {
+    if (flush) {
+      i = s.length;
+      return null;
+    }
+    return {events, rest: s.slice(i)};
+  };
   while (i < s.length) {
     const ch = s.charCodeAt(i);
     if (ch === 0x1b) {
-      // Escape sequences
+      // Escape sequences. A chunk ending right after ESC is ambiguous — it
+      // may be a real Escape press or the start of a sequence — so hold it
+      // until the next chunk or the flush timer decides.
+      if (i + 1 >= s.length && !flush) return partial()!;
       if (s[i + 1] === "[") {
         // CSI
         const j = i + 2;
@@ -150,7 +162,11 @@ export function parseInput(buf: string): InputEvent[] {
         if (s[j] === "<") {
           let k = j + 1;
           while (k < s.length && s[k] !== "M" && s[k] !== "m") k++;
-          if (k >= s.length) break;
+          if (k >= s.length) {
+            const r = partial();
+            if (r) return r;
+            break;
+          }
           const params = s
             .slice(j + 1, k)
             .split(";")
@@ -185,6 +201,11 @@ export function parseInput(buf: string): InputEvent[] {
         // Extract intermediate
         let k = j;
         while (k < s.length && s.charCodeAt(k) >= 0x30 && s.charCodeAt(k) <= 0x3f) k++;
+        if (k >= s.length) {
+          const r = partial();
+          if (r) return r;
+          break;
+        }
         const finalChar = s[k];
         const params = s.slice(j, k);
         const seq = "[" + params + finalChar;
@@ -195,6 +216,11 @@ export function parseInput(buf: string): InputEvent[] {
       }
       if (s[i + 1] === "O") {
         // SS3 (function keys, sometimes home/end)
+        if (i + 2 >= s.length) {
+          const r = partial();
+          if (r) return r;
+          break;
+        }
         const code = s[i + 2];
         let name: string | null = null;
         if (code === "P") name = "f1";
@@ -251,7 +277,7 @@ export function parseInput(buf: string): InputEvent[] {
     events.push({type: "text", text: s.slice(i, j)});
     i = j;
   }
-  return events;
+  return {events, rest: ""};
 }
 
 function csiToEvent(seq: string): KeyEvent | null {

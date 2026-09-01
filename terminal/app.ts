@@ -112,12 +112,18 @@ export class App {
   consoleSavedHandlers: ConsoleSavedHandlers | null;
   cellTimeoutMs: number;
   tickTimer?: NodeJS.Timeout;
+  // Unconsumed tail of a stdin chunk that ended mid-escape-sequence, and the
+  // timer that flushes it if no continuation arrives.
+  inputCarry: string;
+  inputFlushTimer: NodeJS.Timeout | null;
   cursorBlinkOn?: boolean;
   lastBlinkTs?: number;
 
   constructor({initialPath, initialCode, examplesDir, docsDir = null}: AppOptions) {
     this.path = initialPath;
     this.suggestedName = null;
+    this.inputCarry = "";
+    this.inputFlushTimer = null;
     this.examplesDir = examplesDir;
     this.docsDir = docsDir;
     this.helpDocs = null;
@@ -361,6 +367,7 @@ export class App {
   cleanup() {
     try {
       if (this.tickTimer) clearTimeout(this.tickTimer);
+      if (this.inputFlushTimer) clearTimeout(this.inputFlushTimer);
       this.runtime?.destroy?.();
       process.stdin.setRawMode?.(false);
       process.stdout.write(scr.disableMouse + scr.showCursor + scr.leaveAlt + reset);
@@ -500,15 +507,37 @@ export class App {
   // -------------------------------------------------------------------------
   // Input
   onInput(chunk: string) {
-    if (this.modal) {
-      this.onModalInput(chunk);
-    } else {
-      const events = scr.parseInput(chunk);
-      for (const ev of events) this.handleEvent(ev);
+    if (this.inputFlushTimer) {
+      clearTimeout(this.inputFlushTimer);
+      this.inputFlushTimer = null;
     }
+    const {events, rest} = scr.parseInput(this.inputCarry + chunk);
+    this.inputCarry = rest;
+    if (rest) {
+      // A split escape sequence normally completes with the next stdin
+      // chunk. If nothing follows, it was a real Escape press (or junk) —
+      // let the flush decide after a beat.
+      this.inputFlushTimer = setTimeout(() => {
+        this.inputFlushTimer = null;
+        const carry = this.inputCarry;
+        this.inputCarry = "";
+        this.dispatchInput(scr.parseInput(carry, {flush: true}).events);
+        if (this.dirty) this.render();
+      }, 50);
+    }
+    this.dispatchInput(events);
     // Render right away instead of waiting for the next tick — keeps typing
     // latency independent of the tick cadence.
     if (this.dirty) this.render();
+  }
+
+  dispatchInput(events: scr.InputEvent[]) {
+    // Route per event, not per chunk — a key mid-batch may open or close a
+    // modal, and the events after it belong to the new context.
+    for (const ev of events) {
+      if (this.modal) this.onModalInput(ev);
+      else this.handleEvent(ev);
+    }
   }
 
   handleEvent(ev: scr.InputEvent) {
@@ -1014,15 +1043,12 @@ export class App {
     if (this.activeModal.type === "confirm") return this.drawConfirmModal();
   }
 
-  onModalInput(chunk: string) {
-    const events = scr.parseInput(chunk);
-    for (const ev of events) {
-      if (this.activeModal.type === "examples") this.handleExamplesKey(ev);
-      else if (this.activeModal.type === "input") this.handleInputKey(ev);
-      else if (this.activeModal.type === "help") this.handleHelpKey(ev);
-      else if (this.activeModal.type === "console") this.handleConsoleKey(ev);
-      else if (this.activeModal.type === "confirm") this.handleConfirmKey(ev);
-    }
+  onModalInput(ev: scr.InputEvent) {
+    if (this.activeModal.type === "examples") this.handleExamplesKey(ev);
+    else if (this.activeModal.type === "input") this.handleInputKey(ev);
+    else if (this.activeModal.type === "help") this.handleHelpKey(ev);
+    else if (this.activeModal.type === "console") this.handleConsoleKey(ev);
+    else if (this.activeModal.type === "confirm") this.handleConfirmKey(ev);
   }
 
   // ---- examples picker
