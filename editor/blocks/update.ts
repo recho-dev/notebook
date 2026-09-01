@@ -205,9 +205,15 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
         extendedTo = Math.max(extendedTo, coverage.to);
       }
 
+      // Mapped blocks are sorted and disjoint, so blocks that end before the
+      // span cannot overlap it, and neither can any block after the first one
+      // that starts at or past the span's (growing) end. Absorbing a block
+      // can only pull `extendedFrom` down to that block's `from`, which all
+      // skipped blocks end at or before, so they never overlap retroactively.
       for (let i = 0, n = mappedOldBlocks.length; i < n; i++) {
         const mapped = mappedOldBlocks[i]!;
-        if (mapped.to <= extendedFrom || extendedTo <= mapped.from) continue;
+        if (mapped.to <= extendedFrom) continue;
+        if (extendedTo <= mapped.from) break;
         extendedFrom = Math.min(extendedFrom, mapped.from);
         extendedTo = Math.max(extendedTo, mapped.to);
       }
