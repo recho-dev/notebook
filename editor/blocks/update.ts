@@ -1,13 +1,98 @@
 import {Transaction} from "@codemirror/state";
-import {blockRangeLength, findAffectedBlockRange, getOnlyOneBlock} from "../../lib/blocks.ts";
-import {detectBlocksWithinRange} from "../../lib/blocks/detect.ts";
+import {blockRangeLength, findAffectedBlockRange} from "../../lib/blocks.ts";
+import {blocksMatchTree, detectBlocksWithinRange, isMarkLineText, topLevelCoverage} from "../../lib/blocks/detect.ts";
 import {syntaxTree} from "@codemirror/language";
-import {MaxHeap} from "../../lib/containers/heap.ts";
 import {BlockMetadata} from "./BlockMetadata.ts";
-import {deduplicateNaive} from "./deduplicate.ts";
+
+/**
+ * Verbose per-transaction logging is only enabled in the test environment
+ * (the playground defines `process.env.NODE_ENV` as "test", see
+ * `vite.config.js` and `editor/blocks/index.ts`). Invariant violations are
+ * reported with `console.error` unconditionally.
+ */
+const DEBUG = process.env.NODE_ENV === "test";
+
+/**
+ * Give each detected block the identity (id and attributes) of the old block
+ * whose mapped source range it overlaps the most — so identity survives
+ * ordinary typing as well as splits, merges, and swallows. A donor donates at
+ * most once. Every old-block index that overlaps some detected block is added
+ * to `superseded`.
+ */
+function reconcileDetectedBlocks(
+  detectedBlocks: BlockMetadata[],
+  oldBlocks: BlockMetadata[],
+  mappedOldBlocks: BlockMetadata[],
+  tr: Transaction,
+  superseded: Set<number>,
+): BlockMetadata[] {
+  /** Indices of old blocks that have already donated their identity. */
+  const donated = new Set<number>();
+  const reconciledBlocks: BlockMetadata[] = [];
+
+  let searchFrom = 0;
+  for (const block of detectedBlocks) {
+    // Skip old blocks that end before this detected block starts. Both arrays
+    // are sorted, so `searchFrom` only ever moves forward.
+    while (searchFrom < mappedOldBlocks.length && mappedOldBlocks[searchFrom]!.source.to <= block.source.from) {
+      searchFrom++;
+    }
+
+    // Find the overlapping old block with the largest source overlap.
+    let bestIndex = -1;
+    let bestOverlap = 0;
+    for (let k = searchFrom; k < mappedOldBlocks.length; k++) {
+      const mapped = mappedOldBlocks[k]!;
+      if (mapped.source.from >= block.source.to) break;
+      superseded.add(k);
+      const overlap = Math.min(mapped.source.to, block.source.to) - Math.max(mapped.source.from, block.source.from);
+      if (!donated.has(k) && overlap > bestOverlap) {
+        bestOverlap = overlap;
+        bestIndex = k;
+      }
+    }
+
+    if (bestIndex === -1) {
+      // No old block overlaps this detected block; it is genuinely new.
+      if (DEBUG) console.log("Keeping detected block as-is:", block);
+      reconciledBlocks.push(block);
+    } else {
+      donated.add(bestIndex);
+      const donor = mappedOldBlocks[bestIndex]!;
+      // The error flag describes the last run's outcome for this exact
+      // statement, so it only survives when the source range is unchanged
+      // and the change did not touch the statement's text.
+      const donorOld = oldBlocks[bestIndex]!;
+      const untouched =
+        donor.source.from === block.source.from &&
+        donor.source.to === block.source.to &&
+        !tr.changes.touchesRange(donorOld.source.from, donorOld.source.to);
+      const reconciled = new BlockMetadata(
+        donor.id,
+        block.name,
+        block.output,
+        block.source,
+        donor.attributes,
+        untouched ? donor.error : false,
+      );
+      if (DEBUG) console.log("Detected block inherits identity:", reconciled, "from old block:", donor);
+      reconciledBlocks.push(reconciled);
+    }
+  }
+
+  return reconciledBlocks;
+}
 
 /**
  * Update block metadata according to the given transaction.
+ *
+ * The guiding principle: the freshly re-parsed blocks are the ground truth
+ * for block *structure*, while the old blocks are the ground truth for block
+ * *identity* (ids and user-customized attributes). An edit inside one block
+ * can move statement boundaries far beyond the re-parsed span — for example,
+ * an unterminated template literal swallows the rest of the document — so
+ * whenever a re-parsed block overlaps old blocks, the re-parsed block
+ * supersedes them and inherits the identity of the one it overlaps the most.
  *
  * @param oldBlocks the current blocks
  * @param tr the editor transaction
@@ -17,67 +102,70 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
   if (!tr.docChanged) return oldBlocks;
 
   const userEvent = tr.annotation(Transaction.userEvent);
-  if (userEvent) {
-    console.group(`updateBlocks (${userEvent})`);
-  } else {
-    console.groupCollapsed(`updateBlocks`);
+  if (DEBUG) {
+    if (userEvent) {
+      console.group(`updateBlocks (${userEvent})`);
+    } else {
+      console.groupCollapsed(`updateBlocks`);
+    }
   }
 
-  const isCopyingLines = userEvent === "input.copyline";
-
   if (tr.changes.empty) {
-    console.log("No changes detected");
-    console.groupEnd();
+    if (DEBUG) {
+      console.log("No changes detected");
+      console.groupEnd();
+    }
     return oldBlocks;
   }
 
   /**
-   * Keep track of all blocks that are affected by the change. They will not be
-   * added to the array of new blocks.
+   * Keep track of all blocks that are affected by the change. They will not
+   * survive into the array of new blocks, but they may donate their identity
+   * to a re-parsed block.
    */
   const affectedBlocks = new Set<BlockMetadata>();
 
-  const newlyCreatedBlocks = new MaxHeap<BlockMetadata>(
-    (block) => block.from,
-    (a, b) => b - a,
-  );
+  /**
+   * The old blocks mapped into the new document's coordinate space. Used to
+   * expand re-parse spans, to donate identity to detected blocks, and as the
+   * surviving blocks outside the damaged regions.
+   */
+  const mappedOldBlocks = oldBlocks.map((block) => block.map(tr));
+
+  /**
+   * The final re-parse spans, in new-document coordinates. Every old block
+   * overlapping a damage range is stale: it is either re-detected within the
+   * span or gone for good (e.g. swallowed by an unterminated block comment,
+   * which produces no block of its own).
+   */
+  const damageRanges: {from: number; to: number}[] = [];
+
+  /**
+   * Blocks detected in the re-parsed spans. Each re-parse produces blocks in
+   * document order; only a transaction with several changed ranges can make
+   * the collected runs interleave, so a single sort afterwards suffices.
+   */
+  const newlyCreatedBlocks: BlockMetadata[] = [];
 
   // Process changed ranges one by one, because ranges are disjoint.
-  tr.changes.iterChanges((oldFrom, oldTo, newFrom, newTo, inserted) => {
-    if (oldFrom === oldTo) {
-      if (newFrom === oldFrom) {
-        console.groupCollapsed(`Insert ${newTo - newFrom} characters at ${oldFrom}`);
-      } else {
-        console.groupCollapsed(`Insert ${newTo - newFrom} characters: ${oldFrom} -> ${newFrom}-${newTo}`);
-      }
-    } else {
-      console.groupCollapsed(`Update: ${oldFrom}-${oldTo} -> ${newFrom}-${newTo}`);
-    }
-
-    let changeFrom = oldFrom;
-    let changeTo = oldTo;
-    if (isCopyingLines) {
+  tr.changes.iterChanges((oldFrom, oldTo, newFrom, newTo) => {
+    if (DEBUG) {
       if (oldFrom === oldTo) {
-        const index = oldFrom; // The insertion point, should be either at the beginning or the end of the line.
-        const line = tr.startState.doc.lineAt(index);
-        if (index === line.from) {
-          changeFrom = changeTo = index + inserted.length;
-        } else if (index === line.to) {
-          // changeFrom = changeTo = index - inserted.length;
-          changeFrom = changeTo = index;
+        if (newFrom === oldFrom) {
+          console.groupCollapsed(`Insert ${newTo - newFrom} characters at ${oldFrom}`);
         } else {
-          console.error("This is weird as the insertion point is not at the beginning or the end of the line");
+          console.groupCollapsed(`Insert ${newTo - newFrom} characters: ${oldFrom} -> ${newFrom}-${newTo}`);
         }
       } else {
-        console.error("This is weird as the cursor is not at the same position");
+        console.groupCollapsed(`Update: ${oldFrom}-${oldTo} -> ${newFrom}-${newTo}`);
       }
     }
 
     // Step 1: Find the blocks that are affected by the change.
 
-    const affectedBlockRange = findAffectedBlockRange(oldBlocks, changeFrom, changeTo);
+    const affectedBlockRange = findAffectedBlockRange(oldBlocks, oldFrom, oldTo);
 
-    console.log(`Affected block range: ${affectedBlockRange[0]} to ${affectedBlockRange[1] ?? "the end"}`);
+    if (DEBUG) console.log(`Affected block range: ${affectedBlockRange[0]} to ${affectedBlockRange[1] ?? "the end"}`);
 
     // Add the affected blocks to the set.
     for (let i = affectedBlockRange[0] ?? 0, n = affectedBlockRange[1] ?? oldBlocks.length; i < n; i++) {
@@ -89,75 +177,169 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
       console.error("This should never happen");
     }
 
-    // Now, we are going to compute the range which should be re-parsed.
-    const reparseFrom = affectedBlockRange[0] === null ? 0 : oldBlocks[affectedBlockRange[0]]!.from;
-    const reparseTo = affectedBlockRange[1] === null ? tr.state.doc.length : oldBlocks[affectedBlockRange[1] - 1]!.to;
+    // Now, we are going to compute the range which should be re-parsed. The
+    // affected blocks' positions are in the old document's coordinate space,
+    // so they must be mapped through the changes before being used against
+    // the new document and its syntax tree.
+    let reparseFrom =
+      affectedBlockRange[0] === null ? 0 : tr.changes.mapPos(oldBlocks[affectedBlockRange[0]]!.from, -1);
+    let reparseTo =
+      affectedBlockRange[1] === null
+        ? tr.state.doc.length
+        : tr.changes.mapPos(oldBlocks[affectedBlockRange[1] - 1]!.to, 1);
+
+    // The affected block range is only a prediction: the edit may move node
+    // boundaries far beyond it. A statement can swallow its neighbors (an
+    // unterminated template literal), a non-statement node can swallow
+    // statements (an unterminated block comment), and a partially swallowed
+    // block leaves a tail of live statements behind. Expand the span to a
+    // fixed point: every top-level node it touches and every old block it
+    // partially overlaps must lie fully inside it.
+    for (;;) {
+      let extendedFrom = reparseFrom;
+      let extendedTo = reparseTo;
+
+      const coverage = topLevelCoverage(syntaxTree(tr.state), reparseFrom, reparseTo);
+      if (coverage !== null) {
+        extendedFrom = Math.min(extendedFrom, coverage.from);
+        extendedTo = Math.max(extendedTo, coverage.to);
+      }
+
+      // Mapped blocks are sorted and disjoint, so blocks that end before the
+      // span cannot overlap it, and neither can any block after the first one
+      // that starts at or past the span's (growing) end. Absorbing a block
+      // can only pull `extendedFrom` down to that block's `from`, which all
+      // skipped blocks end at or before, so they never overlap retroactively.
+      for (let i = 0, n = mappedOldBlocks.length; i < n; i++) {
+        const mapped = mappedOldBlocks[i]!;
+        if (mapped.to <= extendedFrom) continue;
+        if (extendedTo <= mapped.from) break;
+        extendedFrom = Math.min(extendedFrom, mapped.from);
+        extendedTo = Math.max(extendedTo, mapped.to);
+      }
+
+      // A mark-comment line at the end of the span may serve as the output of
+      // the first statement below the span, and its attachment changes with
+      // the span's content — pull following lines in until the span no longer
+      // ends amid mark-comment lines. (The check is textual, so this can
+      // over-extend into look-alike lines; a wider span is merely re-parsed.)
+      let endLine = tr.state.doc.lineAt(extendedTo);
+      while (isMarkLineText(endLine.text) && endLine.to < tr.state.doc.length) {
+        endLine = tr.state.doc.lineAt(endLine.to + 1);
+        extendedTo = Math.max(extendedTo, endLine.to);
+      }
+
+      if (extendedFrom === reparseFrom && extendedTo === reparseTo) break;
+      if (DEBUG) console.log(`Expanding re-parse span: ${reparseFrom}-${reparseTo} -> ${extendedFrom}-${extendedTo}`);
+      reparseFrom = extendedFrom;
+      reparseTo = extendedTo;
+    }
+
+    damageRanges.push({from: reparseFrom, to: reparseTo});
+
     const newBlocks = detectBlocksWithinRange(syntaxTree(tr.state), tr.state.doc, reparseFrom, reparseTo);
 
-    console.log("New blocks from reparsed range:", newBlocks);
+    if (DEBUG) console.log("New blocks from reparsed range:", newBlocks);
 
-    // If only one block is affected and only one new block is created, we can
-    // simply inherit the attributes from the old block.
-    const soleBlockIndex = getOnlyOneBlock(oldBlocks.length, affectedBlockRange);
-    if (typeof soleBlockIndex === "number" && newBlocks.length === 1) {
-      newBlocks[0]!.attributes = oldBlocks[soleBlockIndex]!.attributes;
-    }
+    newlyCreatedBlocks.push(...newBlocks);
 
-    // Add new blocks to the heap, which sorts blocks by their `from` position.
-    for (let i = 0, n = newBlocks.length; i < n; i++) {
-      newlyCreatedBlocks.insert(newBlocks[i]!);
-    }
-
-    console.groupEnd();
+    if (DEBUG) console.groupEnd();
   });
 
-  // Step 3: Combine the array of old blocks and the heap of new blocks.
+  // Step 2: Sort the detected blocks by position. The same statement can be
+  // detected twice when the re-parse spans of two changed ranges overlap, so
+  // drop blocks that repeat the previous source range. Of two detections of
+  // the same statement, the one carrying an output range has the smaller
+  // `from` and thus comes first — it is the one we keep.
 
-  const newBlocks: BlockMetadata[] = [];
+  newlyCreatedBlocks.sort((a, b) => a.from - b.from);
 
-  console.group("Combining old blocks and new blocks");
+  const detectedBlocks: BlockMetadata[] = [];
 
-  for (let i = 0, n = oldBlocks.length; i < n; i++) {
-    const oldBlock = oldBlocks[i]!;
-
-    // Skip affected blocks, as they have been updated.
-    if (affectedBlocks.has(oldBlock)) {
-      console.log("Skipping affected old block:", oldBlock);
+  for (const block of newlyCreatedBlocks) {
+    const last = detectedBlocks[detectedBlocks.length - 1];
+    if (last !== undefined && last.source.from === block.source.from && last.source.to === block.source.to) {
       continue;
     }
+    detectedBlocks.push(block);
+  }
 
-    const newBlock = oldBlock.map(tr);
+  // Step 3: Reconcile detected blocks with old blocks. Any old block whose
+  // mapped source range overlaps a detected block is superseded by it — this
+  // is exactly the situation that used to surface as a "weird overlap": the
+  // re-parse found a statement extending past the predicted span, and the
+  // stale old blocks inside it must yield. Each detected block inherits the
+  // id and attributes of the old block it overlaps the most (whether that old
+  // block was affected or merely superseded), so identity survives ordinary
+  // typing as well as splits and merges.
 
-    // Peek the heap. Check the positional relationship between its foremost
-    // block and the current old block.
+  if (DEBUG) console.group("Reconciling detected blocks with old blocks");
 
-    while (newlyCreatedBlocks.nonEmpty() && newlyCreatedBlocks.peek.from < newBlock.from) {
-      newBlocks.push(newlyCreatedBlocks.peek);
-      console.log("Pushing new block from heap:", newlyCreatedBlocks.peek);
-      newlyCreatedBlocks.extractMax();
+  /** Indices of old blocks that overlap some detected block. */
+  const superseded = new Set<number>();
+  const reconciledBlocks = reconcileDetectedBlocks(detectedBlocks, oldBlocks, mappedOldBlocks, tr, superseded);
+
+  // Every old block overlapping a re-parsed span is stale: if it still exists
+  // it was re-detected (and donated its identity above); otherwise it is gone
+  // for good — swallowed by a node that produces no block, such as an
+  // unterminated block comment.
+  for (const damage of damageRanges) {
+    for (let k = 0, n = mappedOldBlocks.length; k < n; k++) {
+      const mapped = mappedOldBlocks[k]!;
+      if (mapped.to <= damage.from) continue;
+      if (mapped.from >= damage.to) break;
+      superseded.add(k);
     }
-
-    // At this point, the heap is either empty or the foremost block is after
-    // the current old block's `from` position.
-
-    newBlocks.push(newBlock);
-    console.log("Pushing mapped old block:", newBlock);
   }
 
-  console.groupEnd();
+  if (DEBUG) console.groupEnd();
 
-  // In the end, push any remaining blocks from the heap.
-  while (newlyCreatedBlocks.nonEmpty()) {
-    newBlocks.push(newlyCreatedBlocks.peek);
-    newlyCreatedBlocks.extractMax();
+  // Step 4: Combine the surviving old blocks and the reconciled blocks. Both
+  // arrays are sorted, so this is a plain merge. Old blocks survive only if
+  // they were neither affected by a change nor superseded by a detected block.
+
+  const newBlocks: BlockMetadata[] = [];
+  let reconciledIndex = 0;
+
+  for (let i = 0, n = oldBlocks.length; i < n; i++) {
+    if (affectedBlocks.has(oldBlocks[i]!) || superseded.has(i)) continue;
+    const survivor = mappedOldBlocks[i]!;
+    while (reconciledIndex < reconciledBlocks.length && reconciledBlocks[reconciledIndex]!.from < survivor.from) {
+      newBlocks.push(reconciledBlocks[reconciledIndex]!);
+      reconciledIndex++;
+    }
+    newBlocks.push(survivor);
   }
 
-  console.log("New blocks:", newBlocks);
+  while (reconciledIndex < reconciledBlocks.length) {
+    newBlocks.push(reconciledBlocks[reconciledIndex]!);
+    reconciledIndex++;
+  }
 
-  const deduplicatedBlocks = deduplicateNaive(newBlocks);
+  // Step 5: Validate the result against the actual syntax tree. In a document
+  // with syntax errors, an edit can re-segment statements arbitrarily far
+  // away — a quote or backtick re-pairs every token after it — with no chain
+  // of overlapping nodes connecting the change to the divergence, so no local
+  // span expansion can ever be complete. When the incremental result does not
+  // match the tree, fall back to a full re-detect, reconciled against the old
+  // blocks so identity and attributes still survive.
+  let finalBlocks = newBlocks;
+  if (!blocksMatchTree(syntaxTree(tr.state), newBlocks)) {
+    if (DEBUG) console.log("Merged blocks do not match the tree; falling back to a full re-detect");
+    const fullDetected = detectBlocksWithinRange(syntaxTree(tr.state), tr.state.doc, 0, tr.state.doc.length);
+    finalBlocks = reconcileDetectedBlocks(fullDetected, oldBlocks, mappedOldBlocks, tr, new Set());
+  }
 
-  console.log("Deduplicated blocks:", deduplicatedBlocks);
+  // Invariant check: blocks must be sorted and disjoint.
+  for (let i = 1, n = finalBlocks.length; i < n; i++) {
+    if (finalBlocks[i]!.from < finalBlocks[i - 1]!.to) {
+      console.error("Blocks overlap after update", {previous: finalBlocks[i - 1], current: finalBlocks[i]});
+    }
+  }
 
-  console.groupEnd();
-  return deduplicatedBlocks;
+  if (DEBUG) {
+    console.log("New blocks:", finalBlocks);
+    console.groupEnd();
+  }
+  return finalBlocks;
 }

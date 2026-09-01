@@ -12,10 +12,9 @@ export const blockExtensions = [
   blockMetadataExtension,
   // This view plugin displays output lines in compact mode.
   compactDecoration,
-  // This view plugin displays the block indicators.
-  // Note that block indicators are added by modifying the basic setup.
-  // Because we want to display the block indicators in the gutter.
-  // blockIndicator,
+  // The block indicator gutter is not part of this list on purpose: it is
+  // exported separately and spliced into the basic setup by editor/index.js,
+  // so that the gutter appears at the right position among the built-in ones.
 ];
 
 // Only enable debug decoration in the test environment.

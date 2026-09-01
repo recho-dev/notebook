@@ -5,7 +5,6 @@ import type {BlockMetadata} from "./BlockMetadata.ts";
 
 const debugGreenDecoration = Decoration.mark({attributes: {class: "cm-debug-mark green"}});
 const debugRedDecoration = Decoration.mark({attributes: {class: "cm-debug-mark red"}});
-// const debugBlueDecoration = Decoration.mark({attributes: {class: "cm-debug-mark blue"}});
 
 function createDebugMarks(blockMetadata: BlockMetadata[]): DecorationSet {
   // Build mark decorations separately from line decorations to avoid conflicts
@@ -14,13 +13,11 @@ function createDebugMarks(blockMetadata: BlockMetadata[]): DecorationSet {
   for (const {output, source} of blockMetadata) {
     // Add red marks for output ranges
     if (output !== null && output.from < output.to) {
-      // console.log(`Adding red decoration for output: ${output.from}-${output.to}`);
       builder.add(output.from, output.to, debugRedDecoration);
     }
 
     // Add green marks for source ranges
     if (source.from < source.to) {
-      // console.log(`Adding green decoration for source: ${source.from}-${source.to}`);
       builder.add(source.from, source.to, debugGreenDecoration);
     }
   }

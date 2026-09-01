@@ -4,3 +4,5 @@ dist
 .next
 out
 .vercel
+.claude
+*.tsbuildinfo
