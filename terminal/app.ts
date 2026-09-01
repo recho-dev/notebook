@@ -198,9 +198,10 @@ export class App {
     const onSig = () => this.quit();
     process.on("SIGINT", onSig);
     process.on("SIGTERM", onSig);
-    // Don't tear the UI down on async failures from notebook code — capture
-    // them into the message log and keep going. Truly fatal TUI bugs surface
-    // as synchronous throws inside our render path, which we let crash.
+    // Don't tear the UI down on stray async failures — capture them into the
+    // console log and keep going. The tick loop guards its own body, so a
+    // broken render path escalates to onFatal (which restores the terminal)
+    // instead of dying here with the alt screen still active.
     process.on("uncaughtException", (e) => this.onAsyncError(e, "uncaughtException"));
     process.on("unhandledRejection", (e) => this.onAsyncError(e, "unhandledRejection"));
   }
@@ -294,7 +295,22 @@ export class App {
     const ACTIVE_WINDOW_MS = 250;
     const SPINNER_MS = 80;
     let spinnerTs = 0;
+    let tickFailures = 0;
     const tick = () => {
+      try {
+        tickBody();
+        tickFailures = 0;
+      } catch (e) {
+        // A throw here would become an uncaughtException and the loop would
+        // never reschedule — a frozen alt screen with raw stdin. Capture it
+        // and keep ticking; if the render path is broken and throws every
+        // time, exit cleanly through onFatal instead of looping blind.
+        if (++tickFailures >= 3) return this.onFatal(e);
+        this.onAsyncError(e, "tick");
+      }
+      schedule();
+    };
+    const tickBody = () => {
       const now = Date.now();
       if (this.message && now > this.messageUntil) {
         this.message = null;
@@ -324,7 +340,6 @@ export class App {
         }
       }
       if (this.dirty) this.render();
-      schedule();
     };
     const schedule = () => {
       const active = Date.now() - this.lastChangeTs < ACTIVE_WINDOW_MS;
