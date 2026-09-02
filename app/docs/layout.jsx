@@ -3,8 +3,8 @@ import {DocsLayoutClient} from "./DocsLayoutClient.jsx";
 import {docsNavConfig} from "./nav.config.js";
 
 export const metadata = {
-  title: "Docs | Recho Notebook",
-  description: "Docs | Recho Notebook",
+  title: "Docs | Recho",
+  description: "Docs | Recho",
 };
 
 export default function Layout({children}) {

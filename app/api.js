@@ -14,14 +14,14 @@ function generateProjectName() {
 }
 
 const DEFAULT_CONTENT = `
-/* 
-** Welcome to                                                                         
-**  ___        _          _  _     _       _              _   
-** | _ \\___ __| |_  ___  | \\| |___| |_ ___| |__  ___  ___| |__
-** |   / -_) _| ' \\/ _ \\ | .\` / _ \\  _/ -_) '_ \\/ _ \\/ _ \\ / /
-** |_|_\\___\\__|_||_\\___/ |_|\\_\\___/\\__\\___|_.__/\\___/\\___/_\\_\\
+/*
+** Welcome to
+**  ___        _
+** | _ \\___ __| |_  ___
+** |   / -_) _| ' \\/ _ \\
+** |_|_\\___\\__|_||_\\___/
 **
-** A reactive editor for algorithms and ASCII art. 
+** A reactive editor for algorithms and ASCII art.
 */
 
 // 1. You can call echo(value) to echo output inline as comments, which allows
@@ -48,7 +48,7 @@ const x1 = recho.number(10, {min: 0, max: 40, step: 1});
 //➜ "(๑•̀ㅂ•́)و✧"
 echo("~".repeat(x1) + "(๑•̀ㅂ•́)و✧");
 
-// Refer to the links (cmd/ctrl + click) to learn more about Recho Notebook:
+// Refer to the links (cmd/ctrl + click) to learn more about Recho:
 // - Docs: https://recho.dev/notebook/docs
 // - Examples: https://recho.dev/notebook/examples
 // - Github: https://github.com/recho-dev/notebook

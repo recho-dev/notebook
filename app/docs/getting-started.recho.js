@@ -7,16 +7,16 @@
  * =                            Getting Started                               =
  * ============================================================================
  *
- * This page will quickly guide you through the core concepts of Recho Notebook.
- * After reading this, you will be able to create your own notebooks!
+ * This page will quickly guide you through the core concepts of Recho. After
+ * reading this, you will be able to create your own notebooks!
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *                              Inline Echoing
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * Recho Notebook allows you to echo output inline with your code. This is
- * useful for quickly inspecting your variables and display the output as
- * comments. Each line of output is prefixed with `//➜`.
+ * Recho allows you to echo output inline with your code. This is useful for
+ * quickly inspecting your variables and display the output as comments. Each
+ * line of output is prefixed with `//➜`.
  *
  * To echo output, you can use the `echo` function:
  */
@@ -55,9 +55,9 @@ const foo = echo(function add(a, b) {
  *                             Reactive Blocks
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * Blocks are the fundamentals of Recho Notebook's reactive system. Each
- * top-level statement is a block. The output always appears above the block.
- * Once the upstream blocks change, the downstream blocks will be re-evaluated.
+ * Blocks are the fundamentals of Recho's reactive system. Each top-level
+ * statement is a block. The output always appears above the block. Once the
+ * upstream blocks change, the downstream blocks will be re-evaluated.
  *
  * For example, if you update the value of `a`, then click the run button, `b`
  * will be re-evaluated.
@@ -83,8 +83,8 @@ const b = echo(a + 1);
 }
 
 /**
- * Unlike vanilla JavaScript, you can define blocks in any order. Recho
- * Notebook will automatically execute the blocks in the correct order.
+ * Unlike vanilla JavaScript, you can define blocks in any order. Recho will
+ * automatically execute the blocks in the correct order.
  */
 
 //➜ "I'll be executed first!"
@@ -101,9 +101,9 @@ const c = "I'll be executed first!";
  *                             Animations Authoring
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * Recho Notebook provides two built-in functions to create fluid animations.
- * The first one is `recho.now()`, which returns a generator that yields the
- * current time continuously.
+ * Recho provides two built-in functions to create fluid animations. The first
+ * one is `recho.now()`, which returns a generator that yields the current time
+ * continuously.
  */
 
 const now = recho.now();
@@ -140,10 +140,9 @@ echo(counter);
  *                         Interactive Input Controls
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * Recho Notebook provides interactive input controls that allow users to
- * modify values directly in the editor. These controls update the code as
- * users interact with them, making it easy to explore different parameter
- * values.
+ * Recho provides interactive input controls that allow users to modify values
+ * directly in the editor. These controls update the code as users interact
+ * with them, making it easy to explore different parameter values.
  *
  * The `recho.toggle` function creates a checkbox control for boolean values:
  */
@@ -178,9 +177,8 @@ const rating = recho.number(5, {min: 1, max: 10, step: 0.5});
 }
 
 /**
- * These controls work seamlessly with Recho Notebook's reactive system. When
- * you change a control value, all dependent blocks are automatically
- * re-evaluated:
+ * These controls work seamlessly with Recho's reactive system. When you change
+ * a control value, all dependent blocks are automatically re-evaluated:
  */
 
 const size = recho.number(3, {min: 1, max: 8});
@@ -207,7 +205,7 @@ const size = recho.number(3, {min: 1, max: 8});
  * There are some asynchronous operations that you need to handle, such as
  * fetching data from an API, requiring external packages, or waiting for a
  * user action. These operations can be represented as promises in JavaScript.
- * In Recho Notebook, top-level await is supported.
+ * In Recho, top-level await is supported.
  */
 
 const string = await new Promise((resolve) => setTimeout(() => resolve("I'm a string!"), 1000));
@@ -234,9 +232,9 @@ const sum = echo(numbers.reduce((a, b) => a + scale * b, 0));
  *                           Libraries Imports
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * Recho Notebook allows you to import external browser-based libraries using
- * the `recho.require` function. The import specifiers must be valid npm
- * package names with optional version specifiers.
+ * Recho allows you to import external browser-based libraries using the
+ * `recho.require` function. The import specifiers must be valid npm package
+ * names with optional version specifiers.
  *
  * For example, let's import the `d3` package:
  */
@@ -275,15 +273,13 @@ echo(d3.range(10));
  *  \____\___/|_| |_|\__, |_|  \__,_|\__|\__,_|_|\__,_|\__|_|\___/|_| |_|___/
  *                   |___/
  *
- * You've already mastered the basics of Recho Notebook! We highly recommend
- * you to go to the editor: https://recho.dev and start creating your own
- * notebooks!
+ * You've already mastered the basics of Recho! We highly recommend you to go
+ * to the editor: https://recho.dev and start creating your own notebooks!
  *
  * If you need inspiration, you can check out the examples page:
- * https://recho.dev/examples to see what you can create with Recho Notebook.
+ * https://recho.dev/examples to see what you can create with Recho.
  *
- * Of course, we'll not stop you if you want to dive into the details of Recho
- * Notebook.
+ * Of course, we'll not stop you if you want to dive into the details of Recho.
  *
  * Hackers and painters, let's paint by code!
  */

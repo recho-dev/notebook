@@ -17,7 +17,7 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
-    document.title = "Notebooks | Recho Notebook";
+    document.title = "Notebooks | Recho";
   }, []);
 
   function onDelete(id) {

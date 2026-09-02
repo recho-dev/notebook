@@ -12,7 +12,7 @@ export async function generateMetadata({params}) {
   const doc = getAllJSDocs().find((doc) => doc.slug === slug);
   if (!doc) notFound();
   return {
-    title: `${doc.title} | Recho Notebook`,
+    title: `${doc.title} | Recho`,
   };
 }
 
