@@ -1,4 +1,5 @@
 import {require as browserRequire} from "d3-require";
+import {parseSpecifier} from "./specifier.js";
 
 const nodeImportCache = new Map();
 
@@ -21,14 +22,40 @@ function mergeModules(modules) {
   return merged;
 }
 
-function nodeImport(name) {
-  if (typeof name !== "string") return Promise.resolve(name);
-  let module = nodeImportCache.get(name);
+function nodeImport(spec) {
+  if (typeof spec !== "string") return Promise.resolve(spec);
+  let module = nodeImportCache.get(spec);
   if (!module) {
-    module = import(name).then(normalizeModule);
-    nodeImportCache.set(name, module);
+    module = importInstalled(spec).then(normalizeModule);
+    nodeImportCache.set(spec, module);
   }
   return module;
+}
+
+// Outside the browser there is no CDN: a specifier has to name a package
+// installed alongside the notebook. A pinned `name@version/build/file.js`
+// (the browser's CDN form) loads the installed package instead — first by
+// its subpath, then by its entry point, since packages rarely export their
+// build directory.
+async function importInstalled(spec) {
+  const {url, name, version, subpath} = parseSpecifier(spec);
+  if (url) {
+    throw new Error(
+      `recho.require: ${spec} is a URL — outside the browser only npm packages installed with the notebook can be loaded`,
+    );
+  }
+  const candidates = version && subpath ? [name + subpath, name] : [name + subpath];
+  for (const candidate of candidates) {
+    try {
+      return await import(candidate);
+    } catch (error) {
+      if (error?.code !== "ERR_MODULE_NOT_FOUND" && error?.code !== "ERR_PACKAGE_PATH_NOT_EXPORTED") throw error;
+    }
+  }
+  const pinned = version ? ` (the @${version} pin only applies in the browser)` : "";
+  throw new Error(
+    `recho.require: "${name}" isn't installed — outside the browser only npm packages installed with the notebook can be loaded${pinned}`,
+  );
 }
 
 export function require(...names) {
