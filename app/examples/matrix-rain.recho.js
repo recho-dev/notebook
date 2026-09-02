@@ -5,6 +5,7 @@
  * @pull_request 12
  * @github pearmini
  * @label ASCII Art
+ * @tui true
  */
 
 /**

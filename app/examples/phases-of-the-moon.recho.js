@@ -5,6 +5,7 @@
  * @pull_request 90
  * @github chengluyu
  * @label ASCII Art
+ * @tui true
  */
 
 /**

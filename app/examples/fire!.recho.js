@@ -6,6 +6,7 @@
  * @github pearmini
  * @thumbnail_start 37
  * @label ASCII Art
+ * @tui true
  */
 
 /**

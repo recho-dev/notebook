@@ -6,6 +6,7 @@
  * @github pearmini
  * @label ASCII Art, Beginner
  * @snap sin-wave-radios.snap.png
+ * @tui true
  */
 
 /**

@@ -6,6 +6,7 @@
  * @pull_request 206
  * @thumbnail_start 40
  * @label Algorithm
+ * @tui true
  */
 
 /**

@@ -11,6 +11,7 @@ import {Buffer as DocumentBuffer} from "./buffer.ts";
 import {highlightLine, nextHighlightState, COLORS} from "./highlight.ts";
 import {OUTPUT_PREFIX, ERROR_PREFIX} from "../runtime/output.js";
 import {loadHelpDocs} from "./docs.ts";
+import {listTuiExamples} from "./examples.ts";
 import type {HelpDocs} from "./docs.ts";
 import * as scr from "./screen.ts";
 import {fg, bg, reset, bold, padToWidth, truncateToWidth, visibleLength} from "./screen.ts";
@@ -1074,10 +1075,13 @@ export class App {
     }
     let entries: string[] = [];
     try {
-      entries = fs
+      const files = fs
         .readdirSync(this.examplesDir)
         .filter((f) => f.endsWith(".recho.js"))
         .sort();
+      // Examples whose header says `@tui false` need a browser (camera,
+      // canvas…) and stay out of the picker.
+      entries = listTuiExamples(this.examplesDir, files);
     } catch (e) {
       this.flash("Cannot read examples: " + errorMessage(e), 3000);
       return;

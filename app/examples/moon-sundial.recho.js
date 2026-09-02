@@ -5,6 +5,7 @@
  * @pull_request 87
  * @github pearmini
  * @label Algorithm
+ * @tui true
  */
 
 /**
