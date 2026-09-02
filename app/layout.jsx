@@ -2,6 +2,7 @@ import "./global.css";
 import {Nav} from "./Nav.jsx";
 import {cn} from "./cn.js";
 import {Analytics} from "@vercel/analytics/next";
+import {LegacyDomainMigration} from "./LegacyDomainMigration.jsx";
 
 export const metadata = {
   title: "Recho",
@@ -12,6 +13,7 @@ export default function Layout({children}) {
   return (
     <html lang="en">
       <body className={cn("text-sm")}>
+        <LegacyDomainMigration />
         <Nav />
         <main>{children}</main>
         <Analytics

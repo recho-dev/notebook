@@ -95,6 +95,25 @@ export function clearNotebooksFromLocalStorage() {
   localStorage.removeItem(FILE_NAME);
 }
 
+// The two functions below support a one-time migration of notebooks saved
+// under the legacy recho.dev origin (back when it proxied to this app) into
+// the current www.recho.dev origin. See LegacyDomainMigration.jsx. They can
+// be removed once that migration is no longer needed.
+
+export function getRawNotebooksPayload() {
+  return localStorage.getItem(FILE_NAME);
+}
+
+export function importLegacyNotebooks(payload) {
+  if (!payload) return;
+  const incoming = JSON.parse(payload);
+  if (!Array.isArray(incoming) || incoming.length === 0) return;
+  const existing = getNotebooks();
+  const existingIds = new Set(existing.map((notebook) => notebook.id));
+  const merged = [...existing, ...incoming.filter((notebook) => !existingIds.has(notebook.id))];
+  saveNotebooks(merged);
+}
+
 export function getNotebookById(id) {
   const notebooks = getNotebooks();
   return notebooks.find((f) => f.id === id);
