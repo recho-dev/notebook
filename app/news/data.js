@@ -17,4 +17,13 @@ export const news = [
     image: "light-domain-specific-editors.webp",
     slug: "recho-0-2-0",
   },
+  {
+    title: "When Reactivity Meets Terminal UI",
+    publishedAt: "2026-08-31",
+    summary: "Recho now runs in the terminal, with animations echoed inside your source file.",
+    link: "https://medium.com/@chengluyu/when-reactivity-meets-terminal-ui-6994af74af73",
+    author: "Luyu Cheng",
+    image: "when-reactivity-meets-terminal-ui.webp",
+    slug: "when-reactivity-meets-terminal-ui",
+  },
 ];
