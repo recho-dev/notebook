@@ -55,7 +55,7 @@ export default defineConfig([
     ],
   })),
   {
-    ignores: ["**/*.recho.js", "test/output/**/*"],
+    ignores: ["**/*.recho.js", "test/output/**/*", "dist/**"],
   },
   eslintConfigPrettier,
 ]);

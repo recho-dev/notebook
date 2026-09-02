@@ -15,8 +15,11 @@ import path from "node:path";
 import {dispatch as d3Dispatch} from "d3-dispatch";
 import type {ChangeSpec} from "./buffer.ts";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const WORKER_PATH = path.resolve(__dirname, "..", "runtime", "worker.ts");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+// worker.ts in the checkout, worker.js in the compiled dist/ — the worker
+// always shares this module's extension.
+const WORKER_PATH = path.resolve(__dirname, "..", "runtime", "worker" + path.extname(__filename));
 
 function workerExecArgv(): string[] {
   return process.execArgv.filter((arg) => !arg.startsWith("--input-type"));

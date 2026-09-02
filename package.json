@@ -26,11 +26,21 @@
   ],
   "type": "module",
   "bin": {
-    "recho": "./terminal/cli.ts"
+    "recho": "./dist/terminal/cli.js"
+  },
+  "files": [
+    "dist",
+    "app/examples",
+    "app/docs/*.recho.js"
+  ],
+  "engines": {
+    "node": ">=22"
   },
   "scripts": {
     "dev": "vite",
     "tui": "node terminal/cli.ts",
+    "build:tui": "tsc -p tsconfig.tui.json",
+    "prepack": "pnpm build:tui",
     "app:dev": "next dev",
     "app:build": "next build",
     "app:start": "next start",

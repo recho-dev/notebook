@@ -6,7 +6,8 @@
 //
 // The runtime imports a couple of TypeScript modules. Node 24 supports
 // transparent .ts loading for type-strip-friendly files; the project's
-// .ts files have been adjusted to fit, so we don't need a flag.
+// .ts files have been adjusted to fit, so we don't need a flag. Installed
+// as a package, the compiled copy in dist/ runs instead (`pnpm build:tui`).
 
 import fs from "node:fs";
 import path from "node:path";
@@ -16,9 +17,19 @@ import {setTheme} from "./highlight.ts";
 import {detectTerminalTheme} from "./theme.ts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const repoRoot = path.resolve(__dirname, "..");
+// Examples and docs are read from the package root, which is one level up
+// from terminal/ in the checkout but two up from dist/terminal/ — so locate
+// it by its package.json instead of by depth.
+const repoRoot = findPackageRoot(__dirname);
 const examplesDir = path.join(repoRoot, "app", "examples");
 const docsDir = path.join(repoRoot, "app", "docs");
+
+function findPackageRoot(dir: string): string {
+  for (let d = dir; ; d = path.dirname(d)) {
+    if (fs.existsSync(path.join(d, "package.json"))) return d;
+    if (path.dirname(d) === d) return path.resolve(dir, "..");
+  }
+}
 
 const DEFAULT_CODE = `// Welcome to Recho · the reactive notebook for your terminal.
 // Edit code below and press ^S to run. Output appears as //➜ comments.
