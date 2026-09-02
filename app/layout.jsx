@@ -15,9 +15,9 @@ export default function Layout({children}) {
         <Nav />
         <main>{children}</main>
         <Analytics
-          scriptSrc="/notebook/_vercel/insights/script.js"
-          viewEndpoint="/notebook/_vercel/insights/view"
-          eventEndpoint="/notebook/_vercel/insights/event"
+          scriptSrc="/_vercel/insights/script.js"
+          viewEndpoint="/_vercel/insights/view"
+          eventEndpoint="/_vercel/insights/event"
         />
       </body>
     </html>
