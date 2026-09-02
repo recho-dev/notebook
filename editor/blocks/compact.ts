@@ -16,14 +16,12 @@ export const compactDecoration = ViewPlugin.fromClass(
       return this.#decorations;
     }
 
-    /** @param {EditorView} view */
     constructor(view: EditorView) {
       this.#view = view;
       const blockMetadata = view.state.field(blockMetadataField);
       this.#decorations = this.createDecorations(blockMetadata, view.state);
     }
 
-    /** @param {ViewUpdate} update */
     update(update: ViewUpdate) {
       const blockMetadata = update.state.field(blockMetadataField);
       // A possible optimization would be to only update the changed lines.

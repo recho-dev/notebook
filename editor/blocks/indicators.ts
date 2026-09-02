@@ -3,43 +3,34 @@ import {BlockMetadata} from "./BlockMetadata.ts";
 import {blockMetadataField} from "./state.ts";
 
 export class BlockIndicator extends GutterMarker {
-  constructor(
-    private className: string,
-    private blockId: string | null = null,
-  ) {
+  constructor(private className: string) {
     super();
   }
   toDOM() {
     const div = document.createElement("div");
     div.className = this.className;
-    div.dataset.blockId = this.blockId ?? undefined;
     return div;
   }
 }
 
-const constant =
-  <T>(x: T) =>
-  (): T =>
-    x;
-
 const indicatorMarkers = {
   output: {
-    head: (blockId: string) => new BlockIndicator("cm-block-indicator output head", blockId),
-    tail: (blockId: string) => new BlockIndicator("cm-block-indicator output tail", blockId),
-    sole: (blockId: string) => new BlockIndicator("cm-block-indicator output head tail", blockId),
-    body: (blockId: string) => new BlockIndicator("cm-block-indicator output", blockId),
+    head: new BlockIndicator("cm-block-indicator output head"),
+    tail: new BlockIndicator("cm-block-indicator output tail"),
+    sole: new BlockIndicator("cm-block-indicator output head tail"),
+    body: new BlockIndicator("cm-block-indicator output"),
   },
   source: {
-    head: constant(new BlockIndicator("cm-block-indicator source head")),
-    tail: constant(new BlockIndicator("cm-block-indicator source tail")),
-    sole: constant(new BlockIndicator("cm-block-indicator source head tail")),
-    body: constant(new BlockIndicator("cm-block-indicator source")),
+    head: new BlockIndicator("cm-block-indicator source head"),
+    tail: new BlockIndicator("cm-block-indicator source tail"),
+    sole: new BlockIndicator("cm-block-indicator source head tail"),
+    body: new BlockIndicator("cm-block-indicator source"),
   },
   error: {
-    head: constant(new BlockIndicator("cm-block-indicator error head")),
-    tail: constant(new BlockIndicator("cm-block-indicator error tail")),
-    sole: constant(new BlockIndicator("cm-block-indicator error head tail")),
-    body: constant(new BlockIndicator("cm-block-indicator error")),
+    head: new BlockIndicator("cm-block-indicator error head"),
+    tail: new BlockIndicator("cm-block-indicator error tail"),
+    sole: new BlockIndicator("cm-block-indicator error head tail"),
+    body: new BlockIndicator("cm-block-indicator error"),
   },
 };
 
@@ -78,15 +69,15 @@ export const blockIndicator = gutter({
     const blockFirstLine = view.state.doc.lineAt(block.from).number;
     const blockLastLine = view.state.doc.lineAt(block.to).number;
     if (blockFirstLine === currentLine) {
-      return blockLastLine === currentLine ? group.sole(block.id) : group.head(block.id);
+      return blockLastLine === currentLine ? group.sole : group.head;
     } else if (blockLastLine === currentLine) {
-      return group.tail(block.id);
+      return group.tail;
     } else {
-      return group.body(block.id);
+      return group.body;
     }
   },
   initialSpacer() {
-    return indicatorMarkers.source.body();
+    return indicatorMarkers.source.body;
   },
 });
 
@@ -99,7 +90,8 @@ function findEnclosingBlock(blocks: BlockMetadata[], pos: number): number | null
     const pivot = blocks[middle];
     if (pos < pivot.from) {
       right = middle - 1;
-    } else if (pos > pivot.to) {
+    } else if (pos >= pivot.to) {
+      // The right boundary `to` is exclusive, matching `findAdjacentBlocks`.
       left = middle + 1;
     } else {
       return middle;
