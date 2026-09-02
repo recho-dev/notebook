@@ -11,7 +11,7 @@
  * an API, importing external packages, or waiting for a user action. These
  * operations can be represented as promises[1] in JavaScript.
  *
- * In Recho Notebook, top-level await is supported.
+ * In Recho, top-level await is supported.
  */
 
 const string = await new Promise((resolve) => setTimeout(() => resolve("I'm a string!"), 1000));
@@ -51,8 +51,8 @@ echo(string2);
 }
 
 /**
- * In Recho Notebook, you will typically use promises to import external packages.
- * Refer to https://recho.dev/docs/libraries-imports for more details.
+ * In Recho, you will typically use promises to import external packages. Refer
+ * to https://recho.dev/docs/libraries-imports for more details.
  */
 
 const d3 = recho.require("d3");

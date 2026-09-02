@@ -5,8 +5,8 @@ import {LabelFilters} from "./LabelFilters.jsx";
 import {ExamplesClient} from "./ExamplesClient.jsx";
 
 export const metadata = {
-  title: "Examples | Recho Notebook",
-  description: "Examples | Recho Notebook",
+  title: "Examples | Recho",
+  description: "Examples | Recho",
 };
 
 // Cache examples at module level - Node.js module cache ensures this only runs once per process

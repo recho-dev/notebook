@@ -59,7 +59,7 @@ export function EditorPage({id: initialId}) {
   useEffect(() => {
     // Use setTimeout to avoid changing to default title.
     setTimeout(() => {
-      document.title = `${isAdded ? notebook.title : "New"} | Recho Notebook`;
+      document.title = `${isAdded ? notebook.title : "New"} | Recho`;
     }, 100);
   }, [notebook, isAdded]);
 

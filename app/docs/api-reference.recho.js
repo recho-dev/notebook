@@ -7,9 +7,9 @@
  * =                            API Reference                                =
  * ============================================================================
  *
- * Recho Notebook provides a set of APIs to help you create reactive notebooks
- * and interactive visualizations. This page provides an overview of all
- * available APIs.
+ * Recho provides a set of APIs to help you create reactive notebooks and
+ * interactive visualizations. This page provides an overview of all available
+ * APIs.
  *
  * Click on any API below to see detailed documentation and examples.
  *
