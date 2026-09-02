@@ -49,8 +49,8 @@ const x1 = recho.number(10, {min: 0, max: 40, step: 1});
 echo("~".repeat(x1) + "(๑•̀ㅂ•́)و✧");
 
 // Refer to the links (cmd/ctrl + click) to learn more about Recho:
-// - Docs: https://recho.dev/notebook/docs
-// - Examples: https://recho.dev/notebook/examples
+// - Docs: https://recho.dev/docs
+// - Examples: https://recho.dev/examples
 // - Github: https://github.com/recho-dev/notebook
 `;
 
