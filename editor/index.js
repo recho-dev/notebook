@@ -33,15 +33,8 @@ const eslintConfig = {
 export function createEditor(container, options) {
   const {code, onError, extensions = []} = options;
   const dispatcher = d3Dispatch("userInput");
-  const runtimeRef = {
-    current: null,
-    // Dispose the current runtime (echo.dispose, generators) then re-evaluate.
-    // Defer run so the new runtime starts outside the control's CodeMirror event.
-    restart() {
-      stop();
-      setTimeout(run, 0);
-    },
-  };
+  const runtimeRef = {current: null, restart};
+  let runTimer = null;
 
   const myBasicSetup = Array.from(basicSetup);
   myBasicSetup.splice(2, 0, blockIndicator);
@@ -157,6 +150,8 @@ export function createEditor(container, options) {
   }
 
   function stop() {
+    clearTimeout(runTimer);
+    runTimer = null;
     runtimeRef.current?.destroy();
     runtimeRef.current = null;
     window.removeEventListener("keydown", onKeyDown);
@@ -166,6 +161,8 @@ export function createEditor(container, options) {
 
   /** Run the runtime. Initialize a new runtime if it doesn't exist. */
   function run() {
+    clearTimeout(runTimer);
+    runTimer = null;
     try {
       if (!runtimeRef.current) initRuntime();
       runtimeRef.current.run();
@@ -175,11 +172,20 @@ export function createEditor(container, options) {
     }
   }
 
+  /** Dispose the current runtime, then run again after the current event. */
+  function restart() {
+    stop();
+    runTimer = setTimeout(run, 0);
+  }
+
   return {
     /** @param {boolean} force - Whether to force run the code even if it's already running */
     run: (force = false) => {
       if (runtimeRef.current?.isRunning()) {
-        if (force) runtimeRef.restart();
+        if (force) {
+          stop();
+          run();
+        }
         return;
       }
       run();
@@ -187,10 +193,7 @@ export function createEditor(container, options) {
     stop,
     on: (event, callback) => dispatcher.on(event, callback),
     destroy: () => {
-      runtimeRef.current?.destroy();
-      window.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("keyup", onKeyUp);
-      window.removeEventListener("openlink", onOpenLink);
+      stop();
       view.destroy();
     },
   };

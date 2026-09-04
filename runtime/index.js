@@ -365,10 +365,16 @@ export function createRuntime(initialCode) {
         __echo__.key = (k) => ((options.key = k), __echo__);
         __echo__.__dispose__ = () => {
           const callbacks = disposes.splice(0);
-          callbacks.forEach((cb) => cb());
+          callbacks.forEach((cb) => {
+            try {
+              cb();
+            } catch (error) {
+              console.error(error);
+            }
+          });
         };
-        // Always dispose when this cell is invalidated, even if the cell
-        // source never mentions `echo` (e.g. visualize(array) in /examples/sorting).
+        // Helpers such as `visualize(array)` may call echo.dispose even when
+        // this cell's source never mentions echo.
         invalidation.then(__echo__.__dispose__);
         return __echo__;
       });
