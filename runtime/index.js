@@ -344,31 +344,34 @@ export function createRuntime(initialCode) {
       // such as `add(1, 2)`, because the evaluated code may call echo internally.
       let echoVersion = -1;
       const vd = new v.constructor(2, v._module);
-      vd.define(
-        inputs.filter((i) => i !== "echo"),
-        () => {
-          const options = {};
-          const version = v._version; // Capture version on input change.
-          const __echo__ = (value, ...args) => {
-            if (version < echoVersion) throw new Error("stale echo");
-            else if (state.variables[0] !== v) throw new Error("stale echo");
-            else if (version > echoVersion) clear(state);
-            echoVersion = version;
-            echo(state, {...options}, value, ...args);
-            return args.length ? [value, ...args] : value;
-          };
-          const disposes = [];
-          __echo__.clear = () => clear(state);
-          __echo__.set = function (key, value) {
-            state.attributes[key] = value;
-            return this;
-          };
-          __echo__.dispose = (cb) => disposes.push(cb);
-          __echo__.key = (k) => ((options.key = k), __echo__);
-          __echo__.__dispose__ = () => disposes.forEach((cb) => cb());
-          return __echo__;
-        },
-      );
+      vd.define(["invalidation", ...inputs.filter((i) => i !== "echo" && i !== "invalidation")], (invalidation) => {
+        const options = {};
+        const version = v._version; // Capture version on input change.
+        const __echo__ = (value, ...args) => {
+          if (version < echoVersion) throw new Error("stale echo");
+          else if (state.variables[0] !== v) throw new Error("stale echo");
+          else if (version > echoVersion) clear(state);
+          echoVersion = version;
+          echo(state, {...options}, value, ...args);
+          return args.length ? [value, ...args] : value;
+        };
+        const disposes = [];
+        __echo__.clear = () => clear(state);
+        __echo__.set = function (key, value) {
+          state.attributes[key] = value;
+          return this;
+        };
+        __echo__.dispose = (cb) => disposes.push(cb);
+        __echo__.key = (k) => ((options.key = k), __echo__);
+        __echo__.__dispose__ = () => {
+          const callbacks = disposes.splice(0);
+          callbacks.forEach((cb) => cb());
+        };
+        // Always dispose when this cell is invalidated, even if the cell
+        // source never mentions `echo` (e.g. visualize(array) in /examples/sorting).
+        invalidation.then(__echo__.__dispose__);
+        return __echo__;
+      });
       v._shadow.set("echo", vd);
       const newInputs = [...inputs, "echo"];
       state.variables.push(v.define(vid, newInputs, safeEval(body, newInputs, __setEcho__)));
