@@ -85,6 +85,7 @@ export function createRuntime(initialCode, options = {}) {
   let prevCode = null;
   let isRunning = false;
   const compileCell = options.compileCell ?? defaultCompileCell;
+  let disposed = false;
 
   // Create button registry for this runtime instance
   const buttonRegistry = new ButtonRegistry();
@@ -114,6 +115,7 @@ export function createRuntime(initialCode, options = {}) {
   const dispatcher = d3Dispatch("changes", "error");
 
   const refresh = debounce((code) => {
+    if (disposed) return;
     const changes = removeChanges(code);
 
     // Construct an interval tree containing the ranges to be deleted.
@@ -200,6 +202,8 @@ export function createRuntime(initialCode, options = {}) {
   }
 
   function destroy() {
+    disposed = true;
+    isRunning = false;
     runtime.dispose();
   }
 
@@ -211,9 +215,10 @@ export function createRuntime(initialCode, options = {}) {
         // Note: A more robust solution would involve applying changes from both
         // output generation and user edits, but this approach provides adequate
         // synchronization for the current implementation.
-        if (isRunning) rerun(code);
+        if (!disposed && isRunning) rerun(code);
       },
       rejected(error) {
+        if (disposed) return;
         const e = state.syntaxError || error;
         console.error(e);
         clear(state);
@@ -296,18 +301,19 @@ export function createRuntime(initialCode, options = {}) {
   }
 
   function echo(state, options, ...values) {
-    if (!isRunning) return;
+    if (disposed || !isRunning) return;
     state.values.push({options, values});
     rerun(code);
   }
 
   function clear(state) {
-    if (!isRunning) return;
+    if (disposed || !isRunning) return;
     state.values = [];
     rerun(code);
   }
 
   function rerun(code) {
+    if (disposed) return;
     if (code === prevCode) return refresh(code);
 
     prevCode = code;
@@ -388,31 +394,40 @@ export function createRuntime(initialCode, options = {}) {
       // such as `add(1, 2)`, because the evaluated code may call echo internally.
       let echoVersion = -1;
       const vd = new v.constructor(2, v._module);
-      vd.define(
-        inputs.filter((i) => i !== "echo"),
-        () => {
-          const options = {};
-          const version = v._version; // Capture version on input change.
-          const __echo__ = (value, ...args) => {
-            if (version < echoVersion) throw new Error("stale echo");
-            else if (state.variables[0] !== v) throw new Error("stale echo");
-            else if (version > echoVersion) clear(state);
-            echoVersion = version;
-            echo(state, {...options}, value, ...args);
-            return args.length ? [value, ...args] : value;
-          };
-          const disposes = [];
-          __echo__.clear = () => clear(state);
-          __echo__.set = function (key, value) {
-            state.attributes[key] = value;
-            return this;
-          };
-          __echo__.dispose = (cb) => disposes.push(cb);
-          __echo__.key = (k) => ((options.key = k), __echo__);
-          __echo__.__dispose__ = () => disposes.forEach((cb) => cb());
-          return __echo__;
-        },
-      );
+      vd.define(["invalidation", ...inputs.filter((i) => i !== "echo" && i !== "invalidation")], (invalidation) => {
+        const options = {};
+        const version = v._version; // Capture version on input change.
+        const __echo__ = (value, ...args) => {
+          if (version < echoVersion) throw new Error("stale echo");
+          else if (state.variables[0] !== v) throw new Error("stale echo");
+          else if (version > echoVersion) clear(state);
+          echoVersion = version;
+          echo(state, {...options}, value, ...args);
+          return args.length ? [value, ...args] : value;
+        };
+        const disposes = [];
+        __echo__.clear = () => clear(state);
+        __echo__.set = function (key, value) {
+          state.attributes[key] = value;
+          return this;
+        };
+        __echo__.dispose = (cb) => disposes.push(cb);
+        __echo__.key = (k) => ((options.key = k), __echo__);
+        __echo__.__dispose__ = () => {
+          const callbacks = disposes.splice(0);
+          callbacks.forEach((cb) => {
+            try {
+              cb();
+            } catch (error) {
+              console.error(error);
+            }
+          });
+        };
+        // Helpers such as `visualize(array)` may call echo.dispose even when
+        // this cell's source never mentions echo.
+        invalidation.then(__echo__.__dispose__);
+        return __echo__;
+      });
       v._shadow.set("echo", vd);
       const newInputs = [...inputs, "echo"];
       state.variables.push(v.define(vid, newInputs, safeEval(body, newInputs, __setEcho__, compileCell)));

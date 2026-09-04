@@ -66,12 +66,15 @@ const frame = recho.interval(1000 / 15);
 
   const noise = new Noise();
   const linear = d3.scaleLinear([0, 1], [0, rows]);
-  const source = (i) => linear(noise.get(i, 0, 0));
 
   for (let x = 0; x < cols; x++) {
-    fire[index(x, rows - 1)] = ~~source(x);
+    fire[index(x, rows - 1)] = ~~linear(noise.get(x, 0, 0));
   }
 
+  echo(write(fire));
+}
+
+function write() {
   const quantile = d3.scaleQuantile(d3.extent(fire), chs);
   const ch = (d) => (d ? quantile(d) : "　");
 
@@ -82,7 +85,7 @@ const frame = recho.interval(1000 / 15);
   }
   output = output.split("\n").map((d) => "  " + d).join("\n");
 
-  echo(output);
+  return output;
 }
 
 const d3 = recho.require("d3-array", "d3-random", "d3-scale");

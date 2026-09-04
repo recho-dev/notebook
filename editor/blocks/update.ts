@@ -1,7 +1,7 @@
 import {Transaction} from "@codemirror/state";
 import {blockRangeLength, findAffectedBlockRange} from "../../lib/blocks.ts";
 import {blocksMatchTree, detectBlocksWithinRange, isMarkLineText, topLevelCoverage} from "../../lib/blocks/detect.ts";
-import {syntaxTree} from "@codemirror/language";
+import {ensureSyntaxTree, syntaxTree, syntaxTreeAvailable} from "@codemirror/language";
 import {BlockMetadata} from "./BlockMetadata.ts";
 
 /**
@@ -11,6 +11,16 @@ import {BlockMetadata} from "./BlockMetadata.ts";
  * reported with `console.error` unconditionally.
  */
 const DEBUG = process.env.NODE_ENV === "test";
+
+/**
+ * How long `updateBlocks` may spend finishing the syntax tree of the new
+ * document. CodeMirror gives the parser only 20ms per transaction, and the
+ * tree a state holds is a snapshot taken when that budget ran out — so under
+ * load, or for a document longer than the initial 3000-character parse
+ * viewport, `syntaxTree(tr.state)` can end far before the document does.
+ * Block detection walks the whole tree, so it must never run on a stump.
+ */
+const PARSE_BUDGET_MS = 50;
 
 /**
  * Give each detected block the identity (id and attributes) of the old block
@@ -84,6 +94,26 @@ function reconcileDetectedBlocks(
 }
 
 /**
+ * Handle a transaction without document changes. Most such transactions are
+ * irrelevant here, but when the syntax tree differs from the start state's,
+ * the background parser has finished a parse that an earlier transaction had
+ * to cut short. If the tree now spans the whole document and the blocks
+ * disagree with it, re-detect everything and reconcile against the current
+ * blocks so identity and attributes survive.
+ */
+function recoverFromCompletedParse(oldBlocks: BlockMetadata[], tr: Transaction): BlockMetadata[] {
+  const tree = syntaxTree(tr.state);
+  if (tree === syntaxTree(tr.startState)) return oldBlocks;
+  if (!syntaxTreeAvailable(tr.state)) return oldBlocks;
+  if (blocksMatchTree(tree, oldBlocks)) return oldBlocks;
+
+  if (DEBUG) console.log("Parse completed with a different tree; re-detecting all blocks");
+  const detected = detectBlocksWithinRange(tree, tr.state.doc, 0, tr.state.doc.length);
+  const mappedOldBlocks = oldBlocks.map((block) => block.map(tr));
+  return reconcileDetectedBlocks(detected, oldBlocks, mappedOldBlocks, tr, new Set());
+}
+
+/**
  * Update block metadata according to the given transaction.
  *
  * The guiding principle: the freshly re-parsed blocks are the ground truth
@@ -98,8 +128,11 @@ function reconcileDetectedBlocks(
  * @param tr the editor transaction
  */
 export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): BlockMetadata[] {
-  // If the transaction does not change the document, then we return early.
-  if (!tr.docChanged) return oldBlocks;
+  // A transaction that leaves the document alone can still carry a new syntax
+  // tree: the background parser dispatches one when it finishes a parse that
+  // did not fit into an earlier transaction's budget. That is the moment to
+  // repair blocks computed from (or kept stale by) an incomplete tree.
+  if (!tr.docChanged) return recoverFromCompletedParse(oldBlocks, tr);
 
   const userEvent = tr.annotation(Transaction.userEvent);
   if (DEBUG) {
@@ -116,6 +149,21 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
       console.groupEnd();
     }
     return oldBlocks;
+  }
+
+  // Finish parsing the new document before reading its tree. When even the
+  // extra budget is not enough, keep the old blocks — mapped into the new
+  // coordinates so their positions stay right — and let the parser-completion
+  // transaction (see above) redo the structure once the tree is whole.
+  const tree = ensureSyntaxTree(tr.state, tr.state.doc.length, PARSE_BUDGET_MS);
+  if (tree === null) {
+    if (DEBUG) {
+      console.log("Syntax tree is incomplete; keeping mapped old blocks until the parser catches up");
+      console.groupEnd();
+    }
+    // A block whose statement was deleted maps to an empty range; drop it
+    // rather than hand decorations a zero-length block.
+    return oldBlocks.map((block) => block.map(tr)).filter((block) => block.source.from < block.source.to);
   }
 
   /**
@@ -199,7 +247,7 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
       let extendedFrom = reparseFrom;
       let extendedTo = reparseTo;
 
-      const coverage = topLevelCoverage(syntaxTree(tr.state), reparseFrom, reparseTo);
+      const coverage = topLevelCoverage(tree, reparseFrom, reparseTo);
       if (coverage !== null) {
         extendedFrom = Math.min(extendedFrom, coverage.from);
         extendedTo = Math.max(extendedTo, coverage.to);
@@ -237,7 +285,7 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
 
     damageRanges.push({from: reparseFrom, to: reparseTo});
 
-    const newBlocks = detectBlocksWithinRange(syntaxTree(tr.state), tr.state.doc, reparseFrom, reparseTo);
+    const newBlocks = detectBlocksWithinRange(tree, tr.state.doc, reparseFrom, reparseTo);
 
     if (DEBUG) console.log("New blocks from reparsed range:", newBlocks);
 
@@ -324,9 +372,9 @@ export function updateBlocks(oldBlocks: BlockMetadata[], tr: Transaction): Block
   // match the tree, fall back to a full re-detect, reconciled against the old
   // blocks so identity and attributes still survive.
   let finalBlocks = newBlocks;
-  if (!blocksMatchTree(syntaxTree(tr.state), newBlocks)) {
+  if (!blocksMatchTree(tree, newBlocks)) {
     if (DEBUG) console.log("Merged blocks do not match the tree; falling back to a full re-detect");
-    const fullDetected = detectBlocksWithinRange(syntaxTree(tr.state), tr.state.doc, 0, tr.state.doc.length);
+    const fullDetected = detectBlocksWithinRange(tree, tr.state.doc, 0, tr.state.doc.length);
     finalBlocks = reconcileDetectedBlocks(fullDetected, oldBlocks, mappedOldBlocks, tr, new Set());
   }
 

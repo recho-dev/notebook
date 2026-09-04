@@ -4,8 +4,8 @@ import {cn} from "./cn.js";
 import {Analytics} from "@vercel/analytics/next";
 
 export const metadata = {
-  title: "Recho Notebook",
-  description: "Recho Notebook - A interactive editor for algorithms and ASCII art",
+  title: "Recho",
+  description: "Recho - A interactive editor for algorithms and ASCII art",
 };
 
 export default function Layout({children}) {
@@ -15,9 +15,9 @@ export default function Layout({children}) {
         <Nav />
         <main>{children}</main>
         <Analytics
-          scriptSrc="/notebook/_vercel/insights/script.js"
-          viewEndpoint="/notebook/_vercel/insights/view"
-          eventEndpoint="/notebook/_vercel/insights/event"
+          scriptSrc="/_vercel/insights/script.js"
+          viewEndpoint="/_vercel/insights/view"
+          eventEndpoint="/_vercel/insights/event"
         />
       </body>
     </html>
