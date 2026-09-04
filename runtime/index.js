@@ -48,6 +48,7 @@ export function createRuntime(initialCode) {
   let code = initialCode;
   let prevCode = null;
   let isRunning = false;
+  let disposed = false;
 
   // Create button registry for this runtime instance
   const buttonRegistry = new ButtonRegistry();
@@ -77,6 +78,7 @@ export function createRuntime(initialCode) {
   const dispatcher = d3Dispatch("changes", "error");
 
   const refresh = debounce((code) => {
+    if (disposed) return;
     const changes = removeChanges(code);
 
     // Construct an interval tree containing the ranges to be deleted.
@@ -151,6 +153,8 @@ export function createRuntime(initialCode) {
   }
 
   function destroy() {
+    disposed = true;
+    isRunning = false;
     runtime.dispose();
   }
 
@@ -162,7 +166,7 @@ export function createRuntime(initialCode) {
         // Note: A more robust solution would involve applying changes from both
         // output generation and user edits, but this approach provides adequate
         // synchronization for the current implementation.
-        if (isRunning) rerun(code);
+        if (!disposed && isRunning) rerun(code);
       },
       rejected(error) {
         const e = state.syntaxError || error;
@@ -247,18 +251,19 @@ export function createRuntime(initialCode) {
   }
 
   function echo(state, options, ...values) {
-    if (!isRunning) return;
+    if (disposed || !isRunning) return;
     state.values.push({options, values});
     rerun(code);
   }
 
   function clear(state) {
-    if (!isRunning) return;
+    if (disposed || !isRunning) return;
     state.values = [];
     rerun(code);
   }
 
   function rerun(code) {
+    if (disposed) return;
     if (code === prevCode) return refresh(code);
 
     prevCode = code;

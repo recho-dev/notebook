@@ -33,7 +33,15 @@ const eslintConfig = {
 export function createEditor(container, options) {
   const {code, onError, extensions = []} = options;
   const dispatcher = d3Dispatch("userInput");
-  const runtimeRef = {current: null};
+  const runtimeRef = {
+    current: null,
+    // Dispose the current runtime (echo.dispose, generators) then re-evaluate.
+    // Defer run so the new runtime starts outside the control's CodeMirror event.
+    restart() {
+      stop();
+      setTimeout(run, 0);
+    },
+  };
 
   const myBasicSetup = Array.from(basicSetup);
   myBasicSetup.splice(2, 0, blockIndicator);
@@ -171,12 +179,8 @@ export function createEditor(container, options) {
     /** @param {boolean} force - Whether to force run the code even if it's already running */
     run: (force = false) => {
       if (runtimeRef.current?.isRunning()) {
-        if (force) {
-          stop();
-          runtimeRef.current.run();
-        } else {
-          return;
-        }
+        if (force) runtimeRef.restart();
+        return;
       }
       run();
     },
