@@ -5,6 +5,7 @@
  * @pull_request 90
  * @github chengluyu
  * @label ASCII Art
+ * @tui true
  */
 
 /**
@@ -88,5 +89,5 @@ function getMoonEmoji(date) {
 }
 
 const suncalc = recho.require("suncalc");
-const d3 = recho.require("d3");
+const d3 = recho.require("d3-time", "d3-time-format");
 const _ = recho.require("lodash");

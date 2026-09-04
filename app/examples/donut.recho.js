@@ -6,6 +6,7 @@
  * @github pearmini
  * @label ASCII Art
  * @snap donut.snap.png
+ * @tui true
  */
 
 /**

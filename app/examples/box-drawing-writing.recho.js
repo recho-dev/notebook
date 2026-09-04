@@ -6,6 +6,7 @@
  * @pull_request 227
  * @thumbnail_start 55
  * @label ASCII Art
+ * @tui true
  */
 
 /**

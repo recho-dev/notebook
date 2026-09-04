@@ -6,6 +6,7 @@
  * @pull_request 206
  * @thumbnail_start 40
  * @label Algorithm
+ * @tui true
  */
 
 /**
@@ -131,4 +132,4 @@ class Canvas {
   }
 }
 
-const d3 = recho.require("d3");
+const d3 = recho.require("d3-array");

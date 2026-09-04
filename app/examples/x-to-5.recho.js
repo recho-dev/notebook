@@ -6,6 +6,7 @@
  * @github pearmini
  * @thumbnail_start 23
  * @label Algorithm, Beginner
+ * @tui true
  */
 
 /**

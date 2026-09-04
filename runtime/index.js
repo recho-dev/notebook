@@ -16,12 +16,29 @@ function uid() {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
-function safeEval(code, inputs, __setEcho__) {
-  const create = (code) => {
+// Compile a cell wrapper source (a parenthesized function expression) into a
+// callable. This module is shared between the browser editor bundle and the
+// Node TUI worker, so it must stay free of node: imports; the worker injects
+// a vm-backed compiler (see ./vmEval.js) via createRuntime's `compileCell`
+// option to get timeout-armed execution.
+function defaultCompileCell(source) {
+  return new Function(`return ${source};`)();
+}
+
+// Compile `code` (a Recho-transpiled cell expression) into a callable that
+// the Observable runtime can invoke with input values.
+function safeEval(code, inputs, __setEcho__, compileCell) {
+  const create = (codeStr) => {
+    const argList = ["__setEcho__", ...inputs].join(",");
     const resultVar = `__recho_v_${uid()}`;
-    // Ensure the current echo function is bound for the executing cell.
-    const body = `__setEcho__(echo); const __foo__ = ${code}; const ${resultVar} = __foo__(${inputs.join(",")}); __setEcho__(null); return ${resultVar};`;
-    const fn = new Function("__setEcho__", ...inputs, body);
+    const body = `(function(${argList}){
+      __setEcho__(echo);
+      const __foo__ = ${codeStr};
+      const ${resultVar} = __foo__(${inputs.join(",")});
+      __setEcho__(null);
+      return ${resultVar};
+    })`;
+    const fn = compileCell(body);
     return (...args) => fn(__setEcho__, ...args);
   };
   try {
@@ -36,6 +53,25 @@ function safeEval(code, inputs, __setEcho__) {
   }
 }
 
+// Narrow a change spec to the part that actually differs from the old text:
+// drop the common prefix and suffix of the replaced range and its
+// replacement. Returns null when they are identical (no edit needed).
+// Exported for tests.
+export function trimChange(oldText, change) {
+  const from = change.from;
+  const to = change.to ?? change.from;
+  const insert = change.insert ?? "";
+  const old = oldText.slice(from, to);
+  if (old === insert) return null;
+  const max = Math.min(old.length, insert.length);
+  let p = 0;
+  while (p < max && old[p] === insert[p]) p++;
+  let s = 0;
+  while (s < max - p && old[old.length - 1 - s] === insert[insert.length - 1 - s]) s++;
+  if (p === 0 && s === 0) return change;
+  return {from: from + p, to: to - s, insert: insert.slice(p, insert.length - s)};
+}
+
 function debounce(fn, delay = 0) {
   let timeout;
   return (...args) => {
@@ -44,10 +80,11 @@ function debounce(fn, delay = 0) {
   };
 }
 
-export function createRuntime(initialCode) {
+export function createRuntime(initialCode, options = {}) {
   let code = initialCode;
   let prevCode = null;
   let isRunning = false;
+  const compileCell = options.compileCell ?? defaultCompileCell;
   let disposed = false;
 
   // Create button registry for this runtime instance
@@ -127,9 +164,21 @@ export function createRuntime(initialCode) {
     blocks.sort((a, b) => a.from - b.from);
 
     // Attach block positions and attributes as effects to the transaction.
+    // Blocks are computed from the untrimmed changes above, so trimming
+    // below cannot disturb their ranges.
     const effects = [blockMetadataEffect.of(blocks)];
 
-    dispatch(changes, effects);
+    // Shrink each replacement to the span that actually differs from the
+    // current text. Re-echoing an unchanged frame then dispatches no change
+    // at all, and animations touch only the region that moved — which keeps
+    // editor churn (and the cursor remapping that comes with it) minimal.
+    const trimmed = [];
+    for (const c of changes) {
+      const t = trimChange(code, c);
+      if (t) trimmed.push(t);
+    }
+
+    dispatch(trimmed, effects);
   }, 0);
 
   function setCode(newCode) {
@@ -381,7 +430,7 @@ export function createRuntime(initialCode) {
       });
       v._shadow.set("echo", vd);
       const newInputs = [...inputs, "echo"];
-      state.variables.push(v.define(vid, newInputs, safeEval(body, newInputs, __setEcho__)));
+      state.variables.push(v.define(vid, newInputs, safeEval(body, newInputs, __setEcho__, compileCell)));
 
       // Export cell-level variables for external access.
       for (const o of outputs) {

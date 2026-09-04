@@ -6,6 +6,7 @@
  * @pull_request 181
  * @thumbnail_start 10
  * @label Algorithm, Beginner
+ * @tui true
  */
 
 /** A Quick Example! 🐶 */

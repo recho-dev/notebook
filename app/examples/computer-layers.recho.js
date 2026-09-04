@@ -6,6 +6,7 @@
  * @pull_request 207
  * @thumbnail_start 36
  * @label Beginner
+ * @tui true
  */
 
 /**

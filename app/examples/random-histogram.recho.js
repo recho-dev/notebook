@@ -6,6 +6,7 @@
  * @github pearmini
  * @thumbnail_start 48
  * @label Algorithm
+ * @tui true
  */
 
 /**
@@ -26,7 +27,7 @@
  * results.
  */
 
-const d3 = recho.require("d3");
+const d3 = recho.require("d3-array", "d3-random");
 
 const count = 200;
 const width = 50;

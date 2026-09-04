@@ -11,6 +11,10 @@
  * npm package names with optional version specifiers. It use `d3-require`
  * under the hood.
  *
+ * In the terminal editor there is no CDN: packages load from the notebook's
+ * own node_modules, a pinned version falls back to the installed package,
+ * and URL specifiers aren't supported.
+ *
  * @param {string} ...names - The names of the packages to import.
  * @returns {any} The imported package.
  * @see https://github.com/d3/d3-require

@@ -5,6 +5,7 @@
  * @pull_request 185
  * @github chengluyu
  * @label Algorithm
+ * @tui true
  */
 
 /**

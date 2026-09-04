@@ -3,6 +3,13 @@ import type {Transaction} from "@codemirror/state";
 export type Range = {from: number; to: number};
 
 export class BlockMetadata {
+  public readonly id: string;
+  public readonly name: string;
+  public readonly output: Range | null;
+  public readonly source: Range;
+  public attributes: Record<string, unknown>;
+  public error: boolean;
+
   /**
    * Create a new `BlockMetadata` instance.
    * @param id a unique identifier of this block
@@ -13,13 +20,20 @@ export class BlockMetadata {
    * @param error whether this block has an error
    */
   public constructor(
-    public readonly id: string,
-    public readonly name: string,
-    public readonly output: Range | null,
-    public readonly source: Range,
-    public attributes: Record<string, unknown> = {},
-    public error: boolean = false,
-  ) {}
+    id: string,
+    name: string,
+    output: Range | null,
+    source: Range,
+    attributes: Record<string, unknown> = {},
+    error: boolean = false,
+  ) {
+    this.id = id;
+    this.name = name;
+    this.output = output;
+    this.source = source;
+    this.attributes = attributes;
+    this.error = error;
+  }
 
   /**
    * Get the start position (inclusive) of this block.

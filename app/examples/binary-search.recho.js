@@ -5,6 +5,7 @@
  * @created 2025-12-08
  * @label Algorithm
  * @pull_request 200
+ * @tui true
  */
 
 /**

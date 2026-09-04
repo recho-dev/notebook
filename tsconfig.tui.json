@@ -1,0 +1,25 @@
+{
+  // Emits the terminal CLI — and everything it imports — as plain JavaScript
+  // into dist/ for distribution. Node refuses to type-strip .ts files that
+  // live under node_modules, so the published `recho` bin has to be JS.
+  // `pnpm tui` keeps running the .ts sources directly from the checkout.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "dist",
+    "rootDir": ".",
+    // The base config leaves globals empty and relies on its wide `include`
+    // to pull @types/node in; this build only sees the CLI's import graph.
+    "types": ["node"],
+    // Turns the `./app.ts` specifiers into `./app.js` in the emitted files.
+    "rewriteRelativeImportExtensions": true,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "incremental": false
+  },
+  // Entry points only — tsc follows the import graph from here. The ambient
+  // shims for untyped packages emit nothing but are needed to type-check.
+  "files": ["terminal/cli.ts", "runtime/worker.ts"],
+  "include": ["types/**/*.d.ts"]
+}

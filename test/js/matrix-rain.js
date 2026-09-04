@@ -53,4 +53,4 @@ function randomChar() {
 
 const frame = recho.interval(1000 / 15);
 
-const d3 = recho.require("d3");`;
+const d3 = recho.require("d3-array", "d3-random");`;
