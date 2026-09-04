@@ -169,6 +169,7 @@ export function createRuntime(initialCode) {
         if (!disposed && isRunning) rerun(code);
       },
       rejected(error) {
+        if (disposed) return;
         const e = state.syntaxError || error;
         console.error(e);
         clear(state);

@@ -58,3 +58,41 @@ echo(n);
     expect(globalThis.__rechoUnrelated.disposes).toBe(0);
   });
 });
+
+describe("runtime destroy", () => {
+  let runtime;
+
+  afterEach(() => {
+    runtime?.destroy();
+    runtime = null;
+  });
+
+  it("does not emit changes from a pending refresh after destroy", async () => {
+    let changeCount = 0;
+    runtime = createRuntime("echo(1)");
+    runtime.onChanges(() => {
+      changeCount++;
+    });
+    runtime.run();
+    runtime.destroy();
+    await wait();
+    expect(changeCount).toBe(0);
+  });
+
+  it("does not emit further changes after destroy", async () => {
+    let changeCount = 0;
+    runtime = createRuntime("echo(1)");
+    runtime.onChanges(() => {
+      changeCount++;
+    });
+    runtime.run();
+    await wait();
+    const before = changeCount;
+    expect(before).toBeGreaterThan(0);
+    runtime.destroy();
+    runtime.setIsRunning(true);
+    runtime.run();
+    await wait();
+    expect(changeCount).toBe(before);
+  });
+});
